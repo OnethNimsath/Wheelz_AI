@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WheelsAI - Find Your Perfect Vehicle</title>
+    <link rel="stylesheet" href="/Wheelz_AI/css/home.css">
+</head>
+<body>
+<!-- Navigation Bar -->
+<nav class="navbar">
+    <div class="navbar-container">
+        <a href="#" class="logo">WheelsAI</a>
+        
+        <div class="menu-icon" id="menuToggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        
+        <div class="nav-links" id="navLinks">
+            <a href="#">Home</a>
+            <a href="#">Sell</a>
+            <a href="#">About</a>
+            <a href="#">Contact</a>
+            <div class="auth-buttons">
+                <button class="login-btn">Login</button>
+                <button class="register-btn">Register</button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+
+<!-- Main Content -->
+<div class="main-container">
+    <h1>Find Your Perfect Vehicle</h1>
+    <p class="subtitle">Browse through our collection of vehicles for sale</p>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <input type="text" class="search-input" placeholder="Search by seller name, vehicle model, or keywords...">
+        <button class="search-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#666" viewBox="0 0 16 16">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+            </svg>
+        </button>
+        <button class="advanced-filters-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
+                <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+            </svg>
+            Advanced Filters
+        </button>
+    </div>
+
+    <!-- Categories -->
+    <div class="categories-section">
+        <div class="categories-header">Categories</div>
+        <div class="categories-container">
+            <button class="category-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M4 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm10 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM6 8a1 1 0 0 0 0 2h4a1 1 0 1 0 0-2H6ZM4.862 4.276 3.906 6.19a.51.51 0 0 0 .497.731c.91-.073.995-.375 1.076-.928.039-.244.087-.52.186-.777.147-.386.278-.58.39-.644a.459.459 0 0 1 .307-.067c.377.052.735.705.93 1.286.209.619.357 1.376.357 2.036 0 2.169-1.638 3.2-3.127 3.2h-.059a.25.25 0 0 1-.068-.495c.979-.14 1.75-.648 2.254-1.31.326-.429.571-.944.692-1.479a.24.24 0 0 0-.273-.286c-.203.021-.419.064-.637.143-.531.192-1.164.6-1.702 1.282-.446.566-.753 1.213-.753 1.863v.032c0 .133-.167.286-.267.286C3.358 11.683 3 11.496 3 11v-.01c0-1.36.747-2.303 1.482-3.052.246-.249.47-.485.67-.745.183-.237.347-.493.427-.74.156-.49.307-1.318-.319-1.318-.153 0-.277.068-.39.175-.105.99-.234.223-.444.37-.378.267-.695.498-.695.856 0 .308.306.215.451.139C4.346 6.584 4.5 6.543 4.5 6.5c0 .076-.123.126-.22.144-.126.024-.243.053-.344.109a.551.551 0 0 0-.123.171c-.119.232-.693.832-1.219.832-.217 0-.313-.083-.313-.25 0-.347.447-.893.862-1.209.47-.355.985-.648 1.318-.967.348-.334.596-.83.506-1.055Z"/>
+                    <path d="M3.5 0A.5.5 0 0 1 4 .5v15a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 .5-.5Zm9 0a.5.5 0 0 1 .5.5v15a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 .5-.5Z"/>
+                </svg>
+                Cars
+            </button>
+            <button class="category-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M5 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm-6-1a1 1 0 1 0 0 2h2a1 1 0 1 0 0-2H7Zm1-6c-1.876 0-3.426.109-4.552.226A.5.5 0 0 0 3 4.723v3.554a.5.5 0 0 0 .448.497C4.574 8.891 6.124 9 8 9c1.876 0 3.426-.109 4.552-.226A.5.5 0 0 0 13 8.277V4.723a.5.5 0 0 0-.448-.497A44.303 44.303 0 0 0 8 4Zm0-1c-1.837 0-3.353.107-4.448.22a.5.5 0 1 1-.104-.994A44.304 44.304 0 0 1 8 2c1.876 0 3.426.109 4.552.226a.5.5 0 1 1-.104.994A43.306 43.306 0 0 0 8 3Z"/>
+                    <path d="M15 8a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1V2.64c0-1.188-.845-2.232-2.064-2.372A43.61 43.61 0 0 0 8 0C5.9 0 4.208.136 3.064.268 1.845.408 1 1.452 1 2.64V4a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1v3.5c0 .818.393 1.544 1 2v2a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5V14h6v1.5a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5v-2c.607-.456 1-1.182 1-2V8ZM8 1c2.056 0 3.71.134 4.822.261.676.078 1.178.66 1.178 1.379v8.86a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 11.5V2.64c0-.72.502-1.301 1.178-1.379A42.611 42.611 0 0 1 8 1Z"/>
+                </svg>
+                Vans
+            </button>
+            <button class="category-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M12.5 4a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zm0 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm-11 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm9-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM3.5 7A2.5 2.5 0 1 0 6 9.5H.5V12a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-2.5a2.5 2.5 0 0 0-3-2.45zm6.94-1.35a3.457 3.457 0 0 0-1.945-1.437 3.456 3.456 0 0 0-2.25.249 3.456 3.456 0 0 1 1.758 1.359 3.456 3.456 0 0 1 .402 3.178 3.456 3.456 0 0 0 2.012-.805 3.456 3.456 0 0 0 1.218-1.815 3.456 3.456 0 0 0-1.195-.729Z"/>
+                    <path d="M12 9h4v2h-4z"/>
+                </svg>
+                SUVs
+            </button>
+            <button class="category-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M4 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm0 1a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm8-1a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm0 1a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM.115 3.18A.5.5 0 0 1 .5 3h15a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 14 12H2a.5.5 0 0 1-.491-.408l-1.5-8a.5.5 0 0 1 .106-.411zm.987.82 1.313 7h11.17l1.313-7H1.102z"/>
+                </svg>
+                Pickups
+            </button>
+            <button class="category-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M7.921.265c-.281.21-.682.533-.957.83-.274.295-.58.614-.857.965-.612.794-1.085 1.702-1.083 2.699.002.975.346 1.823.779 2.448.116.167.293.419.511.706 1.049 1.381 2.851 3.081 3.836 3.945-2.648-1.879-5.359-4.273-6.141-7.03-.104-.371-.167-.725-.167-1.069 0-1.2.569-2.24 1.223-3.04a6.6 6.6 0 0 1 1.39-1.399c.367-.278.833-.553 1.322-.776.247-.112.464-.194.613-.246a.666.666 0 0 1 .074-.026C7.53.13 7.907.095 8.059.086c1.031-.061 1.796.168 2.355.425 1.133.52 1.89 1.35 2.301 2.1.438.806.544 1.736.544 2.355"/>
+                </svg>
+                Motorcycles
+            </button>
+        </div>
+    </div>
+
+    <!-- Content Layout -->
+    <div class="content-layout">
+        <!-- Filters Sidebar -->
+        <div class="filters-sidebar">
+            <!-- Price Range Filter -->
+            <div class="filter-section">
+                <div class="filter-title">
+                    Price Range <span>(LKR)</span>
+                </div>
+                <input type="range" class="range-slider" min="0" max="10000000" step="100000" value="5000000">
+                <div class="price-range-values">
+                    <span>Min</span>
+                    <span>Max</span>
+                </div>
+            </div>
+
+            <!-- Brand Filter -->
+            <div class="filter-section">
+                <div class="filter-title">Brand</div>
+                <div class="checkbox-list">
+                    <label class="checkbox-item">
+                        <input type="checkbox" checked> Toyota
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" checked> Honda
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox"> Nissan
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox"> Suzuki
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox"> Mitsubishi
+                    </label>
+                </div>
+                <div class="show-more">Show more</div>
+            </div>
+
+            <!-- Model Year Filter -->
+            <div class="filter-section">
+                <div class="filter-title">Model Year</div>
+                <div class="from-to-container">
+                    <select class="from-to-select">
+                        <option>From</option>
+                        <option>2015</option>
+                        <option>2016</option>
+                        <option>2017</option>
+                        <option>2018</option>
+                        <option>2019</option>
+                        <option>2020</option>
+                    </select>
+                    <span>To</span>
+                    <select class="from-to-select">
+                        <option>To</option>
+                        <option>2020</option>
+                        <option>2021</option>
+                        <option>2022</option>
+                        <option>2023</option>
+                        <option>2024</option>
+                        <option>2025</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Condition Filter -->
+            <div class="filter-section">
+                <div class="filter-title">Condition</div>
+                <div class="condition-buttons">
+                    <div class="condition-btn active">Brand New</div>
+                    <div class="condition-btn">Used</div>
+                </div>
+                <div class="condition-buttons" style="margin-top: 5px;">
+                    <div class="condition-btn">Reconditioned</div>
+                </div>
+            </div>
+
+            <!-- Filter Actions -->
+            <div class="filter-actions">
+                <button class="apply-btn">Apply</button>
+                <button class="reset-btn">Reset</button>
+            </div>
+        </div>
+
+        <!-- Vehicle Listings -->
+        <div class="listings-container">
+            <div class="listings-header">
+                <div class="listings-count">120 vehicles found</div>
+                <div class="sort-container">
+                    <span>Sort by:</span>
+                    <select class="sort-select">
+                        <option>Newest First</option>
+                        <option>Oldest First</option>
+                        <option>Price: Low to High</option>
+                        <option>Price: High to Low</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Vehicle Cards -->
+            <div class="vehicle-cards">
+                <!-- Toyota Corolla -->
+                <div class="vehicle-card">
+                    <div class="vehicle-image">Toyota Corolla Image</div>
+                    <div class="vehicle-details">
+                        <div class="vehicle-title">
+                            Toyota Corolla 2022
+                            <div class="vehicle-price">LKR 7,500,000</div>
+                        </div>
+                        <div class="vehicle-subtitle">Listed by: Dinuka Motors</div>
+                        <div class="vehicle-specs">
+                            <div class="spec-item">
+                                <div class="spec-icon">S</div>
+                                <span>25,000 km</span>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-icon">F</div>
+                                <span>Petrol</span>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-icon">T</div>
+                                <span>Automatic</span>
+                            </div>
+                        </div>
+                        <div class="vehicle-description">
+                            Well maintained, single owner Toyota Corolla with full service history. Alloy wheels, reverse camera, includes...
+                        </div>
+                        <div class="vehicle-actions">
+                            <button class="view-details-btn">View Details</button>
+                            <button class="save-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+                                </svg>
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Honda Civic -->
+                <div class="vehicle-card">
+                    <div class="vehicle-image">Honda Civic Image</div>
+                    <div class="vehicle-details">
+                        <div class="vehicle-title">
+                            Honda Civic 2021
+                            <div class="vehicle-price">LKR 6,800,000</div>
+                        </div>
+                        <div class="vehicle-subtitle">Listed by: Auto Lanka</div>
+                        <div class="vehicle-specs">
+                            <div class="spec-item">
+                                <div class="spec-icon">S</div>
+                                <span>27,000 km</span>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-icon">F</div>
+                                <span>Petrol</span>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-icon">T</div>
+                                <span>Automatic</span>
+                            </div>
+                        </div>
+                        <div class="vehicle-description">
+                            Immaculate condition Honda Civic with leather seats, sunroof, premium sound system, and previous owned records. Low mileage...
+                        </div>
+                        <div class="vehicle-actions">
+                            <button class="view-details-btn">View Details</button>
+                            <button class="save-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+                                </svg>
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nissan X-Trail -->
+                <div class="vehicle-card">
+                    <div class="vehicle-image">Nissan X-Trail Image</div>
+                    <div class="vehicle-details">
+                        <div class="vehicle-title">
+                            Nissan X-Trail 2020
+                            <div class="vehicle-price">LKR 6,900,000</div>
+                        </div>
+                        <div class="vehicle-subtitle">Listed by: Galle Motors</div>
+                        <div class="vehicle-specs">
+                            <div class="spec-item">
+                                <div class="spec-icon">S</div>
+                                <span>32,000 km</span>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-icon">F</div>
+                                <span>Diesel</span>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-icon">T</div>
+                                <span>Automatic</span>
+                            </div>
+                        </div>
+                        <div class="vehicle-description">
+                            Spacious family SUV with 4WD capability. Perfect for both city driving and adventures. Includes...
+                        </div>
+                        <div class="vehicle-actions">
+                            <button class="view-details-btn">View Details</button>
+                            <button class="save-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+                                </svg>
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Suzuki Swift -->
+                <div class="vehicle-card">
+                    <div class="vehicle-image">Suzuki Swift Image</div>
+                    <div class="vehicle-details">
+                        <div class="vehicle-title">
+                            Suzuki Swift 2019
+                            <div class="vehicle-price">LKR 3,200,000</div>
+                        </div>
+                        <div class="vehicle-subtitle">Listed by: Automobile Apex</div>
+                        <div class="vehicle-specs">
+                            <div class="spec-item">
+                                <div class="spec-icon">S</div>
+                                <span>45,000 km</span>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-icon">F</div>
+                                <span>Petrol</span>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-icon">T</div>
+                                <span>Manual</span>
+                            </div>
+                        </div>
+                        <div class="vehicle-description">
+                            Economical and reliable city car with excellent fuel efficiency. Service records available with the...</div>
+                        <div class="vehicle-actions">
+                            <button class="view-details-btn">View Details</button>
+                            <button class="save-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+                                </svg>
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mitsubishi L200 -->
+                <div class="vehicle-card">
+                    <div class="vehicle-image">Mitsubishi L200 Image</div>
+                    <div class="vehicle-details">
+                        <div class="vehicle-title">
+                            Mitsubishi L200 2018
+                            <div class="vehicle-price">LKR 5,500,000</div>
+                        </div>
+                        <div class="vehicle-subtitle">Listed by: Frontier Traders</div>
+                        <div class="vehicle-specs">
+                            <div class="spec-item">
+                                <div class="spec-icon">S</div>
+                                <span>78,000 km</span>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-icon">F</div>
+                                <span>Diesel</span>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-icon">T</div>
+                                <span>Manual</span>
+                            </div>
+                        </div>
+                        <div class="vehicle-description">
+                            Powerful workhouse with 4x4 capability. Great for both work and off-road adventures. Includes canopy...
+                        </div>
+                        <div class="vehicle-actions">
+                            <button class="view-details-btn">View Details</button>
+                            <button class="save-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+                                </svg>
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <div class="page-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                    </svg>
+                </div>
+                <div class="page-item active">1</div>
+                <div class="page-item">2</div>
+                <div class="page-item">3</div>
+                <div class="page-item">4</div>
+                <div class="page-item">5</div>
+                <div class="page-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-container">
+        <div class="footer-column">
+            <div class="footer-title">AutoMarket</div>
+            <p class="footer-text">The best place to buy and sell vehicles in Sri Lanka.</p>
+            <div class="social-icons">
+                <div class="social-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/>
+                    </svg>
+                </div>
+                <div class="social-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M5.026 15c6.038 0 9.341-5.003 9.341-9.334 0-.14 0-.282-.006-.422A6.685 6.685 0 0 0 16 3.542a6.658 6.658 0 0 1-1.889.518 3.301 3.301 0 0 0 1.447-1.817 6.533 6.533 0 0 1-2.087.793A3.286 3.286 0 0 0 7.875 6.03a9.325 9.325 0 0 1-6.767-3.429 3.289 3.289 0 0 0 1.018 4.382A3.323 3.323 0 0 1 .64 6.575v.045a3.288 3.288 0 0 0 2.632 3.218 3.203 3.203 0 0 1-.865.115 3.23 3.23 0 0 1-.614-.057 3.283 3.283 0 0 0 3.067 2.277A6.588 6.588 0 0 1 .78 13.58a6.32 6.32 0 0 1-.78-.045A9.344 9.344 0 0 0 5.026 15z"/>
+                    </svg>
+                </div>
+                <div class="social-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233 0-2.136.008-2.388.046-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div class="footer-column">
+            <div class="footer-title">Quick Links</div>
+            <div class="footer-links">
+                <a href="#">Home</a>
+                <a href="#">Buy Vehicles</a>
+                <a href="#">Sell Your Vehicle</a>
+                <a href="#">About Us</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+        <div class="footer-column">
+            <div class="footer-title">Categories</div>
+            <div class="footer-links">
+                <a href="#">Cars</a>
+                <a href="#">Vans</a>
+                <a href="#">SUVs</a>
+                <a href="#">Pickup Trucks</a>
+                <a href="#">Motorcycles</a>
+            </div>
+        </div>
+        <div class="footer-column">
+            <div class="footer-title">Contact Us</div>
+            <div class="contact-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                </svg>
+                <span>123 Main Street, Colombo 04</span>
+            </div>
+            <div class="contact-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.745 1.745 0 0 1-1.657-.459L5.482 8.062a1.745 1.745 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58L3.654 1.328zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511z"/>
+                </svg>
+                <span>+94 11 234 5678</span>
+            </div>
+            <div class="contact-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z"/>
+                </svg>
+                <span>info@wheelsai.lk</span>
+            </div>
+        </div>
+    </div>
+    <div class="copyright">
+        © 2025 WheelsAI. All rights reserved.
+    </div>
+    <script type="module" src="/Wheelz_AI/Javascript/home.js"></script>
+</footer>
+</body>
+</html>
