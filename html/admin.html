@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wheelz AI</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+    <link rel="stylesheet" href="/Wheelz_AI/css/home.css">
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+</head>
+<body>
+    <div class="design-root">
+        <div class="layout-container">
+            <header class="header">
+                <div class="header-brand">
+                    <div class="logo">
+                        <img src="/Wheelz_AI/Logo/WheelzAI_Logo.png" alt="">
+                    </div>
+                    <h2>WheelzAI</h2>
+                </div>
+                <div class="header-nav">
+                    <div class="nav-links">
+                        <a href="/Wheelz_AI/html/home.html">Home</a>
+                        <a href="/Wheelz_AI/html/buy.html">Buy</a>
+                        <a href="/Wheelz_AI/html/about.html">About</a>
+                        <a href="/Wheelz_AI/html/contact.html">Contact Us</a>
+                    </div>
+                    <button class="sign-in-btn">
+                        <a href="/Wheelz_AI/html/signin.html">Sign In</a>
+                    </button>
+                </div>
+            </header>
+            <body>             
+        <div class="px-40 flex flex-1 justify-center py-5">
+          <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
+            <div class="flex flex-wrap justify-between gap-3 p-4">
+              <div class="flex min-w-72 flex-col gap-3">
+                <p class="text-white tracking-light text-[32px] font-bold leading-tight">Customer Profile</p>
+                <p class="text-[#9eacbd] text-sm font-normal leading-normal">Manage customer details and listings</p>
+              </div>
+            </div>
+            <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+              <label class="flex flex-col min-w-40 flex-1">
+                <p class="text-white text-base font-medium leading-normal pb-2">Customer Name</p>
+                <input
+                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-white focus:outline-0 focus:ring-0 border border-[#3e4c5b] bg-[#1f262e] focus:border-[#3e4c5b] h-14 placeholder:text-[#9eacbd] p-[15px] text-base font-normal leading-normal"
+                  value=""
+                />
+              </label>
+            </div>
+            <div class="flex max-w-[480px] flex-wrap items-end gap-4 px-4 py-3">
+              <label class="flex flex-col min-w-40 flex-1">
+                <p class="text-white text-base font-medium leading-normal pb-2">Email</p>
+                <input
+                  class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-white focus:outline-0 focus:ring-0 border border-[#3e4c5b] bg-[#1f262e] focus:border-[#3e4c5b] h-14 placeholder:text-[#9eacbd] p-[15px] text-base font-normal leading-normal"
+                  value=""
+                />
+              </label>
+            </div>
+            <h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">Vehicle Listings</h2>
+            <div class="px-4 py-3 @container">
+              <div class="flex overflow-hidden rounded-xl border border-[#3e4c5b] bg-[#15191e]">
+                <table class="flex-1">
+                  <thead>
+                    <tr class="bg-[#1f262e]">
+                      <th class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-56 px-4 py-3 text-left text-white w-14 text-sm font-medium leading-normal">Vehicle</th>
+                      <th class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-176 px-4 py-3 text-left text-white w-[400px] text-sm font-medium leading-normal">Year</th>
+                      <th class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-296 px-4 py-3 text-left text-white w-[400px] text-sm font-medium leading-normal">Make</th>
+                      <th class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-416 px-4 py-3 text-left text-white w-[400px] text-sm font-medium leading-normal">Model</th>
+                      <th class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-536 px-4 py-3 text-left text-white w-[400px] text-sm font-medium leading-normal">Price</th>
+                      <th class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-656 px-4 py-3 text-left text-white w-60 text-sm font-medium leading-normal">Status</th>
+                      <th class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-776 px-4 py-3 text-left text-white w-60 text-[#9eacbd] text-sm font-medium leading-normal">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="border-t border-t-[#3e4c5b]">
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-56 h-[72px] px-4 py-2 w-14 text-sm font-normal leading-normal">
+                        <div
+                          class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10"
+                          style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDic4XfDuQ7y8LvUfrRZOUOce2urYvP460GpTqr9lHB8LmXX0n9Nfy1gD1OKn43vmP3KzmjvukbjwUAQV5zZjQ-ZttxuFidhRg8WOlH8PO1z2JVk4a86DFCYiMl-st9-dE5RURRwpsnQlyqWt2YmWRv-AiXCYFmCeTnFWfxaeOXuf_ADE9iKWVgbg7xbwMU7dLn1hWxld1ujBf73BZp7IAfQsyh1g9KOQLeqZLyeru1-IPS1GEPgqf8Jw7IpY3CJLHX7jXp6UgP8CJw");'
+                        ></div>
+                      </td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-176 h-[72px] px-4 py-2 w-[400px] text-[#9eacbd] text-sm font-normal leading-normal">2021</td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-296 h-[72px] px-4 py-2 w-[400px] text-[#9eacbd] text-sm font-normal leading-normal">Honda</td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-416 h-[72px] px-4 py-2 w-[400px] text-[#9eacbd] text-sm font-normal leading-normal">Civic</td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-536 h-[72px] px-4 py-2 w-[400px] text-[#9eacbd] text-sm font-normal leading-normal">$22,000</td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-656 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                        <button
+                          class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-8 px-4 bg-[#2b3540] text-white text-sm font-medium leading-normal w-full"
+                        >
+                          <span class="truncate">Active</span>
+                        </button>
+                      </td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-776 h-[72px] px-4 py-2 w-60 text-[#9eacbd] text-sm font-bold leading-normal tracking-[0.015em]">
+                        Edit, Delete
+                      </td>
+                    </tr>
+                    <tr class="border-t border-t-[#3e4c5b]">
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-56 h-[72px] px-4 py-2 w-14 text-sm font-normal leading-normal">
+                        <div
+                          class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10"
+                          style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC3_9rfK6kdi9X8Bvb4NCF8XnArVrfW6S4p0RFQILL2Yb0k6goP6g-9wx-6HFIOqB00lPAaT2BOC4MaM6pZgWeSahFy0XMhFAzJtkREX88JrYEubibHuY3n6LbX3QsDwzUwuP264XCtdBu8VTRNpGcHHTjqvC8Z713A9kC_5r52duY97U5asdIWvdeiQ7aQ6heLOdcKBlACHPveFZv4kEvMUTn48eHG-VjxWDDCpru-I8x1bPxKfCAuPBl2_rZo_FyvTtFQps8OVRpQ");'
+                        ></div>
+                      </td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-176 h-[72px] px-4 py-2 w-[400px] text-[#9eacbd] text-sm font-normal leading-normal">2019</td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-296 h-[72px] px-4 py-2 w-[400px] text-[#9eacbd] text-sm font-normal leading-normal">Ford</td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-416 h-[72px] px-4 py-2 w-[400px] text-[#9eacbd] text-sm font-normal leading-normal">Explorer</td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-536 h-[72px] px-4 py-2 w-[400px] text-[#9eacbd] text-sm font-normal leading-normal">$28,000</td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-656 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                        <button
+                          class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-8 px-4 bg-[#2b3540] text-white text-sm font-medium leading-normal w-full"
+                        >
+                          <span class="truncate">Sold</span>
+                        </button>
+                      </td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-776 h-[72px] px-4 py-2 w-60 text-[#9eacbd] text-sm font-bold leading-normal tracking-[0.015em]">
+                        Edit, Delete
+                      </td>
+                    </tr>
+                    <tr class="border-t border-t-[#3e4c5b]">
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-56 h-[72px] px-4 py-2 w-14 text-sm font-normal leading-normal">
+                        <div
+                          class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-10"
+                          style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB7c5GsnV-qxyw4juGiMpUZdZN7u68nLROlMSikUmdGQa4s5LLfRV6wlKAQwrvAFBhw5aGBIqr4noBEvO6dTBne1EVHuyiH-yA2kgZtXcO_OVhLTMl6lBc4o4VG9DGEFwsFJoeGBNxbD7-bEzgoRASD63Ewa7uToWD-a0XwJz8o4XLafZhB7m3SF5oELb99OqfllcVH4djs7ShC53sPf-bTQ2uACwfl_E6FQL7QlxLY_r-DHWWhB_m9iZmxtr20g8GCf0kSs1ZK1zHO");'
+                        ></div>
+                      </td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-176 h-[72px] px-4 py-2 w-[400px] text-[#9eacbd] text-sm font-normal leading-normal">2022</td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-296 h-[72px] px-4 py-2 w-[400px] text-[#9eacbd] text-sm font-normal leading-normal">
+                        Chevrolet
+                      </td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-416 h-[72px] px-4 py-2 w-[400px] text-[#9eacbd] text-sm font-normal leading-normal">
+                        Silverado
+                      </td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-536 h-[72px] px-4 py-2 w-[400px] text-[#9eacbd] text-sm font-normal leading-normal">$45,000</td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-656 h-[72px] px-4 py-2 w-60 text-sm font-normal leading-normal">
+                        <button
+                          class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-8 px-4 bg-[#2b3540] text-white text-sm font-medium leading-normal w-full"
+                        >
+                          <span class="truncate">Active</span>
+                        </button>
+                      </td>
+                      <td class="table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-776 h-[72px] px-4 py-2 w-60 text-[#9eacbd] text-sm font-bold leading-normal tracking-[0.015em]">
+                        Edit, Delete
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <style>
+                          @container(max-width:56px){.table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-56{display: none;}}
+                @container(max-width:176px){.table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-176{display: none;}}
+                @container(max-width:296px){.table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-296{display: none;}}
+                @container(max-width:416px){.table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-416{display: none;}}
+                @container(max-width:536px){.table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-536{display: none;}}
+                @container(max-width:656px){.table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-656{display: none;}}
+                @container(max-width:776px){.table-b0715890-8a39-4e7b-90f3-2578d5fb14fb-column-776{display: none;}}
+              </style>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="flex justify-center">
+                        <div class="flex max-w-[960px] flex-1 flex-col">
+                          <footer class="flex flex-col gap-6 px-5 py-10 text-center @container">
+                            <div
+                              class="flex flex-wrap items-center justify-center gap-6 @[480px]:flex-row @[480px]:justify-around"
+                            >
+                              <a class="text-[#93acc8] text-base font-normal leading-normal min-w-40" href="#">Home</a>
+                              <a class="text-[#93acc8] text-base font-normal leading-normal min-w-40" href="#">Buy</a>
+                              <a class="text-[#93acc8] text-base font-normal leading-normal min-w-40" href="#">About</a>
+                              <a class="text-[#93acc8] text-base font-normal leading-normal min-w-40" href="#">Contact Us</a>
+                              <a class="text-[#93acc8] text-base font-normal leading-normal min-w-40" href="#"
+                                >516/4, Dutugamunu road, Kohuwala</a
+                              >
+                            </div>
+                            <div class="flex flex-wrap justify-center gap-4">
+                              <a href="#">
+                                <div class="text-[#93acc8]" data-icon="InstagramLogo" data-size="24px" data-weight="regular">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                                    <path
+                                      d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160ZM176,24H80A56.06,56.06,0,0,0,24,80v96a56.06,56.06,0,0,0,56,56h96a56.06,56.06,0,0,0,56-56V80A56.06,56.06,0,0,0,176,24Zm40,152a40,40,0,0,1-40,40H80a40,40,0,0,1-40-40V80A40,40,0,0,1,80,40h96a40,40,0,0,1,40,40ZM192,76a12,12,0,1,1-12-12A12,12,0,0,1,192,76Z"
+                                    ></path>
+                                  </svg>
+                                </div>
+                              </a>
+                              <a href="#">
+                                <div class="text-[#93acc8]" data-icon="TiktokLogo" data-size="24px" data-weight="regular">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                                    <path
+                                      d="M224,72a48.05,48.05,0,0,1-48-48,8,8,0,0,0-8-8H128a8,8,0,0,0-8,8V156a20,20,0,1,1-28.57-18.08A8,8,0,0,0,96,130.69V88a8,8,0,0,0-9.4-7.88C50.91,86.48,24,119.1,24,156a76,76,0,0,0,152,0V116.29A103.25,103.25,0,0,0,224,128a8,8,0,0,0,8-8V80A8,8,0,0,0,224,72Zm-8,39.64a87.19,87.19,0,0,1-43.33-16.15A8,8,0,0,0,160,102v54a60,60,0,0,1-120,0c0-25.9,16.64-49.13,40-57.6v27.67A36,36,0,1,0,136,156V32h24.5A64.14,64.14,0,0,0,216,87.5Z"
+                                    ></path>
+                                  </svg>
+                                </div>
+                              </a>
+                            </div>
+                            <p class="text-[#93acc8] text-base font-normal leading-normal">© 2025 WheelzAI. All rights reserved.</p>
+                          </footer>
+    </div>
+  </body>
+</html>
