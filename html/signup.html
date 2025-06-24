@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="/Wheelz_AI/css/signup.css">
 </head>
 <body>
-    <!-- Left Panel -->
     <div class="left-panel">
         <div class="car-icon">
             <img src="/Wheelz_AI/Logo/WheelzAI_Logo.png" alt="WheelzAI Logo" />
@@ -16,7 +15,6 @@
         <div class="welcome-subtext">Your premier AI platform for vehicle trading</div>
     </div>
 
-    <!-- Right Panel -->
     <div class="right-panel">
         <div class="header">
             <div class="logo">
@@ -33,30 +31,30 @@
             <div class="form-title">Create your account</div>
             <div class="form-subtitle">Enter your details to access the platform</div>
 
-            <form>
+            <form id="signupForm">
                 <div class="form-group">
-                    <label class="form-label">Seller Name</label>
-                    <input type="text" class="form-input" placeholder="Your full name">
+                    <label class="form-label" for="sellerName">Seller Name</label>
+                    <input type="text" id="sellerName" class="form-input" placeholder="Your full name">
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Email Address</label>
-                    <input type="email" class="form-input" placeholder="name@company.com">
+                    <label class="form-label" for="signupEmail">Email Address</label>
+                    <input type="email" id="signupEmail" class="form-input" placeholder="name@company.com" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <input type="password" class="form-input" placeholder="•••••••">
+                    <label class="form-label" for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" class="form-input" placeholder="•••••••" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Confirm Password</label>
-                    <input type="password" class="form-input" placeholder="•••••••">
+                    <label class="form-label" for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" class="form-input" placeholder="•••••••" required>
                 </div>
 
                 <div class="terms-section">
-                    <input type="checkbox" id="terms" class="terms-checkbox">
-                    <label for="terms">I agree to the Terms and Privacy Policy</label>
+                    <input type="checkbox" id="termsCheckbox" class="terms-checkbox" required>
+                    <label for="termsCheckbox">I agree to the Terms and Privacy Policy</label>
                 </div>
 
                 <button type="submit" class="submit-button">
@@ -71,7 +69,7 @@
 
             <div class="continue-text">Or continue with</div>
 
-            <button class="google-button">
+            <button class="google-button" id="googleSignupButton">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48">
                     <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
                     <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
@@ -82,5 +80,144 @@
             </button>
         </div>
     </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
+            authDomain: "wheelzai.firebaseapp.com",
+            projectId: "wheelzai",
+            storageBucket: "wheelzai.firebasestorage.app",
+            messagingSenderId: "132756052907",
+            appId: "1:132756052907:web:b92dc998b4b5bee8d450ee",
+            measurementId: "G-ECQJYZYK43"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Get a reference to the Auth service
+        const auth = firebase.auth();
+        // For Google Sign-in
+        const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const signupForm = document.getElementById('signupForm');
+            const sellerNameInput = document.getElementById('sellerName');
+            const signupEmailInput = document.getElementById('signupEmail');
+            const signupPasswordInput = document.getElementById('signupPassword');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const termsCheckbox = document.getElementById('termsCheckbox');
+            const googleSignupButton = document.getElementById('googleSignupButton');
+
+            signupForm.addEventListener('submit', async (e) => {
+                e.preventDefault(); // Prevent default form submission
+
+                const sellerName = sellerNameInput.value.trim();
+                const email = signupEmailInput.value.trim();
+                const password = signupPasswordInput.value.trim();
+                const confirmPassword = confirmPasswordInput.value.trim();
+
+                // Basic client-side validation
+                if (!sellerName) {
+                    alert('Please enter your full name.');
+                    return;
+                }
+                if (!email || !password || !confirmPassword) {
+                    alert('Please fill in all required fields (Email, Password, Confirm Password).');
+                    return;
+                }
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match. Please re-enter.');
+                    return;
+                }
+                if (password.length < 6) { // Firebase requires at least 6 characters for password
+                    alert('Password should be at least 6 characters.');
+                    return;
+                }
+                if (!termsCheckbox.checked) {
+                    alert('You must agree to the Terms and Privacy Policy to create an account.');
+                    return;
+                }
+
+                try {
+                    // Create user with email and password
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    const user = userCredential.user;
+
+                    // Optionally: Update user profile (e.g., display name)
+                    await user.updateProfile({
+                        displayName: sellerName
+                    });
+
+                    // Optionally: Save additional user data (like sellerName) to Firestore/Realtime Database
+                    // This part is commented out as it requires additional Firebase SDKs (Firestore)
+                    // and database setup, but this is where you'd typically do it.
+                    /*
+                    const db = firebase.firestore(); // If using Firestore
+                    await db.collection('users').doc(user.uid).set({
+                        name: sellerName,
+                        email: user.email,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    */
+
+                    alert(`Account created successfully for ${user.email}!`);
+                    window.location.href = 'signin.html'; // Redirect to signin page
+                } catch (error) {
+                    let errorMessage = "An unknown error occurred.";
+                    console.error('Firebase Signup Error:', error);
+
+                    switch (error.code) {
+                        case 'auth/email-already-in-use':
+                            errorMessage = 'The email address is already in use by another account.';
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = 'The email address is not valid.';
+                            break;
+                        case 'auth/operation-not-allowed':
+                            errorMessage = 'Email/password sign-in is not enabled. Please enable it in Firebase Console.';
+                            break;
+                        case 'auth/weak-password':
+                            errorMessage = 'The password is too weak. Please choose a stronger password (at least 6 characters).';
+                            break;
+                        default:
+                            errorMessage = `Signup failed: ${error.message}`;
+                    }
+                    alert(errorMessage);
+                }
+            });
+
+            // Google Sign-up/Login
+            googleSignupButton.addEventListener('click', async () => {
+                try {
+                    const result = await auth.signInWithPopup(googleProvider);
+                    // The signed-in user info.
+                    const user = result.user;
+
+                    // You can access the Google Access Token if needed
+                    // const credential = GoogleAuthProvider.credentialFromResult(result);
+                    // const token = credential.accessToken;
+
+                    console.log('Google user signed in:', user);
+                    alert(`Signed in with Google as ${user.displayName || user.email}!`);
+                    window.location.href = 'home.html'; // Or wherever you want to redirect after successful login
+                } catch (error) {
+                    console.error('Google Sign-in Error:', error);
+                    let errorMessage = "An error occurred during Google sign-in.";
+                    if (error.code === 'auth/popup-closed-by-user') {
+                        errorMessage = 'Google sign-in popup was closed.';
+                    } else if (error.code === 'auth/cancelled-popup-request') {
+                         errorMessage = 'Another Google sign-in request was already in progress.';
+                    } else {
+                        errorMessage = `Google sign-in failed: ${error.message}`;
+                    }
+                    alert(errorMessage);
+                }
+            });
+        });
+    </script>
 </body>
 </html>

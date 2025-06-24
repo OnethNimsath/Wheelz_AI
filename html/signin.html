@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="/Wheelz_AI/css/signin.css">
 </head>
 <body>
-    <!-- Left Panel -->
     <div class="left-panel">
         <div class="car-icon">
             <img src="/Wheelz_AI/Logo/WheelzAI_Logo.png" alt="WheelzAI Logo" />
@@ -16,7 +15,6 @@
         <div class="welcome-subtext">Your premier AI platform for vehicle trading</div>
     </div>
 
-    <!-- Right Panel -->
     <div class="right-panel">
         <div class="header">
             <div class="logo">
@@ -33,15 +31,15 @@
             <div class="form-title">Sign in to your account</div>
             <div class="form-subtitle">Enter your credentials to access your dashboard</div>
 
-            <form>
+            <form id="loginForm">
                 <div class="form-group">
-                    <label class="form-label">Email Address</label>
-                    <input type="email" class="form-input" placeholder="name@company.com">
+                    <label class="form-label" for="loginEmail">Email Address</label>
+                    <input type="email" id="loginEmail" class="form-input" placeholder="name@company.com" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <input type="password" class="form-input" placeholder="•••••••">
+                    <label class="form-label" for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" class="form-input" placeholder="•••••••" required>
                 </div>
 
                 <div class="remember-section">
@@ -52,7 +50,7 @@
                     <a href="/Wheelz_AI/html/forgotpassword.html" class="forgot-password">Forgot password?</a>
                 </div>
 
-                <button type="submit" class="submit-button">
+                <button type="submit" class="submit-button" id="emailLoginButton">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2a10 10 0 1 0 0 20 10 10 0 1 0 0-20z"></path>
                         <path d="M12 8v8"></path>
@@ -64,7 +62,7 @@
 
             <div class="continue-text">Or continue with</div>
 
-            <button class="google-button">
+            <button class="google-button" id="googleLoginButton">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48">
                     <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
                     <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
@@ -73,7 +71,112 @@
                 </svg>
                 Google
             </button>
+            <p id="userStatus" style="margin-top: 15px; color: red;"></p>
         </div>
     </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
+            authDomain: "wheelzai.firebaseapp.com",
+            projectId: "wheelzai",
+            storageBucket: "wheelzai.firebasestorage.app",
+            messagingSenderId: "132756052907",
+            appId: "1:132756052907:web:b92dc998b4b5bee8d450ee",
+            measurementId: "G-ECQJYZYK43"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Get a reference to the Auth service
+        const auth = firebase.auth();
+        // For Google Sign-in
+        const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('loginForm');
+            const loginEmailInput = document.getElementById('loginEmail');
+            const loginPasswordInput = document.getElementById('loginPassword');
+            const emailLoginButton = document.getElementById('emailLoginButton');
+            const googleLoginButton = document.getElementById('googleLoginButton');
+            const userStatusParagraph = document.getElementById('userStatus'); // To display messages
+
+            // --- Email/Password Login ---
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault(); // Prevent default form submission
+
+                const email = loginEmailInput.value.trim();
+                const password = loginPasswordInput.value.trim();
+
+                if (!email || !password) {
+                    userStatusParagraph.textContent = 'Please enter both email and password.';
+                    userStatusParagraph.style.color = 'red';
+                    return;
+                }
+
+                try {
+                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                    const user = userCredential.user;
+                    console.log('User logged in:', user);
+                    userStatusParagraph.textContent = `Successfully logged in as: ${user.email}`;
+                    userStatusParagraph.style.color = 'green';
+                    // Redirect to your dashboard or home page
+                    window.location.href = 'home.html'; // Adjust this path to your actual dashboard page
+                } catch (error) {
+                    let errorMessage = "An unknown error occurred.";
+                    console.error('Firebase Login Error:', error);
+
+                    switch (error.code) {
+                        case 'auth/user-not-found':
+                        case 'auth/wrong-password':
+                            errorMessage = 'Invalid email or password.';
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = 'The email address is not valid.';
+                            break;
+                        case 'auth/user-disabled':
+                            errorMessage = 'Your account has been disabled.';
+                            break;
+                        default:
+                            errorMessage = `Login failed: ${error.message}`;
+                    }
+                    userStatusParagraph.textContent = errorMessage;
+                    userStatusParagraph.style.color = 'red';
+                }
+            });
+
+            // --- Google Login ---
+            googleLoginButton.addEventListener('click', async () => {
+                try {
+                    const result = await auth.signInWithPopup(googleProvider);
+                    const user = result.user;
+                    console.log('Google user signed in:', user);
+                    userStatusParagraph.textContent = `Signed in with Google as ${user.displayName || user.email}!`;
+                    userStatusParagraph.style.color = 'green';
+                    // Redirect to your dashboard or home page
+                    window.location.href = 'home.html'; // Adjust this path to your actual dashboard page
+                } catch (error) {
+                    console.error('Google Sign-in Error:', error);
+                    let errorMessage = "An error occurred during Google sign-in.";
+                    if (error.code === 'auth/popup-closed-by-user') {
+                        errorMessage = 'Google sign-in popup was closed.';
+                    } else if (error.code === 'auth/cancelled-popup-request') {
+                         errorMessage = 'Another Google sign-in request was already in progress.';
+                    } else if (error.code === 'auth/auth-domain-config-required') {
+                        errorMessage = 'Authentication domain not configured. Add "localhost" to authorized domains in Firebase Console.';
+                    }
+                    else {
+                        errorMessage = `Google sign-in failed: ${error.message}`;
+                    }
+                    userStatusParagraph.textContent = errorMessage;
+                    userStatusParagraph.style.color = 'red';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
