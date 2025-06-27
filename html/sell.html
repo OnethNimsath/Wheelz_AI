@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sell Vehicle</title>
+    <link rel="stylesheet" href="/Wheelz_AI/css/sell.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for microphone icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+<body>
+    <div class="container">
+        <h1 class="form-section-title">Sell Your Vehicle</h1>
+
+        <form>
+            <!-- Contact Info Section -->
+            <div class="mb-8">
+                <h2 class="form-section-title">Contact Info</h2>
+                <div class="grid-cols-2">
+                    <div class="form-group">
+                        <label for="contactName">Name<span class="text-red-500">*</span></label>
+                        <input type="text" id="contactName" name="contactName" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneNumber">Phone Number<span class="text-red-500">*</span></label>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="07XXXXXXXX" pattern="[0-9]{10}" title="10-digit mobile number" required>
+                        <p class="text-sm text-gray-400 mt-1">(10 numbers) Only Mobile Phone numbers</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City<span class="text-red-500">*</span></label>
+                        <select id="city" name="city" required>
+                            <option value="">Select City</option>
+                            <option value="Colombo">Colombo</option>
+                            <option value="Kandy">Kandy</option>
+                            <option value="Galle">Galle</option>
+                            <option value="Jaffna">Jaffna</option>
+                            <option value="Matara">Matara</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicle Info Section -->
+            <div class="mb-8">
+                <h2 class="form-section-title">Vehicle Info</h2>
+                <div class="grid-cols-2">
+                    <div class="form-group">
+                        <label for="vehicleType">Vehicle Type<span class="text-red-500">*</span></label>
+                        <select id="vehicleType" name="vehicleType" required>
+                            <option value="">Select Type</option>
+                            <option value="Car">Car</option>
+                            <option value="Motorcycle">Motorcycle</option>
+                            <option value="Van">Van</option>
+                            <option value="Bus">Bus</option>
+                            <option value="Lorry">Lorry</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="vehicleCondition">Vehicle Condition<span class="text-red-500">*</span></label>
+                        <select id="vehicleCondition" name="vehicleCondition" required>
+                            <option value="">Select Condition</option>
+                            <option value="New">New</option>
+                            <option value="Used">Used</option>
+                            <option value="Reconditioned">Reconditioned</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="vehicleMake">Vehicle Make<span class="text-red-500">*</span></label>
+                        <select id="vehicleMake" name="vehicleMake" required>
+                            <option value="">Select Make</option>
+                            <option value="Toyota">Toyota</option>
+                            <option value="Honda">Honda</option>
+                            <option value="Mercedes-Benz">Mercedes-Benz</option>
+                            <option value="BMW">BMW</option>
+                            <option value="Nissan">Nissan</option>
+                            <option value="Suzuki">Suzuki</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="model">Model<span class="text-red-500">*</span></label>
+                        <input type="text" id="model" name="model" placeholder="Vehicle Model" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="manufacturedYear">Manufactured Year<span class="text-red-500">*</span></label>
+                        <select id="manufacturedYear" name="manufacturedYear" required>
+                            <option value="">Manufactured Year</option>
+                            <!-- Generate years dynamically with JS or manually add common years -->
+                            <script>
+                                const currentYear = new Date().getFullYear();
+                                for (let i = currentYear; i >= 1900; i--) {
+                                    const option = document.createElement('option');
+                                    option.value = i;
+                                    option.textContent = i;
+                                    document.getElementById('manufacturedYear').appendChild(option);
+                                }
+                            </script>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Price (Rs.)<span class="text-red-500">*</span></label>
+                        <input type="number" id="price" name="price" placeholder="Price in LKR" required min="0">
+                        <div class="checkbox-group mt-2">
+                            <input type="checkbox" id="ongoingLease" name="ongoingLease">
+                            <label for="ongoingLease" class="mb-0 text-gray-400">Ongoing Lease</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="transmission">Transmission<span class="text-red-500">*</span></label>
+                        <select id="transmission" name="transmission" required>
+                            <option value="">Select Transmission</option>
+                            <option value="Automatic">Automatic</option>
+                            <option value="Manual">Manual</option>
+                            <option value="CVT">CVT</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fuelType">Fuel Type<span class="text-red-500">*</span></label>
+                        <select id="fuelType" name="fuelType" required>
+                            <option value="">Select Fuel Type</option>
+                            <option value="Petrol">Petrol</option>
+                            <option value="Diesel">Diesel</option>
+                            <option value="Hybrid">Hybrid</option>
+                            <option value="Electric">Electric</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="engineCapacity">Engine Capacity (CC)</label>
+                        <input type="number" id="engineCapacity" name="engineCapacity" placeholder="e.g., 1500" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="mileage">Mileage (km)<span class="text-red-500">*</span></label>
+                        <input type="number" id="mileage" name="mileage" placeholder="Mileage in km" required min="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Options Section -->
+            <div class="mb-8">
+                <h2 class="form-section-title">Options</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4"> <!-- Responsive grid for checkboxes -->
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="airCondition" name="options" value="Air Condition">
+                        <label for="airCondition" class="mb-0">AIR CONDITION</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="powerSteering" name="options" value="Power Steering">
+                        <label for="powerSteering" class="mb-0">POWER STEERING</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="powerMirror" name="options" value="Power Mirror">
+                        <label for="powerMirror" class="mb-0">POWER MIRROR</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="powerWindow" name="options" value="Power Window">
+                        <label for="powerWindow" class="mb-0">POWER WINDOW</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Info Section -->
+            <div class="mb-8">
+                <h2 class="form-section-title">Additional Info</h2>
+                <div class="form-group">
+                    <label for="additionalInfo">Details</label> <!-- Changed label from direct text to "Details" -->
+                    <div class="textarea-with-mic">
+                        <textarea id="additionalInfo" name="additionalInfo" rows="4" placeholder="Put correct address and Land phone number if you own a 'Car Sale' (Do NOT post your website url)"></textarea>
+                        <!-- Microphone button for voice-to-text -->
+                        <button type="button" class="mic-button" onclick="startVoiceToText()">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-1">Put correct address and Land phone number if you own a "Car Sale" (Do NOT post your website url)</p>
+                </div>
+            </div>
+
+            <!-- Upload Images Section -->
+            <div class="mb-8">
+                <h2 class="form-section-title">Upload Images</h2>
+                <p class="text-sm text-gray-400 mb-4">If you have problem uploading images in Mobile Broadband, Try uploading only one small image file</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4"> <!-- Responsive grid for file inputs -->
+                    <div class="form-group mb-0">
+                        <label for="mainImage" class="mb-2">Main Image</label>
+                        <input type="file" id="mainImage" name="mainImage" accept="image/*">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label for="image2" class="mb-2">Image 2</label>
+                        <input type="file" id="image2" name="image2" accept="image/*">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label for="image3" class="mb-2">Image 3</label>
+                        <input type="file" id="image3" name="image3" accept="image/*">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label for="image4" class="mb-2">Image 4</label>
+                        <input type="file" id="image4" name="image4" accept="image/*">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label for="image5" class="mb-2">Image 5</label>
+                        <input type="file" id="image5" name="image5" accept="image/*">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label for="image6" class="mb-2">Image 6</label>
+                        <input type="file" id="image6" name="image6" accept="image/*">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <!-- Added onclick to navigate to dashboard.html -->
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='dashboard.html'">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add Vehicle</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Custom Message Box HTML -->
+    <div id="customMessageBox" class="modal-overlay">
+        <div class="modal-content">
+            <p id="messageText" class="modal-message"></p>
+            <button class="modal-button" onclick="hideMessageBox()">OK</button>
+        </div>
+    </div>
+    <script>
+        // Function to show the custom message box
+        function showMessageBox(message) {
+            document.getElementById('messageText').textContent = message;
+            document.getElementById('customMessageBox').classList.add('show');
+        }
+
+        // Function to hide the custom message box
+        function hideMessageBox() {
+            document.getElementById('customMessageBox').classList.remove('show');
+        }
+
+        // Get references to the textarea and microphone button
+        const additionalInfoTextarea = document.getElementById('additionalInfo');
+        const micButton = document.querySelector('.mic-button');
+
+        // Global variable to hold the recognition object
+        let recognition;
+        let isRecognizing = false;
+
+        function startVoiceToText() {
+            // Check for browser compatibility
+            if (!('SpeechRecognition' in window) && !('webkitSpeechRecognition' in window)) {
+                showMessageBox("Sorry, your browser doesn't support the Web Speech API. Please try Chrome or Edge.");
+                return;
+            }
+
+            // If already recognizing, stop it
+            if (isRecognizing) {
+                recognition.stop();
+                return;
+            }
+
+            // Initialize SpeechRecognition
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+
+            // Set properties
+            recognition.continuous = false; // Set to true if you want continuous input for longer dictation
+            recognition.interimResults = true; // Set to true to get results while speaking
+            recognition.lang = 'en-US'; // Set the language (e.g., 'en-US', 'si-LK' for Sinhala, 'ta-LK' for Tamil if supported)
+
+            // Event handler for results
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                // Loop through all results from the event
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+
+                // Append the final transcript to the textarea
+                additionalInfoTextarea.value += finalTranscript;
+                // If you want to show interim results live in the textarea (will overwrite as new interim results come)
+                // If recognition.continuous is true, you'd manage the text more carefully to append/update.
+                // For a single utterance (continuous: false), finalTranscript is usually enough.
+            };
+
+            // Event handler for errors
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                if (event.error === 'no-speech') {
+                    showMessageBox('No speech detected. Please try again.');
+                } else if (event.error === 'not-allowed') {
+                    showMessageBox('Microphone access denied. Please allow microphone access in your browser settings.');
+                } else if (event.error === 'aborted') {
+                    showMessageBox('Speech input was cancelled.');
+                }
+                 else {
+                    showMessageBox('An error occurred during speech recognition: ' + event.error);
+                }
+                isRecognizing = false;
+                micButton.style.backgroundColor = '#4a90e2'; // Reset button color
+            };
+
+            // Event handler when recognition ends
+            recognition.onend = () => {
+                console.log('Speech recognition ended.');
+                isRecognizing = false;
+                micButton.style.backgroundColor = '#4a90e2'; // Reset button color
+                // Only show "Voice input finished" if it wasn't an error or manual stop
+                if (document.getElementById('customMessageBox').classList.contains('show') && 
+                    document.getElementById('messageText').textContent.includes('Listening')) {
+                    // This checks if the previous message box was for 'Listening...'
+                    showMessageBox('Voice input finished.');
+                } else if (!document.getElementById('customMessageBox').classList.contains('show')) {
+                    // If no message box is currently open, show this one
+                    showMessageBox('Voice input finished.');
+                }
+            };
+
+            // Start recognition
+            recognition.start();
+            isRecognizing = true;
+            micButton.style.backgroundColor = '#e74c3c'; // Change button color to indicate recording (red)
+            showMessageBox('Listening... Speak now!');
+        }
+    </script>
+</body>
+</html>
