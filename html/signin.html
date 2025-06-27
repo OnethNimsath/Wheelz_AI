@@ -125,7 +125,7 @@
                     userStatusParagraph.textContent = `Successfully logged in as: ${user.email}`;
                     userStatusParagraph.style.color = 'green';
                     // Redirect to your dashboard or home page
-                    window.location.href = 'home.html'; // Adjust this path to your actual dashboard page
+                    window.location.href = 'dashboard.html'; // Adjust this path to your actual dashboard page
                 } catch (error) {
                     let errorMessage = "An unknown error occurred.";
                     console.error('Firebase Login Error:', error);
@@ -158,7 +158,7 @@
                     userStatusParagraph.textContent = `Signed in with Google as ${user.displayName || user.email}!`;
                     userStatusParagraph.style.color = 'green';
                     // Redirect to your dashboard or home page
-                    window.location.href = 'home.html'; // Adjust this path to your actual dashboard page
+                    window.location.href = 'dashboard.html'; // Adjust this path to your actual dashboard page
                 } catch (error) {
                     console.error('Google Sign-in Error:', error);
                     let errorMessage = "An error occurred during Google sign-in.";

@@ -83,16 +83,17 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script> 
     <script>
         // Your web app's Firebase configuration
         const firebaseConfig = {
            apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
-            authDomain: "wheelzai.firebaseapp.com",
-            projectId: "wheelzai",
-            storageBucket: "wheelzai.firebasestorage.app",
-            messagingSenderId: "132756052907",
-            appId: "1:132756052907:web:b92dc998b4b5bee8d450ee",
-            measurementId: "G-ECQJYZYK43"
+           authDomain: "wheelzai.firebaseapp.com",
+           projectId: "wheelzai",
+           storageBucket: "wheelzai.firebasestorage.app",
+           messagingSenderId: "132756052907",
+           appId: "1:132756052907:web:b92dc998b4b5bee8d450ee",
+           measurementId: "G-ECQJYZYK43"
         };
 
         // Initialize Firebase
@@ -100,6 +101,9 @@
 
         // Get a reference to the Auth service
         const auth = firebase.auth();
+        // Get a reference to the Firestore service
+        const db = firebase.firestore(); 
+
         // For Google Sign-in
         const googleProvider = new firebase.auth.GoogleAuthProvider();
 
@@ -143,26 +147,24 @@
                 }
 
                 try {
-                    // Create user with email and password
+                    // 1. Create user with email and password
                     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                     const user = userCredential.user;
 
-                    // Optionally: Update user profile (e.g., display name)
+                    // 2. Optionally: Update user profile (e.g., display name)
                     await user.updateProfile({
                         displayName: sellerName
                     });
 
-                    // Optionally: Save additional user data (like sellerName) to Firestore/Realtime Database
-                    // This part is commented out as it requires additional Firebase SDKs (Firestore)
-                    // and database setup, but this is where you'd typically do it.
-                    /*
-                    const db = firebase.firestore(); // If using Firestore
+                    // 3. Save additional user data to Firestore
+                    // Create a document in a collection named 'users' with the user's UID as the document ID
                     await db.collection('users').doc(user.uid).set({
                         name: sellerName,
                         email: user.email,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(), // Use server timestamp
+                        // Add any other initial fields you want for your users
+                        userType: 'seller' // Example: You might want to categorize users
                     });
-                    */
 
                     alert(`Account created successfully for ${user.email}!`);
                     window.location.href = 'signin.html'; // Redirect to signin page
@@ -194,23 +196,37 @@
             googleSignupButton.addEventListener('click', async () => {
                 try {
                     const result = await auth.signInWithPopup(googleProvider);
-                    // The signed-in user info.
                     const user = result.user;
 
-                    // You can access the Google Access Token if needed
-                    // const credential = GoogleAuthProvider.credentialFromResult(result);
-                    // const token = credential.accessToken;
+                    // Check if the user already exists in Firestore (for Google sign-in)
+                    // If they are signing up for the first time with Google, create a Firestore document.
+                    const userDocRef = db.collection('users').doc(user.uid);
+                    const doc = await userDocRef.get();
+
+                    if (!doc.exists) {
+                        // User is signing in with Google for the first time, create their Firestore profile
+                        await userDocRef.set({
+                            name: user.displayName || 'N/A', // Use display name from Google, or 'N/A'
+                            email: user.email,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            userType: 'seller', // Assuming all sign-ups are 'seller' for now
+                            googleSignIn: true // Mark that they signed up with Google
+                        });
+                        console.log("New Google user profile created in Firestore.");
+                    } else {
+                        console.log("Existing Google user profile found in Firestore.");
+                    }
 
                     console.log('Google user signed in:', user);
                     alert(`Signed in with Google as ${user.displayName || user.email}!`);
-                    window.location.href = 'home.html'; // Or wherever you want to redirect after successful login
+                    window.location.href = 'dashboard.html'; // Or wherever you want to redirect after successful login
                 } catch (error) {
                     console.error('Google Sign-in Error:', error);
                     let errorMessage = "An error occurred during Google sign-in.";
                     if (error.code === 'auth/popup-closed-by-user') {
                         errorMessage = 'Google sign-in popup was closed.';
                     } else if (error.code === 'auth/cancelled-popup-request') {
-                         errorMessage = 'Another Google sign-in request was already in progress.';
+                        errorMessage = 'Another Google sign-in request was already in progress.';
                     } else {
                         errorMessage = `Google sign-in failed: ${error.message}`;
                     }
