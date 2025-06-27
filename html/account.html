@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Details</title>
+    <link rel="stylesheet" href="/Wheelz_AI/css/account.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <style>
+        /* These styles are kept here for completeness but should ideally be in your /Wheelz_AI/css/account.css */
+        /* General Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+        }
+
+        .modal-content {
+            background-color: #2c2c2c; /* Dark background for the modal */
+            margin: auto;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            width: 90%;
+            max-width: 400px; /* Max width for consistency */
+            text-align: center;
+            color: #e0e0e0; /* Light text for readability */
+        }
+
+        .modal-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .modal-content p {
+            margin-bottom: 25px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px; /* Space between buttons */
+            margin-top: 20px;
+        }
+
+        .modal-button {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+        }
+
+        .modal-button.confirm {
+            background-color: #007bff; /* Blue for primary action */
+            color: white;
+        }
+        .modal-button.confirm:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .modal-button.cancel {
+            background-color: #6c757d; /* Grey for secondary action */
+            color: white;
+        }
+        .modal-button.cancel:hover {
+            background-color: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        .modal-button.ok { /* For generic message modal */
+            background-color: #28a745; /* Green for OK */
+            color: white;
+        }
+        .modal-button.ok:hover {
+            background-color: #218838;
+        }
+
+        /* Specific styles for the new edit modal input */
+        .edit-modal-input {
+            width: calc(100% - 20px); /* Adjust width */
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            font-size: 1rem;
+            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+        }
+        .edit-modal-input:focus {
+            outline: none;
+            border-color: #007bff; /* Highlight focus */
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+
+        /* Style for the back button */
+        .back-button {
+            display: block; /* Make it a block element to take full width or align better */
+            width: fit-content; /* Adjust width to content */
+            margin: 20px auto 0 auto; /* Center it below other content with top margin */
+            padding: 10px 20px;
+            background-color: #007bff; /* Primary blue, or choose another color */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            text-decoration: none; /* In case you make it an anchor later */
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="account-container">
+        <h1 class="account-title">Account Details</h1>
+
+        <div class="account-field">
+            <span class="field-label">Account Name:</span>
+            <span class="field-value" id="accountName">Loading...</span>
+            </div>
+
+        <div class="account-field">
+            <span class="field-label">Account Email:</span>
+            <span class="field-value" id="accountEmail">Loading...</span>
+            </div>
+
+        <div class="account-field">
+            <span class="field-label">Contact Number:</span>
+            <span class="field-value" id="contactNumber">Not Set</span>
+            <button class="edit-button" onclick="editField('contactNumber', 'Contact Number')">Edit</button>
+        </div>
+
+        <div class="account-field">
+            <span class="field-label">User Type:</span>
+            <span class="field-value" id="userType">Loading...</span>
+        </div>
+
+        <button class="delete-button" onclick="showDeleteConfirmation()">Delete Account</button>
+
+        <button class="back-button" onclick="goToDashboard()">Back to Dashboard</button>
+    </div>
+
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h3>Confirm Deletion</h3>
+            <p id="deleteModalMessage">Are you sure you want to delete your account? This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <button class="modal-button confirm" onclick="deleteAccount()">Delete</button>
+                <button class="modal-button cancel" onclick="hideDeleteConfirmation()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <h3 id="messageModalTitle">Message</h3>
+            <p id="messageModalContent"></p>
+            <div class="modal-buttons">
+                <button class="modal-button ok" onclick="hideMessage()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3 id="editModalTitle">Edit Field</h3>
+            <input type="text" id="editModalInput" class="edit-modal-input" />
+            <div class="modal-buttons">
+                <button class="modal-button confirm" id="editModalConfirmButton">Save</button>
+                <button class="modal-button cancel" onclick="hideEditModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
+            authDomain: "wheelzai.firebaseapp.com",
+            projectId: "wheelzai",
+            storageBucket: "wheelzai.firebasestorage.app",
+            messagingSenderId: "132756052907",
+            appId: "1:132756052907:web:b92dc998b4b5bee8d450ee",
+            measurementId: "G-ECQJYZYK43"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = app.auth();
+        const db = app.firestore();
+
+        let userId = null; // Will store the user's UID once authenticated
+
+        // Variables to store current field being edited in the modal
+        let currentEditFieldId = null;
+        let currentEditFieldName = null;
+
+        /**
+         * Shows a generic message modal to the user for feedback (success, error, info).
+         * @param {string} title - The title for the message box.
+         * @param {string} message - The content message to display.
+         */
+        function showMessage(title, message) {
+            document.getElementById('messageModalTitle').innerText = title;
+            document.getElementById('messageModalContent').innerText = message;
+            document.getElementById('messageModal').style.display = 'flex'; // Use 'flex' to center
+        }
+
+        /**
+         * Hides the generic message modal.
+         */
+        function hideMessage() {
+            document.getElementById('messageModal').style.display = 'none';
+        }
+
+        /**
+         * Shows the edit modal for a specific user profile field.
+         * @param {string} fieldId - The ID of the HTML element displaying the field value (e.g., 'accountName').
+         * @param {string} fieldName - The user-friendly name of the field (e.g., 'Account Name').
+         * @param {string} currentValue - The current value of the field, fetched from the UI.
+         */
+        function showEditModal(fieldId, fieldName, currentValue) {
+            currentEditFieldId = fieldId;
+            currentEditFieldName = fieldName;
+
+            document.getElementById('editModalTitle').innerText = `Edit ${fieldName}`;
+            const editInput = document.getElementById('editModalInput');
+            editInput.value = currentValue === 'Not Set' ? '' : currentValue; // Clear 'Not Set' placeholder
+            editInput.focus(); // Auto-focus on input
+            document.getElementById('editModal').style.display = 'flex'; // Use 'flex' to center
+        }
+
+        /**
+         * Hides the edit modal and resets the tracking variables.
+         */
+        function hideEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            currentEditFieldId = null;
+            currentEditFieldName = null;
+        }
+
+        /**
+         * The primary function called when an 'Edit' button next to a field is clicked.
+         * @param {string} fieldId - The ID of the HTML span element holding the current value.
+         * @param {string} fieldName - The friendly name of the field to display in the modal title.
+         */
+        function editField(fieldId, fieldName) {
+            const currentValue = document.getElementById(fieldId).innerText;
+            showEditModal(fieldId, fieldName, currentValue);
+        }
+
+        /**
+         * Confirms the edit operation. Saves the new value to Firebase Authentication
+         * and/or Firestore based on the field being edited.
+         */
+        async function confirmEdit() {
+            console.log("DEBUG: confirmEdit function STARTING!");
+            const newValue = document.getElementById('editModalInput').value.trim();
+            hideEditModal();
+
+            if (newValue === '') {
+                showMessage('Input Error', `${currentEditFieldName} cannot be empty.`);
+                return;
+            }
+
+            const currentUser = auth.currentUser;
+
+            try {
+                if (currentEditFieldId === 'accountName') {
+                    if (currentUser) {
+                        await currentUser.updateProfile({ displayName: newValue });
+                        await db.collection('users').doc(currentUser.uid).set({
+                            name: newValue
+                        }, { merge: true });
+                        showMessage('Success', `${currentEditFieldName} updated successfully!`);
+                    } else {
+                        throw { code: 'auth/no-current-user', message: 'No active user found. Please sign in again.' };
+                    }
+
+                } else if (currentEditFieldId === 'accountEmail') {
+                    if (currentUser) {
+                        await currentUser.updateEmail(newValue); // This often requires recent login
+                        await db.collection('users').doc(currentUser.uid).set({
+                            email: newValue
+                        }, { merge: true });
+                        showMessage('Success', `${currentEditFieldName} updated successfully! Please note: You might need to re-authenticate if you sign out and sign in again.`);
+                    } else {
+                        throw { code: 'auth/no-current-user', message: 'No active user found. Please sign in again.' };
+                    }
+
+                } else if (currentEditFieldId === 'contactNumber') {
+                    if (currentUser) {
+                        const userDocRef = db.collection('users').doc(currentUser.uid);
+                        await userDocRef.set({ contactNumber: newValue }, { merge: true });
+                        showMessage('Success', `${currentEditFieldName} updated successfully!`);
+                    } else {
+                        throw { code: 'auth/no-current-user', message: 'No active user found. Please sign in again.' };
+                    }
+                }
+            } catch (error) {
+                console.error(`Error updating ${currentEditFieldName}:`, error);
+                let displayErrorMessage = `Failed to update ${currentEditFieldName}: ${error.message}`;
+
+                if (error.code === 'auth/requires-recent-login' || error.code === 'auth/no-current-user') {
+                    displayErrorMessage = "Your session has expired or no user is logged in. Please sign in again and retry.";
+                    setTimeout(() => {
+                        auth.signOut().then(() => {
+                            window.location.href = 'signin.html';
+                        });
+                    }, 3000);
+                }
+                showMessage('Update Failed', displayErrorMessage);
+            }
+        }
+
+        // Global listener for Firebase Authentication state changes.
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                userId = user.uid;
+                console.log("Authenticated with user ID:", userId);
+                await fetchAccountDetails(user);
+            } else {
+                console.warn("No user logged in. Redirecting to signin.html.");
+                window.location.href = 'signin.html';
+            }
+        });
+
+        /**
+         * Fetches and displays account details from Firebase Authentication and Firestore.
+         * Uses Firestore's onSnapshot for real-time updates.
+         * @param {object} user - The Firebase User object provided by onAuthStateChanged.
+         */
+        async function fetchAccountDetails(user) {
+            const accountNameElem = document.getElementById('accountName');
+            const accountEmailElem = document.getElementById('accountEmail');
+            const contactNumberElem = document.getElementById('contactNumber');
+            const userTypeElem = document.getElementById('userType');
+
+            // Set display name and email from Firebase Auth user object
+            accountNameElem.innerText = user.displayName || 'Not Set';
+            accountEmailElem.innerText = user.email || 'Not Set';
+
+            if (userId) {
+                const userDocRef = db.collection('users').doc(userId);
+                userDocRef.onSnapshot((docSnap) => {
+                    if (docSnap.exists) {
+                        const data = docSnap.data();
+                        contactNumberElem.innerText = data.contactNumber || 'Not Set';
+                        userTypeElem.innerText = data.userType || 'N/A';
+                    } else {
+                        console.log("No additional profile data found in Firestore for this user. Creating default.");
+                        userDocRef.set({
+                            contactNumber: 'Not Set',
+                            userType: 'customer'
+                        }, { merge: true }).catch(error => {
+                            console.error("Error creating default Firestore data:", error);
+                            showMessage('Firestore Error', `Failed to create default profile data: ${error.message}`);
+                        });
+                    }
+                }, (error) => {
+                    console.error("Error fetching Firestore data:", error);
+                    showMessage('Data Fetch Error', `Failed to load user data: ${error.message}`);
+                    contactNumberElem.innerText = 'Error loading';
+                    userTypeElem.innerText = 'Error loading';
+                });
+            } else {
+                contactNumberElem.innerText = 'Not available';
+                userTypeElem.innerText = 'Not available';
+            }
+        }
+
+        // --- Delete Account Functions ---
+        async function showDeleteConfirmation() {
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+
+        async function hideDeleteConfirmation() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        async function deleteAccount() {
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+                console.error("No user logged in to delete account.");
+                hideDeleteConfirmation();
+                showMessage('Error', 'No user logged in to delete account.');
+                return;
+            }
+
+            try {
+                const userUid = currentUser.uid; // Get UID before deleting Auth record
+
+                // Delete user from Firebase Authentication
+                await currentUser.delete();
+
+                // Delete user's data from Firestore
+                if (userUid) {
+                    const userDocRef = db.collection('users').doc(userUid);
+                    await userDocRef.delete();
+                    console.log("Firestore user data deleted.");
+                }
+
+                showMessage('Account Deleted', 'Your account has been successfully deleted. You will be redirected.');
+                hideDeleteConfirmation();
+                setTimeout(() => {
+                    window.location.href = 'signin.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error("Error deleting account:", error);
+                let displayErrorMessage = `Failed to delete account: ${error.message}`;
+                if (error.code === 'auth/requires-recent-login') {
+                    displayErrorMessage += " Please sign in again and retry.";
+                }
+                showMessage('Deletion Failed', displayErrorMessage);
+                hideDeleteConfirmation();
+            }
+        }
+
+        // --- New Function for Back Button Navigation ---
+        function goToDashboard() {
+            window.location.href = 'dashboard.html';
+        }
+
+        // --- Event Listeners for Modals ---
+        const editModalConfirmButton = document.getElementById('editModalConfirmButton');
+        if (editModalConfirmButton) {
+            editModalConfirmButton.addEventListener('click', confirmEdit);
+        } else {
+            console.error("Initialization Error: #editModalConfirmButton not found.");
+        }
+
+        const editModalInput = document.getElementById('editModalInput');
+        if (editModalInput) {
+            editModalInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    confirmEdit();
+                }
+            });
+        } else {
+            console.error("Initialization Error: #editModalInput not found.");
+        }
+
+    </script>
+</body>
+</html>
