@@ -5,24 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Dashboard</title>
     <link rel="stylesheet" href="/Wheelz_AI/css/dashboard.css">
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    </head>
+</head>
 <body>
-    <div class="dashboard-container">
+    <div id="loading-spinner" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+        <p>Checking authentication status...</p>
+    </div>
+
+    <div id="dashboard-content" class="dashboard-container" style="display: none;">
         <h1 class="dashboard-title">Welcome to Your Dashboard!</h1>
+        <p class="mb-4">You are logged in as: <strong id="user-email"></strong></p>
         <div class="space-y-4">
-            <!-- Account Details Button -->
             <a href="/Wheelz_AI/html/account.html" class="nav-button">Account Details</a>
-            <!--Advertisements published-->
             <a href="/Wheelz_AI/html/ad_dashboard.html" class="nav-button">Your Advertisements</a>
-            <!-- Sell a Vehicle Button -->
             <a href="/Wheelz_AI/html/sell.html" class="nav-button">Sell a Vehicle</a>
-            <!-- Buy a Vehicle Button -->
             <a href="/Wheelz_AI/html/buy.html" class="nav-button">Buy a Vehicle</a>
-            <!--Logout button-->
-            <a href="/Wheelz_AI/html/signin.html" class="nav-button">Logout</a>
+            <button id="logoutButton" class="nav-button logout-button">Logout</button>
         </div>
     </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
+            authDomain: "wheelzai.firebaseapp.com",
+            projectId: "wheelzai",
+            storageBucket: "wheelzai.firebasestorage.app",
+            messagingSenderId: "132756052907",
+            appId: "1:132756052907:web:b92dc998b4b5bee8d450ee",
+            measurementId: "G-ECQJYZYK43"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        const dashboardContent = document.getElementById('dashboard-content');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const userEmailSpan = document.getElementById('user-email');
+        const logoutButton = document.getElementById('logoutButton');
+
+        // This listener is the core of the session management
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // User is signed in. Display the dashboard.
+                console.log('User is authenticated:', user.email);
+                userEmailSpan.textContent = user.email;
+                loadingSpinner.style.display = 'none';
+                dashboardContent.style.display = 'block';
+            } else {
+                // No user is signed in. Redirect to the signin page.
+                console.log('No user is authenticated. Redirecting to login page.');
+                window.location.href = 'signin.html';
+            }
+        });
+
+        // Add the event listener for the logout button
+        logoutButton.addEventListener('click', async () => {
+            try {
+                await auth.signOut();
+                console.log('User logged out successfully.');
+                // The onAuthStateChanged listener above will handle the redirection.
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        });
+    </script>
 </body>
 </html>
