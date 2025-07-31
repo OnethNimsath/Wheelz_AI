@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advertisement Dashboard</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
+        }
+        .section-title {
+            font-size: 2rem; /* text-3xl */
+            font-weight: 700; /* font-bold */
+            color: #1f2937; /* gray-900 */
+            margin-bottom: 2rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e5e7eb; /* gray-200 */
+            text-align: center;
+        }
+        .advertisement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .ad-card {
+            background-color: #f9fafb; /* Lighter background */
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* Shadow for cards */
+            border: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .ad-card h3 {
+            font-size: 1.5rem; /* text-xl */
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.75rem;
+        }
+        .ad-card p {
+            font-size: 0.95rem;
+            color: #4b5563;
+            margin-bottom: 0.5rem;
+        }
+        .ad-card p strong {
+            color: #1f2937;
+        }
+        .ad-card .timestamp {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 1rem;
+            text-align: right;
+        }
+        .ad-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+        .ad-images img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+        }
+        .loading-message {
+            text-align: center;
+            color: #6b7280;
+            font-size: 1.1rem;
+            margin-top: 2rem;
+        }
+        .no-ads-message {
+            text-align: center;
+            color: #6b7280;
+            font-size: 1.1rem;
+            margin-top: 2rem;
+        }
+        .back-button {
+            display: block;
+            width: fit-content;
+            margin: 1.5rem auto 0;
+            padding: 0.75rem 1.5rem;
+            background-color: #3b82f6;
+            color: white;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .back-button:hover {
+            background-color: #2563eb;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3), 0 2px 4px -1px rgba(59, 130, 246, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="section-title">Advertisement Dashboard</h1>
+        
+        <div id="advertisementsGrid" class="advertisement-grid">
+            <p class="loading-message" id="loadingAds">Loading advertisements...</p>
+            <!-- Advertisements will be dynamically loaded here -->
+        </div>
+
+        <a href="sell.html" class="back-button">Back to Sell Vehicle</a>
+    </div>
+
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables for Firebase configuration and app ID
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
+            authDomain: "wheelzai.firebaseapp.com",
+            projectId: "wheelzai",
+            storageBucket: "wheelzai.firebasestorage.app",
+            messagingSenderId: "132756052907",
+            appId: "1:132756052907:web:b92dc998b4b5bee8d450ee",
+            measurementId: "G-ECQJYZYK43"
+        };
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app;
+        let db;
+        let auth;
+        let userId = 'anonymous'; // Default to anonymous
+
+        const advertisementsGrid = document.getElementById('advertisementsGrid');
+        const loadingAdsMessage = document.getElementById('loadingAds');
+
+        /**
+         * Initializes Firebase and sets up authentication.
+         */
+        async function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                console.log("Firebase services initialized: app, db, auth.");
+
+                // Authenticate user
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log('Signed in with custom token.');
+                } else {
+                    await signInAnonymously(auth);
+                    console.log('Signed in anonymously.');
+                }
+
+                // Listen for auth state changes to get the user ID
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log('Auth state changed. User ID:', userId);
+                        loadUserAdvertisements(userId); // Load ads specific to this user
+                    } else {
+                        // If user logs out or token expires, sign in anonymously again
+                        signInAnonymously(auth).then(anonUser => {
+                            userId = anonUser.user.uid;
+                            console.log('Auth state changed. Signed in anonymously. User ID:', userId);
+                            loadUserAdvertisements(userId);
+                        }).catch(error => {
+                            console.error("Error signing in anonymously:", error);
+                            loadingAdsMessage.textContent = 'Failed to authenticate. Cannot load advertisements.';
+                        });
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error initializing Firebase or authenticating:", error);
+                loadingAdsMessage.textContent = 'Failed to initialize the application. Please try again.';
+            }
+        }
+
+        /**
+         * Loads advertisements published by the current user from Firestore.
+         * @param {string} currentUserId The UID of the currently authenticated user.
+         */
+        function loadUserAdvertisements(currentUserId) {
+            if (!db || !currentUserId || currentUserId === 'anonymous') {
+                console.warn("Firestore or User ID not ready for loading advertisements, or user is anonymous. DB:", db, "User ID:", currentUserId);
+                loadingAdsMessage.textContent = 'Authentication required to view advertisements, or no user is logged in.';
+                return;
+            }
+
+            console.log(`Attempting to load advertisements for userId: ${currentUserId}`);
+
+            // Collection path: /artifacts/{appId}/public/data/vehicles
+            const vehiclesCollectionRef = collection(db, `artifacts/${appId}/public/data/vehicles`);
+            
+            // Create a query to filter documents by the current user's ID
+            const q = query(vehiclesCollectionRef, where("userId", "==", currentUserId));
+
+            onSnapshot(q, (snapshot) => {
+                advertisementsGrid.innerHTML = ''; // Clear previous ads
+                loadingAdsMessage.style.display = 'none'; // Hide loading message
+
+                if (snapshot.empty) {
+                    console.log(`No advertisements found for userId: ${currentUserId}. Snapshot is empty.`);
+                    advertisementsGrid.innerHTML = '<p class="no-ads-message">You have not published any advertisements yet.</p>';
+                    return;
+                }
+
+                console.log(`Found ${snapshot.size} advertisements for userId: ${currentUserId}.`);
+
+                snapshot.forEach((doc) => {
+                    const vehicle = doc.data();
+                    console.log("Processing document:", doc.id, vehicle); // Log each document data
+                    const adCard = document.createElement('div');
+                    adCard.className = 'ad-card'; // Use the new class for styling
+                    
+                    // Format options
+                    const options = [];
+                    if (vehicle.airCondition) options.push("Air Condition");
+                    if (vehicle.powerSteering) options.push("Power Steering");
+                    if (vehicle.powerMirror) options.push("Power Mirror");
+                    if (vehicle.powerWindow) options.push("Power Window");
+                    const optionsText = options.length > 0 ? options.join(', ') : 'None';
+
+                    // Format timestamp
+                    const timestamp = vehicle.timestamp ? new Date(vehicle.timestamp.toDate()).toLocaleString() : 'N/A';
+
+                    let imageHtml = '';
+                    const imageUrls = [
+                        vehicle.mainImageUrl,
+                        vehicle.image2Url,
+                        vehicle.image3Url,
+                        vehicle.image4Url,
+                        vehicle.image5Url,
+                        vehicle.image6Url
+                    ].filter(url => url); // Filter out undefined/null URLs
+
+                    if (imageUrls.length > 0) {
+                        imageHtml = `<div class="ad-images">`;
+                        imageUrls.forEach(url => {
+                            imageHtml += `<img src="${url}" alt="Vehicle Image" onerror="this.onerror=null;this.src='https://placehold.co/100x100/cccccc/ffffff?text=No+Image';">`;
+                        });
+                        imageHtml += `</div>`;
+                    } else {
+                        imageHtml = `<p class="text-gray-500 text-sm">No images available</p>`;
+                    }
+
+                    adCard.innerHTML = `
+                        <h3>${vehicle.vehicleMake || 'N/A'} ${vehicle.model || 'N/A'} (${vehicle.manufacturedYear || 'N/A'})</h3>
+                        <p><strong>Price:</strong> Rs. ${vehicle.price ? vehicle.price.toLocaleString() : 'N/A'}</p>
+                        <p><strong>Type:</strong> ${vehicle.vehicleType || 'N/A'} | <strong>Condition:</strong> ${vehicle.vehicleCondition || 'N/A'}</p>
+                        <p><strong>Transmission:</strong> ${vehicle.transmission || 'N/A'} | <strong>Fuel:</strong> ${vehicle.fuelType || 'N/A'}</p>
+                        <p><strong>Mileage:</strong> ${vehicle.mileage ? vehicle.mileage.toLocaleString() : 'N/A'} km | <strong>Engine:</strong> ${vehicle.engineCapacity || 'N/A'} CC</p>
+                        <p><strong>City:</strong> ${vehicle.city || 'N/A'}</p>
+                        <p><strong>Options:</strong> ${optionsText}</p>
+                        <p><strong>Details:</strong> ${vehicle.additionalInfo || 'N/A'}</p>
+                        ${imageHtml}
+                        <p class="timestamp">Published on: ${timestamp}</p>
+                    `;
+                    advertisementsGrid.appendChild(adCard);
+                });
+            }, (error) => {
+                console.error("Error listening to user advertisements:", error);
+                loadingAdsMessage.textContent = `Error loading your advertisements: ${error.message}. Please refresh.`;
+            });
+        }
+
+        // DOMContentLoaded event handler
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("Advertisement Dashboard DOMContentLoaded event fired.");
+            initializeFirebase();
+        });
+    </script>
+</body>
+</html>

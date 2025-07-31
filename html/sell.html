@@ -4,18 +4,353 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sell Vehicle</title>
-    <link rel="stylesheet" href="/Wheelz_AI/css/sell.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome for microphone icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    </head>
+    <style>
+        /* Your existing CSS styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
+        }
+        
+        .form-section-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            color: #1f2937;
+        }
+        
+        .grid-cols-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #4b5563;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            height: 16px;
+            width: 16px;
+            border-radius: 4px;
+            accent-color: #3b82f6;
+        }
+        
+        .textarea-with-mic {
+            position: relative;
+        }
+        
+        .mic-button {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+        
+        .mic-button:hover {
+            background: #2563eb;
+        }
+        
+        .mic-button.recording {
+            background: #dc2626;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .modal-message {
+            margin-bottom: 20px;
+            color: #374151;
+        }
+        
+        .modal-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .modal-button:hover {
+            background: #2563eb;
+        }
+        
+        /* Styles for the submitted vehicles list */
+        .vehicles-list-container {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .vehicle-card {
+            background-color: #f9fafb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 1rem;
+        }
+
+        .vehicle-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .vehicle-card p {
+            font-size: 0.95rem;
+            color: #4b5563;
+            margin-bottom: 0.25rem;
+        }
+
+        .vehicle-card p strong {
+            color: #1f2937;
+        }
+
+        .vehicle-card .timestamp {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.75rem;
+            text-align: right;
+        }
+
+        .vehicle-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .vehicle-images img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 0.25rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .vehicle-card-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .vehicle-card-actions .action-btn {
+            padding: 0.6rem 1.2rem; /* Slightly larger padding */
+            border-radius: 0.5rem; /* More rounded corners */
+            font-size: 0.9rem; /* Slightly larger font */
+            font-weight: 600; /* Bolder text */
+            cursor: pointer;
+            transition: all 0.2s ease-in-out; /* Smooth transition for all properties */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+
+        .vehicle-card-actions .action-btn:hover {
+            transform: translateY(-2px); /* Lift effect on hover */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* More pronounced shadow on hover */
+        }
+
+        .vehicle-card-actions .edit-btn {
+            background-color: #3b82f6; /* Blue */
+            color: white;
+        }
+        .vehicle-card-actions .edit-btn:hover {
+            background-color: #2563eb; /* Darker blue */
+        }
+
+        .vehicle-card-actions .delete-btn {
+            background-color: #ef4444; /* Red */
+            color: white;
+        }
+        .vehicle-card-actions .delete-btn:hover {
+            background-color: #dc2626; /* Darker red */
+        }
+
+        /* New styles for comparison modal */
+        #comparisonModal {
+            z-index: 1001; /* Higher than customMessageBox */
+        }
+
+        #comparisonModal .modal-content {
+            max-width: 900px; /* Wider for side-by-side */
+            width: 95%;
+            padding: 20px;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .comparison-image-container {
+            text-align: center;
+        }
+
+        .comparison-image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .comparison-image-container p {
+            margin-top: 10px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        @media (max-width: 640px) {
+            .grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr; /* Stack images on small screens */
+            }
+        }
+    </style>
+</head>
 <body>
     <div class="container">
         <h1 class="form-section-title">Sell Your Vehicle</h1>
 
-        <form>
-            <!-- Contact Info Section -->
+        <form id="vehicleForm">
             <div class="mb-8">
                 <h2 class="form-section-title">Contact Info</h2>
                 <div class="grid-cols-2">
@@ -25,7 +360,7 @@
                     </div>
                     <div class="form-group">
                         <label for="phoneNumber">Phone Number<span class="text-red-500">*</span></label>
-                        <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="07XXXXXXXX" pattern="[0-9]{10}" title="10-digit mobile number" required>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="07XXXXXXXX" pattern="07[0-9]{8}" title="10-digit mobile number" required>
                         <p class="text-sm text-gray-400 mt-1">(10 numbers) Only Mobile Phone numbers</p>
                     </div>
                     <div class="form-group">
@@ -37,12 +372,20 @@
                             <option value="Galle">Galle</option>
                             <option value="Jaffna">Jaffna</option>
                             <option value="Matara">Matara</option>
+                            <option value="Negombo">Negombo</option>
+                            <option value="Batticaloa">Batticaloa</option>
+                            <option value="Trincomalee">Trincomalee</option>
+                            <option value="Anuradhapura">Anuradhapura</option>
+                            <option value="Polonnaruwa">Polonnaruwa</option>
+                            <option value="Badulla">Badulla</option>
+                            <option value="Ratnapura">Ratnapura</option>
+                            <option value="Kurunegala">Kurunegala</option>
+                            <option value="Nuwara Eliya">Nuwara Eliya</option>
                         </select>
                     </div>
                 </div>
             </div>
 
-            <!-- Vehicle Info Section -->
             <div class="mb-8">
                 <h2 class="form-section-title">Vehicle Info</h2>
                 <div class="grid-cols-2">
@@ -55,6 +398,9 @@
                             <option value="Van">Van</option>
                             <option value="Bus">Bus</option>
                             <option value="Lorry">Lorry</option>
+                            <option value="Three Wheel">Three Wheel</option>
+                            <option value="Tractor">Tractor</option>
+                            <option value="Heavy Duty">Heavy Duty</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -72,10 +418,19 @@
                             <option value="">Select Make</option>
                             <option value="Toyota">Toyota</option>
                             <option value="Honda">Honda</option>
-                            <option value="Mercedes-Benz">Mercedes-Benz</option>
-                            <option value="BMW">BMW</option>
                             <option value="Nissan">Nissan</option>
                             <option value="Suzuki">Suzuki</option>
+                            <option value="Mitsubishi">Mitsubishi</option>
+                            <option value="Mercedes-Benz">Mercedes-Benz</option>
+                            <option value="BMW">BMW</option>
+                            <option value="Audi">Audi</option>
+                            <option value="Ford">Ford</option>
+                            <option value="Hyundai">Hyundai</option>
+                            <option value="Kia">Kia</option>
+                            <option value="Mahindra">Mahindra</option>
+                            <option value="Tata">Tata</option>
+                            <option value="Bajaj">Bajaj</option>
+                            <option value="TVS">TVS</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -86,16 +441,7 @@
                         <label for="manufacturedYear">Manufactured Year<span class="text-red-500">*</span></label>
                         <select id="manufacturedYear" name="manufacturedYear" required>
                             <option value="">Manufactured Year</option>
-                            <!-- Generate years dynamically with JS or manually add common years -->
-                            <script>
-                                const currentYear = new Date().getFullYear();
-                                for (let i = currentYear; i >= 1900; i--) {
-                                    const option = document.createElement('option');
-                                    option.value = i;
-                                    option.textContent = i;
-                                    document.getElementById('manufacturedYear').appendChild(option);
-                                }
-                            </script>
+                            <!-- Years will be populated by JavaScript -->
                         </select>
                     </div>
                     <div class="form-group">
@@ -113,6 +459,7 @@
                             <option value="Automatic">Automatic</option>
                             <option value="Manual">Manual</option>
                             <option value="CVT">CVT</option>
+                            <option value="Tiptronic">Tiptronic</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -121,8 +468,8 @@
                             <option value="">Select Fuel Type</option>
                             <option value="Petrol">Petrol</option>
                             <option value="Diesel">Diesel</option>
-                            <option value="Hybrid">Hybrid</option>
                             <option value="Electric">Electric</option>
+                            <option value="Hybrid">Hybrid</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -136,38 +483,35 @@
                 </div>
             </div>
 
-            <!-- Options Section -->
             <div class="mb-8">
                 <h2 class="form-section-title">Options</h2>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4"> <!-- Responsive grid for checkboxes -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div class="checkbox-group">
-                        <input type="checkbox" id="airCondition" name="options" value="Air Condition">
+                        <input type="checkbox" id="airCondition" name="airCondition">
                         <label for="airCondition" class="mb-0">AIR CONDITION</label>
                     </div>
                     <div class="checkbox-group">
-                        <input type="checkbox" id="powerSteering" name="options" value="Power Steering">
+                        <input type="checkbox" id="powerSteering" name="powerSteering">
                         <label for="powerSteering" class="mb-0">POWER STEERING</label>
                     </div>
                     <div class="checkbox-group">
-                        <input type="checkbox" id="powerMirror" name="options" value="Power Mirror">
+                        <input type="checkbox" id="powerMirror" name="powerMirror">
                         <label for="powerMirror" class="mb-0">POWER MIRROR</label>
                     </div>
                     <div class="checkbox-group">
-                        <input type="checkbox" id="powerWindow" name="options" value="Power Window">
+                        <input type="checkbox" id="powerWindow" name="powerWindow">
                         <label for="powerWindow" class="mb-0">POWER WINDOW</label>
                     </div>
                 </div>
             </div>
 
-            <!-- Additional Info Section -->
             <div class="mb-8">
                 <h2 class="form-section-title">Additional Info</h2>
                 <div class="form-group">
-                    <label for="additionalInfo">Details</label> <!-- Changed label from direct text to "Details" -->
+                    <label for="additionalInfo">Details</label>
                     <div class="textarea-with-mic">
                         <textarea id="additionalInfo" name="additionalInfo" rows="4" placeholder="Put correct address and Land phone number if you own a 'Car Sale' (Do NOT post your website url)"></textarea>
-                        <!-- Microphone button for voice-to-text -->
-                        <button type="button" class="mic-button" onclick="startVoiceToText()">
+                        <button type="button" class="mic-button" id="micButton">
                             <i class="fas fa-microphone"></i>
                         </button>
                     </div>
@@ -175,156 +519,1118 @@
                 </div>
             </div>
 
-            <!-- Upload Images Section -->
             <div class="mb-8">
                 <h2 class="form-section-title">Upload Images</h2>
                 <p class="text-sm text-gray-400 mb-4">If you have problem uploading images in Mobile Broadband, Try uploading only one small image file</p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4"> <!-- Responsive grid for file inputs -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="form-group mb-0">
                         <label for="mainImage" class="mb-2">Main Image</label>
                         <input type="file" id="mainImage" name="mainImage" accept="image/*">
+                        <div class="checkbox-group mt-2">
+                            <input type="checkbox" id="enhanceMainImage" name="enhanceMainImage">
+                            <label for="enhanceMainImage" class="mb-0 text-gray-400">Enhance with AI</label>
+                        </div>
+                        <span id="mainImageStatus" class="text-sm hidden"></span>
+                        <!-- New: Image preview and remove button -->
+                        <div id="mainImagePreviewContainer" class="mt-2 hidden flex flex-col items-start">
+                            <img id="mainImagePreview" class="w-24 h-24 object-cover rounded-md border border-gray-300" alt="Image Preview">
+                            <button type="button" class="text-red-500 text-sm mt-1" data-image-name="mainImage" onclick="removeImagePreview(this)">Remove Preview</button>
+                            <button type="button" class="view-comparison-btn text-blue-500 text-sm mt-1 hidden" data-image-name="mainImage">View Comparison</button>
+                        </div>
                     </div>
                     <div class="form-group mb-0">
                         <label for="image2" class="mb-2">Image 2</label>
                         <input type="file" id="image2" name="image2" accept="image/*">
+                        <div class="checkbox-group mt-2">
+                            <input type="checkbox" id="enhanceImage2" name="enhanceImage2">
+                            <label for="enhanceImage2" class="mb-0 text-gray-400">Enhance with AI</label>
+                        </div>
+                        <span id="image2Status" class="text-sm hidden"></span>
+                        <div id="image2PreviewContainer" class="mt-2 hidden flex flex-col items-start">
+                            <img id="image2Preview" class="w-24 h-24 object-cover rounded-md border border-gray-300" alt="Image Preview">
+                            <button type="button" class="text-red-500 text-sm mt-1" data-image-name="image2" onclick="removeImagePreview(this)">Remove Preview</button>
+                            <button type="button" class="view-comparison-btn text-blue-500 text-sm mt-1 hidden" data-image-name="image2">View Comparison</button>
+                        </div>
                     </div>
                     <div class="form-group mb-0">
-                        <label for="image3" class="mb-2">Image 3</label>
+                        <label for="image3" class="mb-0">Image 3</label>
                         <input type="file" id="image3" name="image3" accept="image/*">
+                        <div class="checkbox-group mt-2">
+                            <input type="checkbox" id="enhanceImage3" name="enhanceImage3">
+                            <label for="enhanceImage3" class="mb-0 text-gray-400">Enhance with AI</label>
+                        </div>
+                        <span id="image3Status" class="text-sm hidden"></span>
+                        <div id="image3PreviewContainer" class="mt-2 hidden flex flex-col items-start">
+                            <img id="image3Preview" class="w-24 h-24 object-cover rounded-md border border-gray-300" alt="Image Preview">
+                            <button type="button" class="text-red-500 text-sm mt-1" data-image-name="image3" onclick="removeImagePreview(this)">Remove Preview</button>
+                            <button type="button" class="view-comparison-btn text-blue-500 text-sm mt-1 hidden" data-image-name="image3">View Comparison</button>
+                        </div>
                     </div>
                     <div class="form-group mb-0">
-                        <label for="image4" class="mb-2">Image 4</label>
+                        <label for="image4" class="mb-0">Image 4</label>
                         <input type="file" id="image4" name="image4" accept="image/*">
+                        <div class="checkbox-group mt-2">
+                            <input type="checkbox" id="enhanceImage4" name="enhanceImage4">
+                            <label for="enhanceImage4" class="mb-0 text-gray-400">Enhance with AI</label>
+                        </div>
+                        <span id="image4Status" class="text-sm hidden"></span>
+                        <div id="image4PreviewContainer" class="mt-2 hidden flex flex-col items-start">
+                            <img id="image4Preview" class="w-24 h-24 object-cover rounded-md border border-gray-300" alt="Image Preview">
+                            <button type="button" class="text-red-500 text-sm mt-1" data-image-name="image4" onclick="removeImagePreview(this)">Remove Preview</button>
+                            <button type="button" class="view-comparison-btn text-blue-500 text-sm mt-1 hidden" data-image-name="image4">View Comparison</button>
+                        </div>
                     </div>
                     <div class="form-group mb-0">
-                        <label for="image5" class="mb-2">Image 5</label>
+                        <label for="image5" class="mb-0">Image 5</label>
                         <input type="file" id="image5" name="image5" accept="image/*">
+                        <div class="checkbox-group mt-2">
+                            <input type="checkbox" id="enhanceImage5" name="enhanceImage5">
+                            <label for="enhanceImage5" class="mb-0 text-gray-400">Enhance with AI</label>
+                        </div>
+                        <span id="image5Status" class="text-sm hidden"></span>
+                        <div id="image5PreviewContainer" class="mt-2 hidden flex flex-col items-start">
+                            <img id="image5Preview" class="w-24 h-24 object-cover rounded-md border border-gray-300" alt="Image Preview">
+                            <button type="button" class="text-red-500 text-sm mt-1" data-image-name="image5" onclick="removeImagePreview(this)">Remove Preview</button>
+                            <button type="button" class="view-comparison-btn text-blue-500 text-sm mt-1 hidden" data-image-name="image5">View Comparison</button>
+                        </div>
                     </div>
                     <div class="form-group mb-0">
-                        <label for="image6" class="mb-2">Image 6</label>
+                        <label for="image6" class="mb-0">Image 6</label>
                         <input type="file" id="image6" name="image6" accept="image/*">
+                        <div class="checkbox-group mt-2">
+                            <input type="checkbox" id="enhanceImage6" name="enhanceImage6">
+                            <label for="enhanceImage6" class="mb-0 text-gray-400">Enhance with AI</label>
+                        </div>
+                        <span id="image6Status" class="text-sm hidden"></span>
+                        <div id="image6PreviewContainer" class="mt-2 hidden flex flex-col items-start">
+                            <img id="image6Preview" class="w-24 h-24 object-cover rounded-md border border-gray-300" alt="Image Preview">
+                            <button type="button" class="text-red-500 text-sm mt-1" data-image-name="image6" onclick="removeImagePreview(this)">Remove Preview</button>
+                            <button type="button" class="view-comparison-btn text-blue-500 text-sm mt-1 hidden" data-image-name="image6">View Comparison</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="form-actions">
-                <!-- Added onclick to navigate to dashboard.html -->
-                <button type="button" class="btn btn-secondary" onclick="window.location.href='dashboard.html'">Cancel</button>
-                <button type="submit" class="btn btn-primary">Add Vehicle</button>
+                <button type="button" class="btn btn-secondary" id="cancelButton">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="submitVehicleButton">Add Vehicle</button>
+                <button type="button" class="btn btn-secondary hidden" id="cancelEditButton">Cancel Edit</button>
             </div>
         </form>
+
+        <!-- Display Area for Submitted Vehicles -->
+        <div class="vehicles-list-container">
+            <h2 class="form-section-title">Submitted Vehicles</h2>
+            <div id="vehiclesList" class="space-y-4">
+                <p class="text-gray-500 text-center" id="loadingVehicles">Loading vehicles...</p>
+                <!-- Vehicles will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- User ID Display -->
+        <div class="mt-8 text-center text-sm text-gray-600">
+            Your User ID: <span id="userIdDisplay" class="font-mono font-semibold text-gray-800">Loading...</span>
+        </div>
     </div>
 
-    <!-- Custom Message Box HTML -->
+    <!-- Custom Message Box (existing) -->
     <div id="customMessageBox" class="modal-overlay">
         <div class="modal-content">
             <p id="messageText" class="modal-message"></p>
-            <button class="modal-button" onclick="hideMessageBox()">OK</button>
+            <div class="flex justify-center gap-4">
+                <button class="modal-button" id="okButton">OK</button>
+                <button class="modal-button bg-gray-500 hover:bg-gray-600 hidden" id="confirmCancelButton">Cancel</button>
+            </div>
         </div>
     </div>
-    <script>
-        // Function to show the custom message box
-        function showMessageBox(message) {
-            document.getElementById('messageText').textContent = message;
-            document.getElementById('customMessageBox').classList.add('show');
-        }
 
-        // Function to hide the custom message box
-        function hideMessageBox() {
-            document.getElementById('customMessageBox').classList.remove('show');
-        }
+    <!-- New: Image Comparison Modal -->
+    <div id="comparisonModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="text-xl font-semibold mb-4">Image Comparison</h3>
+            <div class="comparison-grid" id="comparisonGrid">
+                <!-- Images will be dynamically added here -->
+            </div>
+            <button class="modal-button" id="closeComparisonModal">Close</button>
+        </div>
+    </div>
 
-        // Get references to the textarea and microphone button
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, doc, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+
+        // Global variables for Firebase configuration and app ID
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // Use the provided Firebase config directly
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
+            authDomain: "wheelzai.firebaseapp.com",
+            projectId: "wheelzai",
+            storageBucket: "wheelzai.firebasestorage.app",
+            messagingSenderId: "132756052907",
+            appId: "1:132756052907:web:b92dc998b4b5bee8d450ee",
+            measurementId: "G-ECQJYZYK43"
+        };
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app;
+        let db;
+        let auth;
+        let storage;
+        let userId = 'anonymous';
+        let editingDocId = null; // Stores the ID of the document being edited
+
+        // DOM elements
+        const customMessageBox = document.getElementById('customMessageBox');
+        const messageTextElement = document.getElementById('messageText');
+        const okButton = document.getElementById('okButton');
+        const confirmCancelButton = document.getElementById('confirmCancelButton'); // For modal confirmation
+        const vehiclesList = document.getElementById('vehiclesList');
+        const loadingVehicles = document.getElementById('loadingVehicles');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const vehicleForm = document.getElementById('vehicleForm');
+        const submitVehicleButton = document.getElementById('submitVehicleButton');
+        const cancelButton = document.getElementById('cancelButton');
+        const cancelEditButton = document.getElementById('cancelEditButton');
         const additionalInfoTextarea = document.getElementById('additionalInfo');
-        const micButton = document.querySelector('.mic-button');
+        const micButton = document.getElementById('micButton');
 
-        // Global variable to hold the recognition object
-        let recognition;
-        let isRecognizing = false;
+        // Image status spans
+        const imageStatusSpans = {
+            mainImage: document.getElementById('mainImageStatus'),
+            image2: document.getElementById('image2Status'),
+            image3: document.getElementById('image3Status'),
+            image4: document.getElementById('image4Status'),
+            image5: document.getElementById('image5Status'),
+            image6: document.getElementById('image6Status'),
+        };
 
-        function startVoiceToText() {
-            // Check for browser compatibility
-            if (!('SpeechRecognition' in window) && !('webkitSpeechRecognition' in window)) {
-                showMessageBox("Sorry, your browser doesn't support the Web Speech API. Please try Chrome or Edge.");
-                return;
+        // Image preview elements
+        const imagePreviewElements = {
+            mainImage: document.getElementById('mainImagePreview'),
+            image2: document.getElementById('image2Preview'),
+            image3: document.getElementById('image3Preview'),
+            image4: document.getElementById('image4Preview'),
+            image5: document.getElementById('image5Preview'),
+            image6: document.getElementById('image6Preview'),
+        };
+
+        const imagePreviewContainers = {
+            mainImage: document.getElementById('mainImagePreviewContainer'),
+            image2: document.getElementById('image2PreviewContainer'),
+            image3: document.getElementById('image3PreviewContainer'),
+            image4: document.getElementById('image4PreviewContainer'),
+            image5: document.getElementById('image5PreviewContainer'),
+            image6: document.getElementById('image6PreviewContainer'),
+        };
+
+        // New: Image Comparison Modal elements
+        const comparisonModal = document.getElementById('comparisonModal');
+        const comparisonGrid = document.getElementById('comparisonGrid');
+        const closeComparisonModalButton = document.getElementById('closeComparisonModal');
+
+        // New: Object to store original and enhanced image data for comparison
+        const enhancedImageComparisonData = {}; // Stores { imageName: { originalUrl: 'data:...', enhancedUrl: 'data:...' } }
+
+
+        /**
+         * Updates the status message for a specific image upload.
+         * @param {string} imageName The base name of the image input (e.g., 'mainImage').
+         * @param {string} message The message to display.
+         * @param {boolean} isError True if the message indicates an error.
+         */
+        function updateImageStatus(imageName, message, isError = false) {
+            const span = imageStatusSpans[imageName];
+            if (span) {
+                span.textContent = message;
+                span.classList.remove('hidden', 'text-blue-500', 'text-red-500', 'text-green-500');
+                if (isError) {
+                    span.classList.add('text-red-500');
+                } else if (message.includes('Enhancing') || message.includes('Uploading')) {
+                    span.classList.add('text-blue-500');
+                } else if (message.includes('Success')) {
+                    span.classList.add('text-green-500');
+                }
             }
-
-            // If already recognizing, stop it
-            if (isRecognizing) {
-                recognition.stop();
-                return;
-            }
-
-            // Initialize SpeechRecognition
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-
-            // Set properties
-            recognition.continuous = false; // Set to true if you want continuous input for longer dictation
-            recognition.interimResults = true; // Set to true to get results while speaking
-            recognition.lang = 'en-US'; // Set the language (e.g., 'en-US', 'si-LK' for Sinhala, 'ta-LK' for Tamil if supported)
-
-            // Event handler for results
-            recognition.onresult = (event) => {
-                let interimTranscript = '';
-                let finalTranscript = '';
-
-                // Loop through all results from the event
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    const transcript = event.results[i][0].transcript;
-                    if (event.results[i].isFinal) {
-                        finalTranscript += transcript;
-                    } else {
-                        interimTranscript += transcript;
-                    }
-                }
-
-                // Append the final transcript to the textarea
-                additionalInfoTextarea.value += finalTranscript;
-                // If you want to show interim results live in the textarea (will overwrite as new interim results come)
-                // If recognition.continuous is true, you'd manage the text more carefully to append/update.
-                // For a single utterance (continuous: false), finalTranscript is usually enough.
-            };
-
-            // Event handler for errors
-            recognition.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
-                if (event.error === 'no-speech') {
-                    showMessageBox('No speech detected. Please try again.');
-                } else if (event.error === 'not-allowed') {
-                    showMessageBox('Microphone access denied. Please allow microphone access in your browser settings.');
-                } else if (event.error === 'aborted') {
-                    showMessageBox('Speech input was cancelled.');
-                }
-                 else {
-                    showMessageBox('An error occurred during speech recognition: ' + event.error);
-                }
-                isRecognizing = false;
-                micButton.style.backgroundColor = '#4a90e2'; // Reset button color
-            };
-
-            // Event handler when recognition ends
-            recognition.onend = () => {
-                console.log('Speech recognition ended.');
-                isRecognizing = false;
-                micButton.style.backgroundColor = '#4a90e2'; // Reset button color
-                // Only show "Voice input finished" if it wasn't an error or manual stop
-                if (document.getElementById('customMessageBox').classList.contains('show') && 
-                    document.getElementById('messageText').textContent.includes('Listening')) {
-                    // This checks if the previous message box was for 'Listening...'
-                    showMessageBox('Voice input finished.');
-                } else if (!document.getElementById('customMessageBox').classList.contains('show')) {
-                    // If no message box is currently open, show this one
-                    showMessageBox('Voice input finished.');
-                }
-            };
-
-            // Start recognition
-            recognition.start();
-            isRecognizing = true;
-            micButton.style.backgroundColor = '#e74c3c'; // Change button color to indicate recording (red)
-            showMessageBox('Listening... Speak now!');
         }
+
+        /**
+         * Clears the status message for a specific image upload.
+         * @param {string} imageName The base name of the image input.
+         */
+        function clearImageStatus(imageName) {
+            const span = imageStatusSpans[imageName];
+            if (span) {
+                span.textContent = '';
+                span.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Removes the image preview and clears the associated file input.
+         * @param {HTMLElement} buttonElement The "Remove Preview" button element.
+         */
+        function removeImagePreview(buttonElement) {
+            const imageName = buttonElement.dataset.imageName;
+            const fileInput = document.getElementById(imageName);
+            const previewContainer = imagePreviewContainers[imageName];
+            const previewImg = imagePreviewElements[imageName];
+            const enhanceCheckbox = document.getElementById(`enhance${imageName.charAt(0).toUpperCase() + imageName.slice(1)}`);
+            const viewComparisonBtn = previewContainer.querySelector('.view-comparison-btn');
+
+            if (fileInput) fileInput.value = ''; // Clear the selected file
+            if (previewImg) previewImg.src = ''; // Clear image src
+            if (previewContainer) previewContainer.classList.add('hidden'); // Hide container
+            if (enhanceCheckbox) enhanceCheckbox.checked = false; // Uncheck enhance option
+            if (viewComparisonBtn) viewComparisonBtn.classList.add('hidden'); // Hide comparison button
+            delete enhancedImageComparisonData[imageName]; // Remove data from comparison object
+            clearImageStatus(imageName); // Clear any status messages
+            console.log(`Image preview and input cleared for ${imageName}`);
+        }
+        window.removeImagePreview = removeImagePreview; // Make function globally accessible for onclick
+
+
+        /**
+         * Displays a message in the custom modal message box.
+         * @param {string} message The message to display.
+         * @param {string} type The type of message ('success', 'error', 'info').
+         * @param {boolean} showConfirmButton Whether to show a confirmation button (e.g., for delete).
+         * @returns {Promise<boolean>} Resolves true if OK/Confirm, false if Cancel.
+         */
+        function showMessage(message, type, showConfirmButton = false) {
+            return new Promise((resolve) => {
+                console.log("showMessage called with message:", message, "type:", type, "confirm:", showConfirmButton);
+                messageTextElement.textContent = message;
+                okButton.onclick = () => {
+                    hideMessageBox();
+                    resolve(true);
+                };
+
+                if (showConfirmButton) {
+                    confirmCancelButton.classList.remove('hidden');
+                    confirmCancelButton.onclick = () => {
+                        hideMessageBox();
+                        resolve(false);
+                    };
+                } else {
+                    confirmCancelButton.classList.add('hidden');
+                }
+
+                customMessageBox.classList.add('show');
+            });
+        }
+
+        /**
+         * Hides the custom modal message box.
+         */
+        function hideMessageBox() {
+            console.log("hideMessageBox called.");
+            customMessageBox.classList.remove('show');
+        }
+
+        /**
+         * Displays the image comparison modal with original and enhanced images.
+         * @param {string} imageName The name of the image input (e.g., 'mainImage').
+         */
+        function showComparisonModal(imageName) {
+            const imageData = enhancedImageComparisonData[imageName];
+            if (!imageData) {
+                showMessage("No comparison data available for this image.", "info");
+                return;
+            }
+
+            comparisonGrid.innerHTML = `
+                <div class="comparison-image-container">
+                    <img src="${imageData.originalUrl}" alt="Original Image">
+                    <p>Original</p>
+                </div>
+                <div class="comparison-image-container">
+                    <img src="${imageData.enhancedUrl}" alt="Enhanced Image">
+                    <p>Enhanced</p>
+                </div>
+            `;
+            comparisonModal.classList.add('show');
+        }
+
+        /**
+         * Hides the image comparison modal.
+         */
+        function hideComparisonModal() {
+            comparisonModal.classList.remove('show');
+            comparisonGrid.innerHTML = ''; // Clear images
+        }
+
+
+        /**
+         * Initializes Firebase and sets up authentication.
+         */
+        async function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                storage = getStorage(app);
+                console.log("Firebase services initialized: app, db, auth, storage.");
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log('Signed in with custom token.');
+                } else {
+                    await signInAnonymously(auth);
+                    console.log('Signed in anonymously.');
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        userIdDisplay.textContent = userId;
+                        console.log('Auth state changed. User ID:', userId);
+                        setupRealtimeListener();
+                    } else {
+                        signInAnonymously(auth).then(anonUser => {
+                            userId = anonUser.user.uid;
+                            userIdDisplay.textContent = userId;
+                            console.log('Auth state changed. Signed in anonymously. User ID:', userId);
+                            setupRealtimeListener();
+                        }).catch(error => {
+                            console.error("Error signing in anonymously:", error);
+                            userIdDisplay.textContent = 'Error getting user ID';
+                            showMessage("Failed to authenticate. Some features may not work.", "error");
+                        });
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error initializing Firebase or authenticating:", error);
+                showMessage("Failed to initialize the application. Please try again.", "error");
+                userIdDisplay.textContent = 'Error';
+            }
+        }
+
+        /**
+         * Sets up a real-time listener for vehicle data from Firestore.
+         */
+        function setupRealtimeListener() {
+            if (!db || !userId) {
+                console.warn("Firestore or User ID not ready for real-time listener.");
+                return;
+            }
+            const vehiclesCollectionRef = collection(db, `artifacts/${appId}/public/data/vehicles`);
+            const q = query(vehiclesCollectionRef);
+
+            onSnapshot(q, (snapshot) => {
+                vehiclesList.innerHTML = '';
+                loadingVehicles.style.display = 'none';
+
+                if (snapshot.empty) {
+                    vehiclesList.innerHTML = '<p class="text-gray-500 text-center">No vehicles added yet.</p>';
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    const vehicle = doc.data();
+                    const vehicleId = doc.id; // Get the document ID
+                    const vehicleCard = document.createElement('div');
+                    vehicleCard.className = 'vehicle-card';
+                    
+                    const options = [];
+                    if (vehicle.airCondition) options.push("Air Condition");
+                    if (vehicle.powerSteering) options.push("Power Steering");
+                    if (vehicle.powerMirror) options.push("Power Mirror");
+                    if (vehicle.powerWindow) options.push("Power Window");
+                    const optionsText = options.length > 0 ? options.join(', ') : 'None';
+
+                    const timestamp = vehicle.timestamp ? new Date(vehicle.timestamp.toDate()).toLocaleString() : 'N/A';
+
+                    let imageHtml = '';
+                    const imageUrls = [
+                        vehicle.mainImageUrl,
+                        vehicle.image2Url,
+                        vehicle.image3Url,
+                        vehicle.image4Url,
+                        vehicle.image5Url,
+                        vehicle.image6Url
+                    ].filter(url => url);
+
+                    if (imageUrls.length > 0) {
+                        imageHtml = `<div class="vehicle-images">`;
+                        imageUrls.forEach(url => {
+                            imageHtml += `<img src="${url}" alt="Vehicle Image" onerror="this.onerror=null;this.src='https://placehold.co/80x80/cccccc/ffffff?text=No+Image';">`;
+                        });
+                        imageHtml += `</div>`;
+                    } else {
+                        imageHtml = `<p class="text-gray-500 text-sm">No images available</p>`;
+                    }
+
+                    vehicleCard.innerHTML = `
+                        <h3>${vehicle.vehicleMake || 'N/A'} ${vehicle.model || 'N/A'} (${vehicle.manufacturedYear || 'N/A'})</h3>
+                        <p><strong>Price:</strong> Rs. ${vehicle.price ? vehicle.price.toLocaleString() : 'N/A'}</p>
+                        <p><strong>Type:</strong> ${vehicle.vehicleType || 'N/A'} | <strong>Condition:</strong> ${vehicle.vehicleCondition || 'N/A'}</p>
+                        <p><strong>Transmission:</strong> ${vehicle.transmission || 'N/A'} | <strong>Fuel:</strong> ${vehicle.fuelType || 'N/A'}</p>
+                        <p><strong>Mileage:</strong> ${vehicle.mileage ? vehicle.mileage.toLocaleString() : 'N/A'} km | <strong>Engine:</strong> ${vehicle.engineCapacity || 'N/A'} CC</p>
+                        <p><strong>City:</strong> ${vehicle.city || 'N/A'}</p>
+                        <p><strong>Options:</strong> ${optionsText}</p>
+                        <p><strong>Details:</strong> ${vehicle.additionalInfo || 'N/A'}</p>
+                        ${imageHtml}
+                        <p class="timestamp">Added by: ${vehicle.userId || 'Unknown'} on ${timestamp}</p>
+                        <div class="vehicle-card-actions">
+                            <button class="action-btn edit-btn" data-id="${vehicleId}">Edit</button>
+                            <button class="action-btn delete-btn" data-id="${vehicleId}" data-image-urls='${JSON.stringify(imageUrls)}'>Delete</button>
+                        </div>
+                    `;
+                    vehiclesList.appendChild(vehicleCard);
+                });
+
+                // Attach event listeners to new buttons
+                document.querySelectorAll('.edit-btn').forEach(button => {
+                    button.addEventListener('click', (e) => editVehicle(e.target.dataset.id));
+                });
+                document.querySelectorAll('.delete-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const docIdToDelete = e.target.dataset.id;
+                        const imageUrlsToDelete = JSON.parse(e.target.dataset.imageUrls);
+                        deleteVehicle(docIdToDelete, imageUrlsToDelete);
+                    });
+                });
+
+            }, (error) => {
+                console.error("Error listening to vehicles collection:", error);
+                showMessage("Error loading vehicles. Please refresh.", "error");
+                loadingVehicles.style.display = 'none';
+                vehiclesList.innerHTML = '<p class="text-red-500 text-center">Failed to load vehicles.</p>';
+            });
+        }
+
+        /**
+         * Uploads a file to Firebase Storage.
+         * @param {File|Blob} file The file or Blob to upload.
+         * @param {string} path The storage path (e.g., 'images/mainImage.jpg').
+         * @returns {Promise<string|null>} The download URL of the uploaded file, or null if error.
+         */
+        async function uploadFile(file, path) {
+            if (!file) return null;
+            try {
+                const storageRef = ref(storage, path);
+                const snapshot = await uploadBytes(storageRef, file);
+                const downloadURL = await getDownloadURL(snapshot.ref);
+                console.log(`Uploaded ${file.name || 'blob'} to ${path}. URL: ${downloadURL}`);
+                return downloadURL;
+            } catch (error) {
+                console.error(`Error uploading file ${file.name || 'blob'}:`, error);
+                showMessage(`Failed to upload image: ${file.name || 'blob'}.`, "error");
+                return null;
+            }
+        }
+
+        /**
+         * Deletes a file from Firebase Storage using its download URL.
+         * @param {string} fileUrl The download URL of the file to delete.
+         */
+        async function deleteFileByUrl(fileUrl) {
+            if (!fileUrl || !storage) return;
+            try {
+                // Get the storage reference from the download URL
+                const fileRef = ref(storage, fileUrl);
+                await deleteObject(fileRef);
+                console.log(`File deleted from Storage: ${fileUrl}`);
+            } catch (error) {
+                console.error(`Error deleting file from Storage (${fileUrl}):`, error);
+                // Handle specific errors like 'storage/object-not-found' gracefully
+                if (error.code === 'storage/object-not-found') {
+                    console.warn(`File not found in storage, skipping deletion: ${fileUrl}`);
+                } else {
+                    showMessage(`Failed to delete image from storage: ${fileUrl}. Details: ${error.message}`, "error");
+                }
+            }
+        }
+
+        /**
+         * Simulates AI image enhancement. In a real application, this would call a backend service.
+         * @param {File} file The image file to enhance.
+         * @param {string} imageName The name of the image input (for status updates).
+         * @returns {Promise<Blob>} A promise that resolves with the enhanced image as a Blob, or the original file if enhancement fails.
+         */
+        async function enhanceImageWithAI(file, imageName) {
+            updateImageStatus(imageName, 'Enhancing image with AI...', false);
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = async () => {
+                    const originalBase64DataUrl = reader.result; // Store original Base64 URL
+                    const base64Data = originalBase64DataUrl.split(',')[1]; // Get base64 part
+                    try {
+                        // Simulate AI enhancement API call
+                        const response = await fetch('http://localhost:3000/enhance-image', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ imageData: base64Data, mimeType: file.type }),
+                        });
+
+                        if (!response.ok) {
+                            const errorDetails = await response.text();
+                            throw new Error(`AI enhancement failed: ${response.status} ${response.statusText} - ${errorDetails}`);
+                        }
+
+                        const result = await response.json();
+                        if (result.enhancedImageData) {
+                            // Convert enhanced Base64 back to Blob
+                            const enhancedBlob = await fetch(`data:${file.type};base64,${result.enhancedImageData}`).then(res => res.blob());
+                            // Assign original file name to the blob for consistent naming during upload
+                            Object.defineProperty(enhancedBlob, 'name', { value: file.name, writable: true });
+
+                            updateImageStatus(imageName, 'Image enhanced successfully!', false);
+
+                            // Display preview of the enhanced image
+                            const previewImg = imagePreviewElements[imageName];
+                            const previewContainer = imagePreviewContainers[imageName];
+                            const viewComparisonBtn = previewContainer.querySelector('.view-comparison-btn');
+
+                            if (previewImg && previewContainer) {
+                                const previewReader = new FileReader();
+                                previewReader.onload = (e) => {
+                                    previewImg.src = e.target.result;
+                                    previewContainer.classList.remove('hidden');
+                                    if (viewComparisonBtn) viewComparisonBtn.classList.remove('hidden'); // Show comparison button
+                                };
+                                previewReader.readAsDataURL(enhancedBlob);
+                            }
+
+                            // Store original and enhanced URLs for later comparison
+                            enhancedImageComparisonData[imageName] = {
+                                originalUrl: originalBase64DataUrl,
+                                enhancedUrl: `data:${file.type};base64,${result.enhancedImageData}`
+                            };
+
+                            resolve(enhancedBlob);
+                        } else {
+                            throw new Error('AI enhancement response missing enhanced image data.');
+                        }
+                    } catch (error) {
+                        console.error(`Error during AI image enhancement for ${imageName}:`, error);
+                        updateImageStatus(imageName, `Enhancement failed: ${error.message}. Using original image.`, true);
+                        const previewContainer = imagePreviewContainers[imageName];
+                        const viewComparisonBtn = previewContainer ? previewContainer.querySelector('.view-comparison-btn') : null;
+                        if (viewComparisonBtn) viewComparisonBtn.classList.add('hidden'); // Hide comparison button on failure
+                        resolve(file); // Resolve with original file if enhancement fails
+                    }
+                };
+                reader.onerror = (error) => {
+                    console.error(`FileReader error for ${imageName}:`, error);
+                    updateImageStatus(imageName, `Failed to read image file. Using original.`, true);
+                    const previewContainer = imagePreviewContainers[imageName];
+                    const viewComparisonBtn = previewContainer ? previewContainer.querySelector('.view-comparison-btn') : null;
+                    if (viewComparisonBtn) viewComparisonBtn.classList.add('hidden'); // Hide comparison button on failure
+                    resolve(file); // Resolve with original file if read fails
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        /**
+         * Handles the form submission to add or update vehicle data.
+         * @param {Event} event The form submission event.
+         */
+        async function handleAddUpdateVehicle(event) {
+            event.preventDefault();
+
+            if (!app || !db || !auth || !storage || !userId || userId === 'anonymous') {
+                console.error("Firebase services not fully initialized or user not authenticated.");
+                showMessage("Application not ready or user not authenticated. Please wait and try again.", "error");
+                return;
+            }
+
+            submitVehicleButton.disabled = true;
+            submitVehicleButton.textContent = editingDocId ? 'Processing Images...' : 'Processing Images...';
+            // Removed the initial showMessage to prevent blocking interaction
+
+            const form = event.target;
+            const vehicleData = {};
+            const processedImageFiles = {}; // Stores { imageName: Blob/File }
+            let anyImagesWereEnhanced = false;
+
+            // Collect all form data
+            vehicleData.contactName = form.elements.contactName.value;
+            vehicleData.phoneNumber = form.elements.phoneNumber.value;
+            vehicleData.city = form.elements.city.value;
+            vehicleData.vehicleType = form.elements.vehicleType.value;
+            vehicleData.vehicleCondition = form.elements.vehicleCondition.value;
+            vehicleData.vehicleMake = form.elements.vehicleMake.value;
+            vehicleData.model = form.elements.model.value;
+            vehicleData.manufacturedYear = parseInt(form.elements.manufacturedYear.value);
+            vehicleData.price = parseFloat(form.elements.price.value);
+            vehicleData.ongoingLease = form.elements.ongoingLease.checked;
+            vehicleData.transmission = form.elements.transmission.value;
+            vehicleData.fuelType = form.elements.fuelType.value;
+            vehicleData.engineCapacity = form.elements.engineCapacity.value ? parseInt(form.elements.engineCapacity.value) : null;
+            vehicleData.mileage = parseFloat(form.elements.mileage.value);
+            vehicleData.airCondition = form.elements.airCondition.checked;
+            vehicleData.powerSteering = form.elements.powerSteering.checked;
+            vehicleData.powerMirror = form.elements.powerMirror.checked;
+            vehicleData.powerWindow = form.elements.powerWindow.checked;
+            vehicleData.additionalInfo = form.elements.additionalInfo.value;
+
+            // Fetch current vehicle data if editing to compare images
+            let currentVehicleImages = {};
+            const imageInputNames = ['mainImage', 'image2', 'image3', 'image4', 'image5', 'image6'];
+            if (editingDocId) {
+                try {
+                    const docRef = doc(db, `artifacts/${appId}/public/data/vehicles`, editingDocId);
+                    const docSnapshot = await getDoc(docRef);
+                    if (docSnapshot.exists()) {
+                        const existingVehicle = docSnapshot.data();
+                        imageInputNames.forEach(name => {
+                            currentVehicleImages[`${name}Url`] = existingVehicle[`${name}Url`];
+                            currentVehicleImages[`${name}Name`] = existingVehicle[`${name}Name`];
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error fetching current vehicle images for update:", error);
+                    showMessage("Could not retrieve existing image data for update. Please try again.", "error");
+                    submitVehicleButton.disabled = false;
+                    submitVehicleButton.textContent = 'Add Vehicle';
+                    return;
+                }
+            }
+
+            // Process each image file
+            for (const name of imageInputNames) {
+                const fileInput = form.elements[name];
+                const enhanceCheckbox = document.getElementById(`enhance${name.charAt(0).toUpperCase() + name.slice(1)}`);
+                
+                if (fileInput && fileInput.files && fileInput.files[0]) {
+                    let file = fileInput.files[0];
+                    if (enhanceCheckbox && enhanceCheckbox.checked) {
+                        anyImagesWereEnhanced = true;
+                        file = await enhanceImageWithAI(file, name); // This will also display the preview
+                    }
+                    processedImageFiles[name] = file; // Store the original or enhanced Blob/File
+                } else if (editingDocId) {
+                    // If editing and no new file, retain existing image data
+                    processedImageFiles[name] = {
+                        url: currentVehicleImages[`${name}Url`] || null,
+                        name: currentVehicleImages[`${name}Name`] || ''
+                    };
+                } else {
+                    processedImageFiles[name] = null; // No file selected for new entry
+                }
+            }
+
+            // Ask for confirmation IF any images were enhanced AND this is the final submit action
+            if (anyImagesWereEnhanced) {
+                const confirmed = await showMessage("Images have been enhanced. Do you want to proceed with saving the advertisement?", "info", true);
+                if (!confirmed) {
+                    showMessage("Advertisement saving cancelled.", "info");
+                    submitVehicleButton.disabled = false;
+                    submitVehicleButton.textContent = editingDocId ? 'Update Vehicle' : 'Add Vehicle';
+                    return; // Stop the process if user cancels
+                }
+            }
+            
+            // Proceed with uploading processed images and saving vehicle data
+            showMessage(editingDocId ? "Uploading enhanced images and updating vehicle details..." : "Uploading images and adding vehicle details...", "info");
+
+            for (const name of imageInputNames) {
+                const processedFile = processedImageFiles[name];
+                if (processedFile && processedFile instanceof Blob) { // Check if it's a new Blob/File to upload
+                    const uniqueFileName = `${Date.now()}-${processedFile.name || 'image'}`;
+                    const path = `artifacts/${appId}/public/images/${uniqueFileName}`;
+                    const url = await uploadFile(processedFile, path);
+                    vehicleData[`${name}Url`] = url;
+                    vehicleData[`${name}Name`] = processedFile.name || '';
+
+                    // Delete old image from storage if a new one replaces it during edit
+                    if (editingDocId && currentVehicleImages[`${name}Url`] && currentVehicleImages[`${name}Url`] !== url) {
+                        console.log(`New image selected for ${name}. Deleting old image: ${currentVehicleImages[`${name}Url`]}`);
+                        await deleteFileByUrl(currentVehicleImages[`${name}Url`]);
+                    }
+
+                } else if (processedFile && processedFile.url) { // It's an existing image (for edit mode)
+                    vehicleData[`${name}Url`] = processedFile.url;
+                    vehicleData[`${name}Name`] = processedFile.name;
+                } else { // No image for this slot
+                    vehicleData[`${name}Url`] = null;
+                    vehicleData[`${name}Name`] = '';
+                }
+            }
+
+            vehicleData.userId = userId;
+            vehicleData.timestamp = serverTimestamp(); 
+
+            console.log("Final vehicle data for Firestore operation:", JSON.stringify(vehicleData, null, 2));
+
+            try {
+                if (editingDocId) {
+                    // Update existing document
+                    const docRef = doc(db, `artifacts/${appId}/public/data/vehicles`, editingDocId);
+                    await updateDoc(docRef, vehicleData);
+                    console.log("Document updated with ID: ", editingDocId);
+                    showMessage("Vehicle advertisement updated successfully!", "success");
+                } else {
+                    // Add new document
+                    const docRef = await addDoc(collection(db, `artifacts/${appId}/public/data/vehicles`), vehicleData);
+                    console.log("Document written with ID: ", docRef.id);
+                    showMessage("Vehicle advertisement added successfully!", "success");
+                }
+                form.reset(); // Clear the form
+                editingDocId = null; // Reset editing state
+                submitVehicleButton.textContent = 'Add Vehicle';
+                cancelEditButton.classList.add('hidden');
+
+                // Clear all image previews and comparison data after successful submission
+                imageInputNames.forEach(name => {
+                    removeImagePreview({ dataset: { imageName: name } });
+                });
+                Object.keys(enhancedImageComparisonData).forEach(key => delete enhancedImageComparisonData[key]); // Clear comparison data
+
+            } catch (e) {
+                console.error("Error adding/updating document to Firestore: ", e);
+                let errorMessage = editingDocId ? "Error updating vehicle. Please try again." : "Error adding vehicle. Please try again.";
+                if (e.code === 'permission-denied') {
+                    errorMessage = "Permission denied. Check your Firestore security rules. Error: " + e.message;
+                } else if (e.message) {
+                    errorMessage += ` Details: ${e.message}`;
+                }
+                showMessage(errorMessage, "error");
+            } finally {
+                submitVehicleButton.disabled = false;
+            }
+        }
+
+        /**
+         * Populates the form with data from a selected vehicle for editing.
+         * @param {string} docId The ID of the document to edit.
+         */
+        async function editVehicle(docId) {
+            console.log("Editing vehicle with ID:", docId);
+            try {
+                const docRef = doc(db, `artifacts/${appId}/public/data/vehicles`, docId);
+                const docSnapshot = await getDoc(docRef);
+                
+                if (!docSnapshot.exists()) {
+                    showMessage("Advertisement not found for editing.", "error");
+                    return;
+                }
+                const vehicle = docSnapshot.data();
+                editingDocId = docId; // Set the ID of the document being edited
+
+                // Populate form fields
+                vehicleForm.elements.contactName.value = vehicle.contactName || '';
+                vehicleForm.elements.phoneNumber.value = vehicle.phoneNumber || '';
+                vehicleForm.elements.city.value = vehicle.city || '';
+                vehicleForm.elements.vehicleType.value = vehicle.vehicleType || '';
+                vehicleForm.elements.vehicleCondition.value = vehicle.vehicleCondition || '';
+                vehicleForm.elements.vehicleMake.value = vehicle.vehicleMake || '';
+                vehicleForm.elements.model.value = vehicle.model || '';
+                vehicleForm.elements.manufacturedYear.value = vehicle.manufacturedYear || '';
+                vehicleForm.elements.price.value = vehicle.price || '';
+                vehicleForm.elements.ongoingLease.checked = vehicle.ongoingLease || false;
+                vehicleForm.elements.transmission.value = vehicle.transmission || '';
+                vehicleForm.elements.fuelType.value = vehicle.fuelType || '';
+                vehicleForm.elements.engineCapacity.value = vehicle.engineCapacity || '';
+                vehicleForm.elements.mileage.value = vehicle.mileage || '';
+                vehicleForm.elements.airCondition.checked = vehicle.airCondition || false;
+                vehicleForm.elements.powerSteering.checked = vehicle.powerSteering || false;
+                vehicleForm.elements.powerMirror.checked = vehicle.powerMirror || false;
+                vehicleForm.elements.powerWindow.checked = vehicle.powerWindow || false;
+                vehicleForm.elements.additionalInfo.value = vehicle.additionalInfo || '';
+
+                // Clear file inputs for security reasons and any existing previews
+                const imageInputNames = ['mainImage', 'image2', 'image3', 'image4', 'image5', 'image6'];
+                imageInputNames.forEach(name => {
+                    vehicleForm.elements[name].value = ''; // Clear file input
+                    removeImagePreview({ dataset: { imageName: name } }); // Clear preview and status, also comparison data
+                });
+                console.log("File input fields and previews cleared for security. User must re-select images to change them.");
+
+
+                // Change button text and show cancel edit button
+                submitVehicleButton.textContent = 'Update Vehicle';
+                cancelEditButton.classList.remove('hidden');
+
+                // Scroll to top of the form
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            } catch (error) {
+                console.error("Error fetching document for edit:", error);
+                showMessage("Failed to load advertisement for editing. Please try again.", "error");
+            }
+        }
+
+        /**
+         * Deletes a vehicle advertisement and its associated images from Storage.
+         * @param {string} docId The ID of the document to delete.
+         * @param {string[]} imageUrls An array of image URLs associated with the vehicle.
+         */
+        async function deleteVehicle(docId, imageUrls) {
+            console.log("Attempting to delete vehicle with ID:", docId);
+            // Show confirmation dialog
+            const confirmed = await showMessage("Are you sure you want to delete this advertisement? This action cannot be undone.", "warning", true);
+            
+            if (!confirmed) {
+                console.log("Deletion cancelled by user.");
+                return; // Exit if user cancels
+            }
+
+            try {
+                // Delete images from Storage first
+                if (imageUrls && imageUrls.length > 0) {
+                    console.log("Deleting associated images from Storage:", imageUrls);
+                    await Promise.all(imageUrls.map(url => deleteFileByUrl(url)));
+                    showMessage("Images deleted from storage. Deleting vehicle record...", "info");
+                }
+
+                // Delete document from Firestore
+                await deleteDoc(doc(db, `artifacts/${appId}/public/data/vehicles`, docId));
+                console.log("Document deleted from Firestore:", docId);
+                showMessage("Advertisement deleted successfully!", "success");
+            } catch (error) {
+                console.error("Error deleting advertisement:", error);
+                let errorMessage = "Failed to delete advertisement. Please try again.";
+                if (error.code === 'permission-denied') {
+                    errorMessage = "Permission denied. Check your Firestore/Storage security rules. Error: " + error.message;
+                } else if (error.message) {
+                    errorMessage += ` Details: ${e.message}`;
+                }
+                showMessage(errorMessage, "error");
+            }
+        }
+
+
+        // Voice-to-Text functionality (retained from your original code)
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        let recordingTimeout;
+
+        async function startVoiceToText() {
+            console.log('Mic button clicked. isRecording:', isRecording);
+            
+            if (isRecording) {
+                console.log('Stopping recording...');
+                if (recordingTimeout) {
+                    clearTimeout(recordingTimeout);
+                }
+                mediaRecorder.stop();
+                return;
+            }
+
+            try {
+                console.log('Requesting microphone access...');
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                console.log('Microphone access granted.');
+
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    console.log('MediaRecorder data available:', event.data.size, 'bytes');
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    console.log('MediaRecorder stopped. Processing audio chunks...');
+                    isRecording = false;
+                    micButton.classList.remove('recording');
+                    micButton.innerHTML = '<i class="fas fa-microphone"></i>';
+
+                    stream.getTracks().forEach(track => track.stop());
+                    console.log('Microphone stream tracks stopped.');
+
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    console.log('Audio Blob created:', audioBlob.size, 'bytes', audioBlob.type);
+
+                    if (audioBlob.size === 0) {
+                        console.warn('Warning: Audio blob is empty.');
+                        showMessage('No audio recorded. Please try again.', 'info');
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('audio', audioBlob, 'recording.webm');
+
+                    showMessage('Processing speech...', 'info');
+                    
+                    try {
+                        console.log('Sending audio to server for transcription...');
+                        
+                        const response = await fetch('http://localhost:3000/transcribe', {
+                            method: 'POST',
+                            body: formData,
+                        });
+
+                        console.log('Response status:', response.status, response.statusText);
+                        
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => response.text());
+                            console.error('Server error response:', errorData);
+                            let errorMessage = 'Unknown error from server.';
+                            if (typeof errorData === 'object' && errorData.error) {
+                                errorMessage = errorData.error;
+                            } else if (typeof errorData === 'string' && errorData) {
+                                errorMessage = errorData;
+                            }
+                            throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorMessage}`);
+                        }
+
+                        const data = await response.json();
+                        console.log('Parsed JSON response from server:', data);
+                        
+                        const transcript = data.transcript;
+                        
+                        if (transcript) {
+                            const cleanTranscript = transcript.trim();
+                            console.log('Clean transcript from server:', cleanTranscript);
+                            
+                            if (cleanTranscript) {
+                                const currentValue = additionalInfoTextarea.value.trim();
+                                console.log('Current textarea value:', currentValue);
+                                
+                                const newValue = currentValue ? `${currentValue} ${cleanTranscript}` : cleanTranscript;
+                                console.log('New textarea value will be:', newValue);
+                                
+                                additionalInfoTextarea.value = newValue;
+                                console.log('Textarea updated successfully');
+                                
+                                additionalInfoTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+                                additionalInfoTextarea.dispatchEvent(new Event('change', { bubbles: true }));
+                                
+                                additionalInfoTextarea.focus();
+                                additionalInfoTextarea.setSelectionRange(newValue.length, newValue.length);
+                                
+                                console.log('Textarea updated with transcript:', newValue);
+                                showMessage('Speech converted to text successfully!', 'success');
+                                
+                            } else {
+                                console.warn('Transcript is empty after trimming');
+                                showMessage('No speech detected or empty transcription received. Please try again.', 'info');
+                            }
+                        } else {
+                            console.warn('The "transcript" property was not found in the server response or was null/undefined:', data);
+                            showMessage('No usable transcription received from the server. Server response missing "transcript" property.', 'error');
+                        }
+
+                    } catch (error) {
+                        console.error('Error during transcription fetch:', error);
+                        showMessage('Error communicating with speech server: ' + error.message, 'error');
+                    }
+                };
+
+                console.log('Starting recording...');
+                mediaRecorder.start();
+                isRecording = true;
+                micButton.classList.add('recording');
+                micButton.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+                showMessage('Listening... Click the mic button again to stop, or it will stop automatically after 45 seconds.', 'info');
+
+                const MAX_RECORDING_DURATION_MS = 45000;
+                recordingTimeout = setTimeout(() => {
+                    if (isRecording) {
+                        console.log(`Automatically stopping recording after ${MAX_RECORDING_DURATION_MS / 1000} seconds.`);
+                        mediaRecorder.stop();
+                        showMessage(`Recording stopped automatically after ${MAX_RECORDING_DURATION_MS / 1000} seconds.`, 'info');
+                    }
+                }, MAX_RECORDING_DURATION_MS);
+
+            } catch (err) {
+                console.error('Error accessing microphone:', err);
+                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                    showMessage('Microphone access denied. Please allow microphone access in your browser.', 'error');
+                } else if (err.name === 'NotFoundError') {
+                    showMessage('No microphone found. Please ensure a microphone is connected.', 'error');
+                } else {
+                    showMessage('Error starting voice input: ' + err.message, 'error');
+                }
+                isRecording = false;
+                micButton.classList.remove('recording');
+                micButton.innerHTML = '<i class="fas fa-microphone"></i>';
+            }
+        }
+
+        // DOMContentLoaded event handler
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("DOMContentLoaded event fired.");
+
+            // Initialize Firebase
+            initializeFirebase();
+
+            // Populate manufactured year dropdown
+            const manufacturedYearSelect = document.getElementById('manufacturedYear');
+            if (manufacturedYearSelect) {
+                const currentYear = new Date().getFullYear();
+                for (let i = currentYear; i >= 1900; i--) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = i;
+                    manufacturedYearSelect.appendChild(option);
+                }
+                console.log('Manufactured years populated.');
+            }
+
+            // Attach mic button listener
+            if (micButton) {
+                micButton.addEventListener('click', startVoiceToText);
+                console.log("Mic button event listener attached.");
+            }
+
+            // Attach click listener to the OK button in the modal
+            okButton.addEventListener('click', hideMessageBox);
+
+            // Attach click listener to the Close button in the comparison modal
+            closeComparisonModalButton.addEventListener('click', hideComparisonModal);
+
+            // Handle form submission (now handles both add and update)
+            vehicleForm.addEventListener('submit', handleAddUpdateVehicle);
+
+            // Handle Cancel button (redirects to dashboard)
+            cancelButton.addEventListener('click', () => {
+                console.log("Cancel button clicked. Redirecting to dashboard.html");
+                window.location.href = 'dashboard.html';
+            });
+
+            // Handle Cancel Edit button
+            cancelEditButton.addEventListener('click', () => {
+                vehicleForm.reset();
+                editingDocId = null;
+                submitVehicleButton.textContent = 'Add Vehicle';
+                cancelEditButton.classList.add('hidden');
+                showMessage("Edit cancelled. Form reset to add new vehicle.", "info");
+
+                // Clear all image previews and comparison data when cancelling edit
+                const imageInputNames = ['mainImage', 'image2', 'image3', 'image4', 'image5', 'image6'];
+                imageInputNames.forEach(name => {
+                    removeImagePreview({ dataset: { imageName: name } });
+                });
+                Object.keys(enhancedImageComparisonData).forEach(key => delete enhancedImageComparisonData[key]); // Clear comparison data
+            });
+
+            // Add event listeners to each file input to clear preview on new selection
+            const imageInputNames = ['mainImage', 'image2', 'image3', 'image4', 'image5', 'image6'];
+            imageInputNames.forEach(name => {
+                const fileInput = document.getElementById(name);
+                const previewContainer = imagePreviewContainers[name];
+                const viewComparisonBtn = previewContainer.querySelector('.view-comparison-btn');
+
+                if (fileInput) {
+                    fileInput.addEventListener('change', () => {
+                        const previewImg = imagePreviewElements[name];
+                        if (previewImg) previewImg.src = '';
+                        if (previewContainer) previewContainer.classList.add('hidden');
+                        if (viewComparisonBtn) viewComparisonBtn.classList.add('hidden'); // Hide comparison button
+                        delete enhancedImageComparisonData[name]; // Remove data from comparison object
+                        clearImageStatus(name);
+                    });
+                }
+                // Attach click listener to the View Comparison button for each image
+                if (viewComparisonBtn) {
+                    viewComparisonBtn.addEventListener('click', () => showComparisonModal(name));
+                }
+            });
+        });
     </script>
 </body>
 </html>
