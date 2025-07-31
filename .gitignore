@@ -67,3 +67,10 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# API key
+/ .env
+
+# Google API
+/ wheelzai-465314-9319083b7ff8
+
