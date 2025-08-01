@@ -10,6 +10,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: Inter, "Noto Sans", sans-serif;
+  color: #333; /* Default text color for the white background */
 }
 
 /* Layout styles */
@@ -20,7 +21,7 @@ body {
   height: 100%;
   min-height: 100vh;
   flex-direction: column;
-  background-color: #15191e;
+  background-color: white; /* Changed to white */
   overflow-x: hidden;
 }
 
@@ -39,6 +40,7 @@ body {
   white-space: nowrap;
   border-bottom: 1px solid #2b3540;
   padding: 0.75rem 2.5rem;
+  background-color: #15191e; /* Kept black for the navbar */
 }
 
 .header-brand {
@@ -76,7 +78,7 @@ body {
 }
 
 .nav-links a {
-  color: white;
+  color: white; /* Kept white for contrast */
   font-size: 0.875rem;
   font-weight: 500;
   line-height: normal;
@@ -200,6 +202,7 @@ body {
   backdrop-filter: blur(10px);
   background-color: rgba(21, 25, 30, 0.95);
 }
+
 .main-content {
   padding: 0 10rem;
   display: flex;
@@ -233,8 +236,9 @@ body {
   align-items: flex-start;
   justify-content: flex-end;
   padding: 1rem 2.5rem 2.5rem;
+  /* The image and linear gradient create the hero section, so this still works well */
   background-image: linear-gradient(rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%), 
-                    url("/Wheelz_AI/Images/Home\ -\ Hero\ section\ image.jpg");
+                     url("/Wheelz_AI/Images/Home\ -\ Hero\ section\ image.jpg");
 }
 
 .hero-content {
@@ -245,7 +249,7 @@ body {
 }
 
 .hero-title {
-  color: white;
+  color: white; /* Kept white for readability against the hero image */
   font-size: 2.25rem;
   font-weight: 900;
   line-height: 1.25;
@@ -254,7 +258,7 @@ body {
 }
 
 .hero-subtitle {
-  color: white;
+  color: white; /* Kept white for readability against the hero image */
   font-size: 0.875rem;
   font-weight: 400;
   line-height: normal;
@@ -283,7 +287,7 @@ body {
 
 /* Section titles */
 .section-title {
-  color: white;
+  color: #15191e; /* Changed to dark for the white background */
   font-size: 1.375rem;
   font-weight: 700;
   line-height: 1.25;
@@ -333,7 +337,7 @@ body {
 }
 
 .vehicle-info .title {
-  color: white;
+  color: #15191e; /* Changed to dark for the white background */
   font-size: 1rem;
   font-weight: 500;
   line-height: normal;
@@ -341,7 +345,7 @@ body {
 }
 
 .vehicle-info .description {
-  color: #9eacbd;
+  color: #555; /* Changed to a dark gray for the white background */
   font-size: 0.875rem;
   font-weight: 400;
   line-height: normal;
@@ -380,9 +384,9 @@ body {
     position: relative;
     overflow: hidden;
     cursor: pointer;
-  }
+}
   
-  .vehicle-image::before {
+.vehicle-image::before {
     content: '';
     position: absolute;
     top: 0;
@@ -393,9 +397,9 @@ body {
     opacity: 0;
     transition: opacity 0.4s ease;
     z-index: 1;
-  }
+}
   
-  .vehicle-image::after {
+.vehicle-image::after {
     content: '';
     position: absolute;
     top: 50%;
@@ -407,31 +411,31 @@ body {
     transform: translate(-50%, -50%);
     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 2;
-  }
+}
   
-  .vehicle-image:hover {
+.vehicle-image:hover {
     transform: scale(1.05) translateY(-8px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 
-                0 0 30px rgba(179, 202, 228, 0.2);
+                  0 0 30px rgba(179, 202, 228, 0.2);
     border-radius: 1rem;
-  }
+}
   
-  .vehicle-image:hover::before {
+.vehicle-image:hover::before {
     opacity: 1;
-  }
+}
   
-  .vehicle-image:hover::after {
+.vehicle-image:hover::after {
     width: 100px;
     height: 100px;
-  }
+}
   
-  .vehicle-image:active {
+.vehicle-image:active {
     transform: scale(1.02) translateY(-4px);
     transition: transform 0.1s ease;
-  }
+}
   
-  /* Enhanced vehicle card hover effect */
-  .vehicle-card {
+/* Enhanced vehicle card hover effect */
+.vehicle-card {
     display: flex;
     height: 100%;
     flex: 1;
@@ -440,21 +444,21 @@ body {
     border-radius: 0.5rem;
     min-width: 240px;
     transition: transform 0.3s ease;
-  }
+}
   
-  .vehicle-card:hover {
+.vehicle-card:hover {
     transform: translateY(-5px);
-  }
+}
   
-  .vehicle-card:hover .vehicle-info .title {
+.vehicle-card:hover .vehicle-info .title {
     color: #b3cae4;
     transition: color 0.3s ease;
-  }
+}
   
-  .vehicle-card:hover .vehicle-info .description {
+.vehicle-card:hover .vehicle-info .description {
     color: #c5d2e3;
     transition: color 0.3s ease;
-  }
+}
 
 /* Bottom button section */
 .bottom-section {
@@ -483,9 +487,9 @@ body {
     border: none;
     position: relative;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
+}
   
-  .hero-btn::after {
+.hero-btn::after {
     content: '';
     position: absolute;
     bottom: -8px;
@@ -496,31 +500,31 @@ body {
     border-radius: 2px;
     transform: translateX(-50%);
     transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
+}
   
-  .hero-btn:hover {
+.hero-btn:hover {
     background-color: #9bb8d9;
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(179, 202, 228, 0.4);
-  }
+}
   
-  .hero-btn:hover::after {
+.hero-btn:hover::after {
     width: 100%;
-  }
+}
   
-  .hero-btn:active {
+.hero-btn:active {
     transform: translateY(0) scale(0.98);
     box-shadow: 0 2px 8px rgba(179, 202, 228, 0.3);
-  }
+}
   
-  .hero-btn:active::after {
+.hero-btn:active::after {
     width: 110%;
     height: 4px;
     background: linear-gradient(90deg, #15191e 0%, #9bb8d9 50%, #15191e 100%);
-  }
+}
   
-  /* Enhanced Buy More Vehicles Button with Underline Effect */
-  .buy-more-btn {
+/* Enhanced Buy More Vehicles Button with Underline Effect */
+.buy-more-btn {
     display: flex;
     min-width: 84px;
     max-width: 480px;
@@ -540,9 +544,9 @@ body {
     border: none;
     position: relative;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
+}
   
-  .buy-more-btn::after {
+.buy-more-btn::after {
     content: '';
     position: absolute;
     bottom: -8px;
@@ -553,28 +557,83 @@ body {
     border-radius: 2px;
     transform: translateX(-50%);
     transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
+}
   
-  .buy-more-btn:hover {
+.buy-more-btn:hover {
     background-color: #9bb8d9;
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(179, 202, 228, 0.4);
-  }
+}
   
-  .buy-more-btn:hover::after {
+.buy-more-btn:hover::after {
     width: 100%;
-  }
+}
   
-  .buy-more-btn:active {
+.buy-more-btn:active {
     transform: translateY(0) scale(0.98);
     box-shadow: 0 2px 8px rgba(179, 202, 228, 0.3);
-  }
+}
   
-  .buy-more-btn:active::after {
+.buy-more-btn:active::after {
     width: 110%;
     height: 4px;
     background: linear-gradient(90deg, #15191e 0%, #9bb8d9 50%, #15191e 100%);
-  }
+}
+
+/* Footer styles (You'll need to add this to your HTML with a class of 'footer') */
+.footer {
+  background-color: #15191e; /* Black background */
+  color: white; /* White text for contrast */
+  padding: 2.5rem 1rem;
+  text-align: center;
+  border-top: 1px solid #2b3540; /* Consistent border with header */
+  font-size: 0.875rem;
+}
+
+.footer-nav {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 1rem;
+}
+
+.footer-nav a {
+  color: white; /* White links for contrast */
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.footer-nav a:hover {
+  color: #b3cae4; /* Same hover effect as header links */
+}
+
+.footer-contact-info {
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.footer-social-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.footer-social-links a {
+  color: white; /* White social icons */
+  font-size: 1.5rem; /* Adjust icon size */
+  transition: color 0.3s ease;
+}
+
+.footer-social-links a:hover {
+  color: #b3cae4; /* Hover color for social icons */
+}
+
+.footer-copyright {
+  font-size: 0.75rem;
+  color: #9eacbd; /* Slightly lighter text for the copyright notice */
+}
 
 /* Responsive design */
 @media (min-width: 480px) {
@@ -618,8 +677,8 @@ body {
 
 .header-brand .logo {
     display: flex; 
-     align-items: center; 
-     justify-content: center; 
+      align-items: center; 
+      justify-content: center; 
     height: auto; 
 }
 
