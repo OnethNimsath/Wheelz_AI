@@ -5,6 +5,145 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WheelzAI - Sign Up</title>
     <link rel="stylesheet" href="/Wheelz_AI/css/signup.css">
+    <style>
+        /* Custom Popup Styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .popup-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .popup-container {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 1px solid #475569;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.8) translateY(-20px);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .popup-overlay.show .popup-container {
+            transform: scale(1) translateY(0);
+        }
+
+        .popup-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 24px;
+            color: white;
+            animation: checkmark 0.6s ease-in-out;
+        }
+
+        @keyframes checkmark {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .popup-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 12px;
+        }
+
+        .popup-message {
+            color: #cbd5e1;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .popup-button {
+            background: linear-gradient(45deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .popup-button:hover {
+            background: linear-gradient(45deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .wheelzai-branding {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #3b82f6, #06b6d4);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #374151;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .button-loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+    </style>
 </head>
 <body>
     <div class="left-panel">
@@ -57,13 +196,13 @@
                     <label for="termsCheckbox">I agree to the Terms and Privacy Policy</label>
                 </div>
 
-                <button type="submit" class="submit-button">
+                <button type="submit" class="submit-button" id="createAccountBtn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2a10 10 0 1 0 0 20 10 10 0 1 0 0-20z"></path>
                         <path d="M12 8v8"></path>
                         <path d="M8 12h8"></path>
                     </svg>
-                    Create Account
+                    <span id="btnText">Create Account</span>
                 </button>
             </form>
 
@@ -76,8 +215,21 @@
                     <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
                     <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
                 </svg>
-                Google
+                <span id="googleBtnText">Google</span>
             </button>
+        </div>
+    </div>
+
+    <!-- Success Popup -->
+    <div id="successPopup" class="popup-overlay">
+        <div class="popup-container">
+            <div class="wheelzai-branding">WheelzAI</div>
+            <div class="popup-icon">✓</div>
+            <div class="popup-title">Account Created Successfully!</div>
+            <div class="popup-message" id="popupMessage">
+                Welcome to WheelzAI! Your account has been created and you're ready to start trading vehicles.
+            </div>
+            <button class="popup-button" onclick="redirectToSignin()">Continue to Sign In</button>
         </div>
     </div>
 
@@ -107,6 +259,38 @@
         // For Google Sign-in
         const googleProvider = new firebase.auth.GoogleAuthProvider();
 
+        // Popup functions
+        function showSuccessPopup(title, message) {
+            const popup = document.getElementById('successPopup');
+            const titleElement = popup.querySelector('.popup-title');
+            const messageElement = document.getElementById('popupMessage');
+            
+            titleElement.textContent = title;
+            messageElement.textContent = message;
+            popup.classList.add('show');
+        }
+
+        function hideSuccessPopup() {
+            const popup = document.getElementById('successPopup');
+            popup.classList.remove('show');
+        }
+
+        function redirectToSignin() {
+            hideSuccessPopup();
+            window.location.href = 'signin.html';
+        }
+
+        function setButtonLoading(button, isLoading, text = '') {
+            const btnText = button.querySelector('span');
+            if (isLoading) {
+                button.classList.add('button-loading');
+                btnText.innerHTML = '<div class="loading-spinner"></div>' + text;
+            } else {
+                button.classList.remove('button-loading');
+                btnText.textContent = text;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const signupForm = document.getElementById('signupForm');
             const sellerNameInput = document.getElementById('sellerName');
@@ -115,9 +299,10 @@
             const confirmPasswordInput = document.getElementById('confirmPassword');
             const termsCheckbox = document.getElementById('termsCheckbox');
             const googleSignupButton = document.getElementById('googleSignupButton');
+            const createAccountBtn = document.getElementById('createAccountBtn');
 
             signupForm.addEventListener('submit', async (e) => {
-                e.preventDefault(); // Prevent default form submission
+                e.preventDefault();
 
                 const sellerName = sellerNameInput.value.trim();
                 const email = signupEmailInput.value.trim();
@@ -137,7 +322,7 @@
                     alert('Passwords do not match. Please re-enter.');
                     return;
                 }
-                if (password.length < 6) { // Firebase requires at least 6 characters for password
+                if (password.length < 6) {
                     alert('Password should be at least 6 characters.');
                     return;
                 }
@@ -146,29 +331,40 @@
                     return;
                 }
 
+                // Set loading state
+                setButtonLoading(createAccountBtn, true, 'Creating Account...');
+
                 try {
-                    // 1. Create user with email and password
+                    // Create user with email and password
                     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                     const user = userCredential.user;
 
-                    // 2. Optionally: Update user profile (e.g., display name)
+                    // Update user profile
                     await user.updateProfile({
                         displayName: sellerName
                     });
 
-                    // 3. Save additional user data to Firestore
-                    // Create a document in a collection named 'users' with the user's UID as the document ID
+                    // Save additional user data to Firestore
                     await db.collection('users').doc(user.uid).set({
                         name: sellerName,
                         email: user.email,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(), // Use server timestamp
-                        // Add any other initial fields you want for your users
-                        userType: 'seller' // Example: You might want to categorize users
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        userType: 'seller'
                     });
 
-                    alert(`Account created successfully for ${user.email}!`);
-                    window.location.href = 'signin.html'; // Redirect to signin page
+                    // Reset loading state
+                    setButtonLoading(createAccountBtn, false, 'Create Account');
+
+                    // Show success popup instead of alert
+                    showSuccessPopup(
+                        'Account Created Successfully!',
+                        `Welcome to WheelzAI, ${sellerName}! Your account has been created successfully. You can now sign in to access your dashboard.`
+                    );
+
                 } catch (error) {
+                    // Reset loading state
+                    setButtonLoading(createAccountBtn, false, 'Create Account');
+
                     let errorMessage = "An unknown error occurred.";
                     console.error('Firebase Signup Error:', error);
 
@@ -194,33 +390,43 @@
 
             // Google Sign-up/Login
             googleSignupButton.addEventListener('click', async () => {
+                setButtonLoading(googleSignupButton, true, 'Connecting...');
+
                 try {
                     const result = await auth.signInWithPopup(googleProvider);
                     const user = result.user;
 
-                    // Check if the user already exists in Firestore (for Google sign-in)
-                    // If they are signing up for the first time with Google, create a Firestore document.
+                    // Check if the user already exists in Firestore
                     const userDocRef = db.collection('users').doc(user.uid);
                     const doc = await userDocRef.get();
 
                     if (!doc.exists) {
                         // User is signing in with Google for the first time, create their Firestore profile
                         await userDocRef.set({
-                            name: user.displayName || 'N/A', // Use display name from Google, or 'N/A'
+                            name: user.displayName || 'N/A',
                             email: user.email,
                             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                            userType: 'seller', // Assuming all sign-ups are 'seller' for now
-                            googleSignIn: true // Mark that they signed up with Google
+                            userType: 'seller',
+                            googleSignIn: true
                         });
                         console.log("New Google user profile created in Firestore.");
                     } else {
                         console.log("Existing Google user profile found in Firestore.");
                     }
 
-                    console.log('Google user signed in:', user);
-                    alert(`Signed in with Google as ${user.displayName || user.email}!`);
-                    window.location.href = 'dashboard.html'; // Or wherever you want to redirect after successful login
+                    // Reset loading state
+                    setButtonLoading(googleSignupButton, false, 'Google');
+
+                    // Show success popup for Google signup
+                    showSuccessPopup(
+                        'Google Sign-up Successful!',
+                        `Welcome ${user.displayName || user.email}! Your account has been created successfully using Google.`
+                    );
+
                 } catch (error) {
+                    // Reset loading state
+                    setButtonLoading(googleSignupButton, false, 'Google');
+
                     console.error('Google Sign-in Error:', error);
                     let errorMessage = "An error occurred during Google sign-in.";
                     if (error.code === 'auth/popup-closed-by-user') {
@@ -231,6 +437,13 @@
                         errorMessage = `Google sign-in failed: ${error.message}`;
                     }
                     alert(errorMessage);
+                }
+            });
+
+            // Close popup when clicking outside
+            document.getElementById('successPopup').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideSuccessPopup();
                 }
             });
         });
