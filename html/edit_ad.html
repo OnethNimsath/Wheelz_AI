@@ -1,0 +1,2145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Advertisement - WheelzAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase Scripts - v8 Compat -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <!-- Session Management - Embedded -->
+    <script>
+        // Session Manager Class - Embedded for reliability
+        class SessionManager {
+            constructor() {
+                this.auth = firebase.auth();
+                this.db = firebase.firestore();
+                this.currentUser = null;
+                this.userProfile = null;
+                this.authStateListenerActive = false;
+                this.sessionTimeout = 30 * 60 * 1000; // 30 minutes
+                this.warningTimeout = 25 * 60 * 1000; // 25 minutes
+                this.sessionWarningShown = false;
+                this.heartbeatInterval = null;
+            }
+
+            // Initialize session management
+            init() {
+                if (this.authStateListenerActive) return Promise.resolve(this.currentUser);
+                
+                this.authStateListenerActive = true;
+                return new Promise((resolve) => {
+                    this.auth.onAuthStateChanged(async (user) => {
+                        this.currentUser = user;
+                        if (user) {
+                            await this.loadUserProfile();
+                            this.startSessionMonitoring();
+                            this.setupActivityListeners();
+                            this.updateUIWithUserInfo();
+                        }
+                        this.handleAuthStateChange(user);
+                        resolve(user);
+                    });
+                });
+            }
+
+            // Load user profile from Firestore
+            async loadUserProfile() {
+                if (!this.currentUser) return null;
+                
+                try {
+                    const doc = await this.db.collection('users').doc(this.currentUser.uid).get();
+                    if (doc.exists) {
+                        this.userProfile = { id: this.currentUser.uid, ...doc.data() };
+                        this.updateSessionStorage();
+                        return this.userProfile;
+                    }
+                } catch (error) {
+                    console.error('Error loading user profile:', error);
+                }
+                return null;
+            }
+
+            // Handle authentication state changes
+            handleAuthStateChange(user) {
+                if (user) {
+                    console.log('User session active:', user.email);
+                    this.setUserSession(user);
+                    this.redirectIfOnAuthPage();
+                } else {
+                    console.log('No active session');
+                    this.clearUserSession();
+                    this.stopSessionMonitoring();
+                    this.redirectToAuthIfNeeded();
+                }
+            }
+
+            // Set user session
+            setUserSession(user) {
+                const sessionData = {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL,
+                    emailVerified: user.emailVerified,
+                    lastLoginTime: new Date().toISOString(),
+                    lastActivity: Date.now(),
+                    sessionStart: Date.now(),
+                    userProfile: this.userProfile
+                };
+                
+                sessionStorage.setItem('wheelzai_user_session', JSON.stringify(sessionData));
+                
+                const rememberMe = localStorage.getItem('wheelzai_remember_me') === 'true';
+                if (rememberMe) {
+                    localStorage.setItem('wheelzai_user_session', JSON.stringify(sessionData));
+                }
+            }
+
+            // Update session storage
+            updateSessionStorage() {
+                const sessionData = this.getSessionData();
+                if (sessionData && this.currentUser) {
+                    sessionData.userProfile = this.userProfile;
+                    sessionData.lastActivity = Date.now();
+                    
+                    sessionStorage.setItem('wheelzai_user_session', JSON.stringify(sessionData));
+                    
+                    const rememberMe = localStorage.getItem('wheelzai_remember_me') === 'true';
+                    if (rememberMe) {
+                        localStorage.setItem('wheelzai_user_session', JSON.stringify(sessionData));
+                    }
+                }
+            }
+
+            // Clear user session
+            clearUserSession() {
+                sessionStorage.removeItem('wheelzai_user_session');
+                localStorage.removeItem('wheelzai_user_session');
+                localStorage.removeItem('wheelzai_remember_me');
+                this.currentUser = null;
+                this.userProfile = null;
+            }
+
+            // Get session data
+            getSessionData() {
+                try {
+                    const sessionData = sessionStorage.getItem('wheelzai_user_session') || 
+                                       localStorage.getItem('wheelzai_user_session');
+                    return sessionData ? JSON.parse(sessionData) : null;
+                } catch (error) {
+                    console.error('Error parsing session data:', error);
+                    return null;
+                }
+            }
+
+            // Check if authenticated
+            isAuthenticated() {
+                const sessionData = this.getSessionData();
+                if (!sessionData || !this.currentUser) {
+                    return false;
+                }
+
+                const now = Date.now();
+                const lastActivity = sessionData.lastActivity || 0;
+                const timeSinceActivity = now - lastActivity;
+
+                if (timeSinceActivity > this.sessionTimeout) {
+                    this.handleSessionTimeout();
+                    return false;
+                }
+
+                return true;
+            }
+
+            // Update last activity
+            updateLastActivity() {
+                const sessionData = this.getSessionData();
+                if (sessionData) {
+                    sessionData.lastActivity = Date.now();
+                    sessionStorage.setItem('wheelzai_user_session', JSON.stringify(sessionData));
+                    
+                    const rememberMe = localStorage.getItem('wheelzai_remember_me') === 'true';
+                    if (rememberMe) {
+                        localStorage.setItem('wheelzai_user_session', JSON.stringify(sessionData));
+                    }
+                }
+                this.sessionWarningShown = false;
+            }
+
+            // Setup activity listeners
+            setupActivityListeners() {
+                const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+                
+                const throttledUpdate = this.throttle(() => {
+                    this.updateLastActivity();
+                }, 30000);
+
+                events.forEach(event => {
+                    document.addEventListener(event, throttledUpdate, true);
+                });
+
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) {
+                        this.updateLastActivity();
+                    }
+                });
+            }
+
+            // Throttle function
+            throttle(func, limit) {
+                let inThrottle;
+                return function() {
+                    const args = arguments;
+                    const context = this;
+                    if (!inThrottle) {
+                        func.apply(context, args);
+                        inThrottle = true;
+                        setTimeout(() => inThrottle = false, limit);
+                    }
+                }
+            }
+
+            // Start session monitoring
+            startSessionMonitoring() {
+                if (this.heartbeatInterval) {
+                    clearInterval(this.heartbeatInterval);
+                }
+
+                this.heartbeatInterval = setInterval(() => {
+                    this.checkSessionStatus();
+                }, 60000);
+
+                this.checkSessionStatus();
+            }
+
+            // Stop session monitoring
+            stopSessionMonitoring() {
+                if (this.heartbeatInterval) {
+                    clearInterval(this.heartbeatInterval);
+                    this.heartbeatInterval = null;
+                }
+            }
+
+            // Check session status
+            checkSessionStatus() {
+                const sessionData = this.getSessionData();
+                if (!sessionData || !this.currentUser) {
+                    this.redirectToAuthIfNeeded();
+                    return;
+                }
+
+                const now = Date.now();
+                const lastActivity = sessionData.lastActivity || 0;
+                const timeSinceActivity = now - lastActivity;
+
+                if (timeSinceActivity > this.warningTimeout && !this.sessionWarningShown) {
+                    this.showSessionWarning();
+                }
+
+                if (timeSinceActivity > this.sessionTimeout) {
+                    this.handleSessionTimeout();
+                }
+            }
+
+            // Show session warning
+            showSessionWarning() {
+                this.sessionWarningShown = true;
+                const timeLeft = Math.ceil((this.sessionTimeout - this.warningTimeout) / 60000);
+                
+                if (confirm(`Your session will expire in ${timeLeft} minutes due to inactivity. Click OK to extend your session.`)) {
+                    this.updateLastActivity();
+                }
+            }
+
+            // Handle session timeout
+            handleSessionTimeout() {
+                alert('Your session has expired due to inactivity. Please sign in again.');
+                this.signOut();
+            }
+
+            // Update UI with user info
+            updateUIWithUserInfo() {
+                try {
+                    const userEmailElements = document.querySelectorAll('.user-email, #userEmail, [data-user-email]');
+                    userEmailElements.forEach(element => {
+                        if (element) {
+                            element.textContent = this.currentUser.email;
+                        }
+                    });
+
+                    const userName = this.currentUser.displayName || this.userProfile?.name || 'User';
+                    const userNameElements = document.querySelectorAll('.user-name, #userName, [data-user-name]');
+                    userNameElements.forEach(element => {
+                        if (element) {
+                            element.textContent = userName;
+                        }
+                    });
+
+                } catch (error) {
+                    console.error('Error updating UI:', error);
+                }
+            }
+
+            // Sign out
+            async signOut() {
+                try {
+                    this.stopSessionMonitoring();
+                    this.clearUserSession();
+                    await this.auth.signOut();
+                    window.location.href = 'signin.html';
+                } catch (error) {
+                    console.error('Sign out error:', error);
+                    window.location.href = 'signin.html';
+                }
+            }
+
+            // Redirect if on auth page
+            redirectIfOnAuthPage() {
+                const currentPage = window.location.pathname;
+                const authPages = ['/signin.html', '/signup.html', '/forgotpassword.html'];
+                
+                if (authPages.some(page => currentPage.includes(page))) {
+                    window.location.href = 'dashboard.html';
+                }
+            }
+
+            // Redirect to auth if needed
+            redirectToAuthIfNeeded() {
+                const currentPage = window.location.pathname;
+                const publicPages = ['/signin.html', '/signup.html', '/forgotpassword.html', '/index.html', '/', '/home.html'];
+                
+                if (!publicPages.some(page => currentPage.includes(page)) && 
+                    !currentPage.includes('signin') && 
+                    !currentPage.includes('signup') &&
+                    !currentPage.includes('index')) {
+                    window.location.href = 'signin.html';
+                }
+            }
+
+            // Get current user
+            getCurrentUser() {
+                return {
+                    user: this.currentUser,
+                    profile: this.userProfile,
+                    session: this.getSessionData()
+                };
+            }
+        }
+
+        // Global session manager instance
+        let globalSessionManager = null;
+
+        // Function to get or create session manager
+        function getSessionManager() {
+            if (!globalSessionManager) {
+                globalSessionManager = new SessionManager();
+            }
+            return globalSessionManager;
+        }
+    </script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom Popup Styles -->
+    <style>
+        /* Custom Popup Overlay */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .popup-overlay.show {
+            opacity: 1;
+        }
+
+        .popup-container {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .popup-overlay.show .popup-container {
+            transform: scale(1);
+        }
+
+        .popup-success .popup-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 24px;
+            color: white;
+        }
+
+        .popup-error .popup-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #ef4444, #dc2626);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 24px;
+            color: white;
+        }
+
+        .popup-info .popup-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #3b82f6, #2563eb);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 24px;
+            color: white;
+        }
+
+        .popup-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+
+        .popup-message {
+            color: #64748b;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .popup-button {
+            background: linear-gradient(45deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            min-width: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .popup-button:hover {
+            background: linear-gradient(45deg, #2563eb, #1d4ed8);
+            transform: translateY(-1px);
+        }
+
+        .popup-success .popup-button {
+            background: linear-gradient(45deg, #10b981, #059669);
+        }
+
+        .popup-success .popup-button:hover {
+            background: linear-gradient(45deg, #059669, #047857);
+        }
+
+        .popup-error .popup-button {
+            background: linear-gradient(45deg, #ef4444, #dc2626);
+        }
+
+        .popup-error .popup-button:hover {
+            background: linear-gradient(45deg, #dc2626, #b91c1c);
+        }
+
+        .popup-loading .popup-icon {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Upload area styles */
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+        }
+
+        .upload-area:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #3b82f6;
+            background: #dbeafe;
+        }
+
+        .upload-area.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .upload-text {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .upload-subtext {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .upload-button {
+            background: linear-gradient(45deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .upload-button:hover {
+            background: linear-gradient(45deg, #2563eb, #1d4ed8);
+            transform: translateY(-1px);
+        }
+
+        .upload-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .upload-button-document {
+            background: linear-gradient(45deg, #059669, #047857);
+        }
+
+        .upload-button-document:hover {
+            background: linear-gradient(45deg, #047857, #065f46);
+        }
+
+        .upload-button-icon {
+            margin-right: 8px;
+        }
+
+        .upload-limit-warning {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .image-preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .image-preview {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #e5e7eb;
+            background: #f3f4f6;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-preview-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .image-preview-remove:hover {
+            background: rgba(239, 68, 68, 1);
+            transform: scale(1.1);
+        }
+
+        /* Session status indicator */
+        .session-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(16, 185, 129, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .session-status.warning {
+            background: rgba(245, 158, 11, 0.9);
+        }
+
+        .session-status.error {
+            background: rgba(239, 68, 68, 0.9);
+        }
+
+        .session-pulse {
+            width: 8px;
+            height: 8px;
+            background: currentColor;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Session Status Indicator -->
+    <div id="sessionStatus" class="session-status" style="display: none;">
+        <div class="session-pulse"></div>
+        <span id="sessionStatusText">Session Active</span>
+    </div>
+
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-4">
+                    <button onclick="goBack()" class="text-gray-600 hover:text-gray-900 transition-colors">
+                        <i class="fas fa-arrow-left text-xl"></i>
+                    </button>
+                    <h1 class="text-xl font-semibold text-gray-900">Edit Advertisement</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-3">
+                        <span class="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">Active</span>
+                        <span class="text-sm text-gray-500" id="adListingId">ID: Loading...</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-600 user-email">Loading...</span>
+                        <button onclick="handleLogout()" class="text-red-600 hover:text-red-800 transition-colors" title="Logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading advertisement data...</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <form id="editAdForm" class="space-y-8">
+            <!-- Pricing Section -->
+            <div class="bg-white rounded-lg shadow-sm border p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-tag text-blue-600 mr-3"></i>
+                    Pricing Information
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Asking Price (LKR)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">LKR</span>
+                            <input type="text" id="askingPrice" class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg font-semibold" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">AI Estimate Range</label>
+                        <input type="text" id="aiEstimate" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50" readonly placeholder="Calculating...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Negotiable</label>
+                        <div class="flex items-center space-x-4 pt-2">
+                            <label class="flex items-center">
+                                <input type="radio" name="negotiable" value="yes" class="mr-2 text-blue-600">
+                                <span>Yes</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="negotiable" value="no" class="mr-2 text-blue-600">
+                                <span>No</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicle Information -->
+            <div class="bg-white rounded-lg shadow-sm border p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-car text-blue-600 mr-3"></i>
+                    Vehicle Information
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Make</label>
+                        <select id="make" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Select Make</option>
+                            <option value="ford">Ford</option>
+                            <option value="toyota">Toyota</option>
+                            <option value="honda">Honda</option>
+                            <option value="nissan">Nissan</option>
+                            <option value="bmw">BMW</option>
+                            <option value="mercedes">Mercedes-Benz</option>
+                            <option value="audi">Audi</option>
+                            <option value="hyundai">Hyundai</option>
+                            <option value="suzuki">Suzuki</option>
+                            <option value="mitsubishi">Mitsubishi</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Model</label>
+                        <input type="text" id="model" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter model">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Year</label>
+                        <select id="year" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Select Year</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Mileage (km)</label>
+                        <input type="text" id="mileage" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="25,000">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Body Type</label>
+                        <select id="bodyType" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Select Body Type</option>
+                            <option value="sedan">Sedan</option>
+                            <option value="suv">SUV</option>
+                            <option value="hatchback">Hatchback</option>
+                            <option value="coupe">Coupe</option>
+                            <option value="convertible">Convertible</option>
+                            <option value="truck">Truck</option>
+                            <option value="van">Van</option>
+                            <option value="wagon">Wagon</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Fuel Type</label>
+                        <select id="fuelType" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Select Fuel Type</option>
+                            <option value="petrol">Petrol</option>
+                            <option value="diesel">Diesel</option>
+                            <option value="hybrid">Hybrid</option>
+                            <option value="electric">Electric</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Condition</label>
+                        <select id="condition" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Select Condition</option>
+                            <option value="excellent">Excellent</option>
+                            <option value="good">Good</option>
+                            <option value="fair">Fair</option>
+                            <option value="poor">Poor</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Transmission</label>
+                        <select id="transmission" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Select Transmission</option>
+                            <option value="manual">Manual</option>
+                            <option value="automatic">Automatic</option>
+                            <option value="cvt">CVT</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Engine Capacity (cc)</label>
+                        <input type="text" id="engineCapacity" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 2000">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicle History -->
+            <div class="bg-white rounded-lg shadow-sm border p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-history text-blue-600 mr-3"></i>
+                    Vehicle History
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Accident History</label>
+                        <select id="accidentHistory" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Select Option</option>
+                            <option value="none">None</option>
+                            <option value="minor">Minor Accidents</option>
+                            <option value="major">Major Accidents</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Service History</label>
+                        <select id="serviceHistory" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Select Option</option>
+                            <option value="complete">Complete</option>
+                            <option value="partial">Partial</option>
+                            <option value="none">None Available</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Notes -->
+            <div class="bg-white rounded-lg shadow-sm border p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-sticky-note text-blue-600 mr-3"></i>
+                    Additional Information
+                </h2>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description / Notes</label>
+                    <textarea id="additionalNotes" rows="4" placeholder="Add any additional details about your vehicle..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
+                </div>
+            </div>
+
+            <!-- Media Upload -->
+            <div class="bg-white rounded-lg shadow-sm border p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-images text-blue-600 mr-3"></i>
+                    Photos & Documents
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Photos</label>
+                        <div class="upload-area" id="photo-upload-area" ondrop="handleDrop(event, 'photos')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                            <div class="upload-icon">📷</div>
+                            <div class="upload-text">Drag & drop photos here</div>
+                            <div class="upload-subtext">Currently: <span id="photo-count">0</span> uploaded (Max: 5)</div>
+                            <input type="file" multiple accept="image/*" class="hidden" id="photos" onchange="handleImageUpload(event)">
+                        </div>
+                        <button type="button" class="upload-button" id="photo-upload-btn" onclick="document.getElementById('photos').click()">
+                            <span class="upload-button-icon">📷</span>
+                            Choose Photos
+                        </button>
+                        <div class="upload-limit-warning" id="photo-limit-warning">
+                            Maximum 5 photos allowed. Please remove some photos to add new ones.
+                        </div>
+                        <div id="image-previews" class="image-preview-container"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Documents</label>
+                        <div class="upload-area" id="document-upload-area" ondrop="handleDrop(event, 'documents')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                            <div class="upload-icon">📄</div>
+                            <div class="upload-text">Drag & drop documents here</div>
+                            <div class="upload-subtext">Currently: <span id="document-count">0</span> uploaded</div>
+                            <input type="file" multiple accept=".pdf,.doc,.docx" class="hidden" id="documents" onchange="handleDocumentUpload(event)">
+                        </div>
+                        <button type="button" class="upload-button upload-button-document" onclick="document.getElementById('documents').click()">
+                            <span class="upload-button-icon">📄</span>
+                            Choose Documents
+                        </button>
+                        <div id="document-previews" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="bg-white rounded-lg shadow-sm border p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-address-book text-blue-600 mr-3"></i>
+                    Contact Information
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
+                        <input type="tel" id="phoneNumber" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter phone number">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                        <input type="email" id="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter email address">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">WhatsApp Number</label>
+                        <input type="tel" id="whatsappNumber" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter WhatsApp number">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Preferred Contact Method</label>
+                        <div class="flex space-x-4 pt-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="contactPhone" class="mr-2 text-blue-600 rounded">
+                                <span class="text-sm">Phone</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="contactEmail" class="mr-2 text-blue-600 rounded">
+                                <span class="text-sm">Email</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="contactWhatsapp" class="mr-2 text-blue-600 rounded">
+                                <span class="text-sm">WhatsApp</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-between items-center pt-6">
+                <div class="flex space-x-4">
+                    <button type="button" onclick="previewAd()" class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center">
+                        <i class="fas fa-eye mr-2"></i>
+                        Preview
+                    </button>
+                    <button type="button" onclick="saveAsDraft()" class="px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors flex items-center">
+                        <i class="fas fa-save mr-2"></i>
+                        Save as Draft
+                    </button>
+                </div>
+                <div class="flex space-x-4">
+                    <button type="button" onclick="goBack()" class="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center font-semibold">
+                        <i class="fas fa-check mr-2"></i>
+                        Update Advertisement
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Custom Popup Modal -->
+    <div id="custom-popup" class="popup-overlay" style="display: none;">
+        <div class="popup-container">
+            <div class="popup-icon" id="popup-icon"></div>
+            <div class="popup-title" id="popup-title">Title</div>
+            <div class="popup-message" id="popup-message">Message</div>
+            <button class="popup-button" id="popup-button" onclick="hideCustomPopup()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration and initialization
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
+            authDomain: "wheelzai.firebaseapp.com",
+            projectId: "wheelzai",
+            storageBucket: "wheelzai.firebasestorage.app",
+            messagingSenderId: "132756052907",
+            appId: "1:132756052907:web:b92dc998b4b5bee8d450ee",
+            measurementId: "G-ECQJYZYK43"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Global variables for session management
+        let sessionManager = null;
+        let currentAdData = null;
+        let currentAdId = null;
+        let uploadedImages = [];
+        let uploadedDocuments = [];
+        let hasUnsavedChanges = false;
+
+        // Session management integration
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Edit advertisement page loading...');
+            
+            try {
+                // Verify Firebase is loaded
+                if (typeof firebase === 'undefined') {
+                    throw new Error('Firebase is not loaded');
+                }
+                
+                console.log('Firebase loaded successfully');
+                
+                // Initialize session manager
+                sessionManager = getSessionManager();
+                console.log('Session manager created');
+                
+                await sessionManager.init();
+                console.log('Session manager initialized');
+
+                // Check authentication first
+                if (!sessionManager.isAuthenticated()) {
+                    console.log('User not authenticated, redirecting...');
+                    customAlert('Please log in to edit advertisements', 'error', () => {
+                        window.location.href = 'signin.html';
+                    });
+                    return;
+                }
+
+                console.log('User authenticated:', sessionManager.currentUser?.email);
+                
+                // Update session status indicator
+                updateSessionStatusUI();
+                
+                // Get advertisement ID from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const adId = urlParams.get('id');
+                console.log('Advertisement ID from URL:', adId);
+                
+                if (!adId) {
+                    customAlert('No advertisement ID provided', 'error', () => {
+                        window.location.href = 'dashboard.html';
+                    });
+                    return;
+                }
+
+                // Load advertisement data
+                console.log('Loading advertisement data...');
+                await loadAdvertisementData(adId);
+                console.log('Advertisement data loaded successfully');
+                
+                // Initialize form functionality
+                initializeFormHandlers();
+                
+                // Setup session monitoring for this page
+                setupEditPageSessionMonitoring();
+                
+                // Populate year dropdown
+                populateYearDropdown();
+                
+                // Hide loading overlay
+                document.getElementById('loadingOverlay').style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error initializing edit page:', error);
+                customAlert('Error loading page: ' + error.message, 'error', () => {
+                    window.location.href = 'dashboard.html';
+                });
+            }
+        });
+
+        // Load advertisement data with ownership verification
+        async function loadAdvertisementData(adId) {
+            try {
+                console.log('Loading advertisement data for ID:', adId);
+                
+                const adDoc = await db.collection('Advertisements').doc(adId).get();
+                
+                if (!adDoc.exists) {
+                    throw new Error('Advertisement not found');
+                }
+
+                const adData = adDoc.data();
+                console.log('Loaded advertisement data:', adData);
+                
+                // Verify ownership
+                const currentUserId = sessionManager.currentUser.uid;
+                if (adData.userId && adData.userId !== currentUserId) {
+                    throw new Error('You can only edit your own advertisements');
+                }
+
+                // Store global variables
+                currentAdData = adData;
+                currentAdId = adId;
+                
+                // Populate form with existing data
+                populateForm(adData);
+                
+                // Load existing images
+                loadExistingImages(adData);
+                
+                console.log('Advertisement data loaded successfully');
+                
+            } catch (error) {
+                console.error('Error loading advertisement:', error);
+                throw error;
+            }
+        }
+
+        // Populate form with existing data
+        function populateForm(adData) {
+            try {
+                console.log('Populating form with data:', adData);
+                
+                // Update header with listing ID
+                if (adData.listingId) {
+                    document.getElementById('adListingId').textContent = `ID: ${adData.listingId}`;
+                }
+
+                // Pricing Information
+                if (adData.askingPrice) {
+                    document.getElementById('askingPrice').value = formatPrice(adData.askingPrice);
+                }
+                
+                if (adData.aiEstimate) {
+                    document.getElementById('aiEstimate').value = adData.aiEstimate;
+                }
+                
+                if (adData.negotiable !== undefined) {
+                    const negotiableRadio = document.querySelector(`input[name="negotiable"][value="${adData.negotiable ? 'yes' : 'no'}"]`);
+                    if (negotiableRadio) negotiableRadio.checked = true;
+                }
+
+                // Vehicle Information
+                const vehicleFields = {
+                    'make': adData.make,
+                    'model': adData.model,
+                    'year': adData.year,
+                    'mileage': adData.mileage,
+                    'bodyType': adData.bodyType,
+                    'fuelType': adData.fuelType,
+                    'condition': adData.condition,
+                    'transmission': adData.transmission,
+                    'engineCapacity': adData.engineCapacity,
+                    'accidentHistory': adData.accidentHistory,
+                    'serviceHistory': adData.serviceHistory,
+                    'additionalNotes': adData.additionalNotes,
+                    'phoneNumber': adData.phoneNumber,
+                    'email': adData.email,
+                    'whatsappNumber': adData.whatsappNumber
+                };
+
+                // Populate all fields
+                Object.keys(vehicleFields).forEach(fieldId => {
+                    const element = document.getElementById(fieldId);
+                    if (element && vehicleFields[fieldId]) {
+                        element.value = vehicleFields[fieldId];
+                    }
+                });
+
+                // Contact methods checkboxes
+                if (adData.contactMethods && Array.isArray(adData.contactMethods)) {
+                    document.getElementById('contactPhone').checked = adData.contactMethods.includes('Phone');
+                    document.getElementById('contactEmail').checked = adData.contactMethods.includes('Email');
+                    document.getElementById('contactWhatsapp').checked = adData.contactMethods.includes('WhatsApp');
+                }
+
+                console.log('Form populated successfully');
+                
+            } catch (error) {
+                console.error('Error populating form:', error);
+                customAlert('Some fields could not be populated', 'warning');
+            }
+        }
+
+        // Format price for display
+        function formatPrice(amount) {
+            if (amount >= 10000000) return `${(amount / 10000000).toFixed(1)}Cr`;
+            if (amount >= 100000) return `${(amount / 100000).toFixed(1)}L`;
+            return amount.toString();
+        }
+
+        // Load existing images
+        function loadExistingImages(adData) {
+            if (adData.photos && Array.isArray(adData.photos)) {
+                uploadedImages = adData.photos.slice(0, 5).map((url, index) => ({
+                    url: url,
+                    name: `existing-image-${index + 1}.jpg`,
+                    size: 'Unknown',
+                    isExisting: true
+                }));
+                displayImagePreviews();
+                updatePhotoCount();
+                updateUploadUI();
+            }
+        }
+
+        // Populate year dropdown
+        function populateYearDropdown() {
+            const yearSelect = document.getElementById('year');
+            const currentYear = new Date().getFullYear();
+            
+            for (let year = currentYear; year >= 1990; year--) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            }
+        }
+
+        // Initialize form handlers
+        function initializeFormHandlers() {
+            // Track form changes for unsaved changes warning
+            const formElements = document.querySelectorAll('#editAdForm input, #editAdForm select, #editAdForm textarea');
+            formElements.forEach(element => {
+                element.addEventListener('change', () => {
+                    hasUnsavedChanges = true;
+                    updateSessionActivity();
+                });
+                element.addEventListener('input', () => {
+                    hasUnsavedChanges = true;
+                    updateSessionActivity();
+                });
+            });
+
+            // Form submission handler
+            document.getElementById('editAdForm').addEventListener('submit', handleFormSubmission);
+
+            // Warn before leaving with unsaved changes
+            window.addEventListener('beforeunload', (e) => {
+                if (hasUnsavedChanges) {
+                    e.preventDefault();
+                    e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                }
+            });
+        }
+
+        // Handle form submission
+        async function handleFormSubmission(e) {
+            e.preventDefault();
+            
+            customConfirm('Are you sure you want to update this advertisement?', async (confirmed) => {
+                if (confirmed) {
+                    try {
+                        showCustomPopup('loading', 'Updating Advertisement', 'Please wait while we update your advertisement...');
+                        
+                        const formData = collectFormData();
+                        await updateAdvertisement(formData);
+                        
+                        hideCustomPopup();
+                        hasUnsavedChanges = false;
+                        
+                        customAlert('Advertisement updated successfully!', 'success', () => {
+                            window.location.href = 'dashboard.html';
+                        });
+                        
+                    } catch (error) {
+                        hideCustomPopup();
+                        console.error('Error updating advertisement:', error);
+                        customAlert('Error updating advertisement: ' + error.message, 'error');
+                    }
+                }
+            });
+        }
+
+        // Collect form data
+        function collectFormData() {
+            const formData = {
+                // Pricing
+                askingPrice: parsePriceToNumber(document.getElementById('askingPrice').value),
+                negotiable: document.querySelector('input[name="negotiable"]:checked')?.value === 'yes',
+                
+                // Vehicle Information
+                make: document.getElementById('make').value,
+                model: document.getElementById('model').value,
+                year: parseInt(document.getElementById('year').value),
+                mileage: parseInt(document.getElementById('mileage').value?.replace(/,/g, '')),
+                bodyType: document.getElementById('bodyType').value,
+                fuelType: document.getElementById('fuelType').value,
+                condition: document.getElementById('condition').value,
+                transmission: document.getElementById('transmission').value,
+                engineCapacity: document.getElementById('engineCapacity').value,
+                
+                // Vehicle History
+                accidentHistory: document.getElementById('accidentHistory').value,
+                serviceHistory: document.getElementById('serviceHistory').value,
+                
+                // Additional Information
+                additionalNotes: document.getElementById('additionalNotes').value,
+                
+                // Contact Information
+                phoneNumber: document.getElementById('phoneNumber').value,
+                email: document.getElementById('email').value,
+                whatsappNumber: document.getElementById('whatsappNumber').value,
+                
+                // Contact Methods
+                contactMethods: getSelectedContactMethods(),
+                
+                // Media
+                photos: uploadedImages.map(img => img.url || img),
+                documents: uploadedDocuments.map(doc => ({
+                    name: doc.name,
+                    size: doc.size,
+                    type: doc.type || 'application/octet-stream'
+                })),
+                
+                // Metadata
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedBy: sessionManager.currentUser.uid
+            };
+            
+            return formData;
+        }
+
+        // Parse price string to number
+        function parsePriceToNumber(priceStr) {
+            if (!priceStr) return 0;
+            
+            let price = parseFloat(priceStr.replace(/[^\d.]/g, ''));
+            if (priceStr.toLowerCase().includes('l')) price *= 100000;
+            if (priceStr.toLowerCase().includes('cr')) price *= 10000000;
+            
+            return price;
+        }
+
+        // Get selected contact methods
+        function getSelectedContactMethods() {
+            const methods = [];
+            if (document.getElementById('contactPhone').checked) methods.push('Phone');
+            if (document.getElementById('contactEmail').checked) methods.push('Email');
+            if (document.getElementById('contactWhatsapp').checked) methods.push('WhatsApp');
+            return methods;
+        }
+
+        // Update advertisement in Firestore
+        async function updateAdvertisement(formData) {
+            if (!currentAdId) {
+                throw new Error('No advertisement ID available');
+            }
+            
+            try {
+                await db.collection('Advertisements').doc(currentAdId).update(formData);
+                console.log('Advertisement updated successfully');
+                
+                // Update session activity
+                updateSessionActivity();
+                
+            } catch (error) {
+                console.error('Error updating advertisement:', error);
+                throw error;
+            }
+        }
+
+        // Session management functions
+        function updateSessionActivity() {
+            if (sessionManager) {
+                sessionManager.updateLastActivity();
+            }
+        }
+
+        function updateSessionStatusUI() {
+            const statusElement = document.getElementById('sessionStatus');
+            const textElement = document.getElementById('sessionStatusText');
+            
+            if (sessionManager && sessionManager.isAuthenticated()) {
+                statusElement.style.display = 'flex';
+                statusElement.className = 'session-status';
+                textElement.textContent = 'Session Active';
+            } else {
+                statusElement.style.display = 'flex';
+                statusElement.className = 'session-status error';
+                textElement.textContent = 'Session Expired';
+            }
+        }
+
+        function setupEditPageSessionMonitoring() {
+            // Enhanced session monitoring for edit page
+            setInterval(() => {
+                if (sessionManager) {
+                    const sessionData = sessionManager.getSessionData();
+                    if (sessionData) {
+                        const now = Date.now();
+                        const lastActivity = sessionData.lastActivity || 0;
+                        const timeSinceActivity = now - lastActivity;
+                        
+                        // Update UI based on session status
+                        if (timeSinceActivity > 25 * 60 * 1000) { // 25 minutes
+                            updateSessionStatusUI();
+                            if (timeSinceActivity > 30 * 60 * 1000) { // 30 minutes
+                                handleSessionTimeout();
+                            }
+                        }
+                    }
+                }
+            }, 60000); // Check every minute
+        }
+
+        function handleSessionTimeout() {
+            customAlert('Your session has expired. Please log in again.', 'error', () => {
+                sessionManager.signOut();
+            });
+        }
+
+        // Navigation functions
+        function goBack() {
+            if (hasUnsavedChanges) {
+                customConfirm('You have unsaved changes. Are you sure you want to go back?', (confirmed) => {
+                    if (confirmed) {
+                        window.location.href = 'dashboard.html';
+                    }
+                });
+            } else {
+                window.location.href = 'dashboard.html';
+            }
+        }
+
+        async function handleLogout() {
+            if (hasUnsavedChanges) {
+                customConfirm('You have unsaved changes. Are you sure you want to logout?', async (confirmed) => {
+                    if (confirmed) {
+                        await sessionManager.signOut();
+                    }
+                });
+            } else {
+                customConfirm('Are you sure you want to logout?', async (confirmed) => {
+                    if (confirmed) {
+                        await sessionManager.signOut();
+                    }
+                });
+            }
+        }
+
+        function previewAd() {
+            const formData = collectFormData();
+            customAlert('Preview functionality would show the ad with current data', 'info');
+        }
+
+        function saveAsDraft() {
+            customConfirm('Save current changes as draft?', async (confirmed) => {
+                if (confirmed) {
+                    try {
+                        showCustomPopup('loading', 'Saving Draft', 'Please wait...');
+                        
+                        const formData = collectFormData();
+                        formData.status = 'draft';
+                        
+                        await updateAdvertisement(formData);
+                        
+                        hideCustomPopup();
+                        hasUnsavedChanges = false;
+                        
+                        customAlert('Advertisement saved as draft successfully!', 'success');
+                        
+                    } catch (error) {
+                        hideCustomPopup();
+                        console.error('Error saving draft:', error);
+                        customAlert('Error saving draft: ' + error.message, 'error');
+                    }
+                }
+            });
+        }
+
+        // Custom popup functions
+        function showCustomPopup(type, title, message, callback) {
+            const popup = document.getElementById('custom-popup');
+            const container = popup.querySelector('.popup-container');
+            const icon = document.getElementById('popup-icon');
+            const titleEl = document.getElementById('popup-title');
+            const messageEl = document.getElementById('popup-message');
+            const button = document.getElementById('popup-button');
+
+            popup.className = 'popup-overlay';
+            container.className = 'popup-container';
+            popup.classList.add(`popup-${type}`);
+            
+            switch(type) {
+                case 'success':
+                    icon.innerHTML = '✓';
+                    break;
+                case 'error':
+                    icon.innerHTML = '✕';
+                    break;
+                case 'info':
+                    icon.innerHTML = 'ℹ';
+                    break;
+                case 'loading':
+                    icon.innerHTML = '';
+                    button.style.display = 'none';
+                    break;
+                default:
+                    icon.innerHTML = 'ℹ';
+            }
+
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+
+            if (type !== 'loading') {
+                button.style.display = 'inline-block';
+                button.onclick = () => {
+                    hideCustomPopup();
+                    if (callback) callback();
+                };
+            }
+
+            popup.style.display = 'flex';
+            setTimeout(() => {
+                popup.classList.add('show');
+            }, 10);
+
+            window.popupCallback = callback;
+        }
+
+        function hideCustomPopup() {
+            const popup = document.getElementById('custom-popup');
+            popup.classList.remove('show');
+            
+            setTimeout(() => {
+                popup.style.display = 'none';
+                const confirmButtons = popup.querySelectorAll('.confirm-buttons');
+                confirmButtons.forEach(btn => btn.remove());
+                
+                const button = document.getElementById('popup-button');
+                button.style.display = 'inline-block';
+                
+                if (window.popupCallback) {
+                    const callback = window.popupCallback;
+                    window.popupCallback = null;
+                    callback();
+                }
+            }, 300);
+        }
+
+        function customAlert(message, type = 'info', callback) {
+            const titles = {
+                success: 'Success!',
+                error: 'Error',
+                info: 'Information',
+                warning: 'Warning',
+                loading: 'Loading...'
+            };
+            
+            showCustomPopup(type, titles[type], message, callback);
+        }
+
+        function customConfirm(message, callback) {
+            const popup = document.getElementById('custom-popup');
+            const container = popup.querySelector('.popup-container');
+            const icon = document.getElementById('popup-icon');
+            const titleEl = document.getElementById('popup-title');
+            const messageEl = document.getElementById('popup-message');
+            const button = document.getElementById('popup-button');
+
+            popup.className = 'popup-overlay popup-info';
+            container.className = 'popup-container';
+            
+            icon.innerHTML = '?';
+            titleEl.textContent = 'Confirm Action';
+            messageEl.textContent = message;
+
+            button.style.display = 'none';
+            
+            const existingContainer = container.querySelector('.confirm-buttons');
+            if (existingContainer) {
+                existingContainer.remove();
+            }
+            
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'confirm-buttons';
+            buttonContainer.style.display = 'flex';
+            buttonContainer.style.gap = '12px';
+            buttonContainer.style.justifyContent = 'center';
+            
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.className = 'popup-button';
+            cancelBtn.style.background = '#6b7280';
+            cancelBtn.onclick = () => {
+                hideCustomPopup();
+                if (callback) callback(false);
+            };
+            
+            const confirmBtn = document.createElement('button');
+            confirmBtn.textContent = 'Confirm';
+            confirmBtn.className = 'popup-button';
+            confirmBtn.onclick = () => {
+                hideCustomPopup();
+                if (callback) callback(true);
+            };
+            
+            buttonContainer.appendChild(cancelBtn);
+            buttonContainer.appendChild(confirmBtn);
+            container.appendChild(buttonContainer);
+            
+            popup.style.display = 'flex';
+            setTimeout(() => {
+                popup.classList.add('show');
+            }, 10);
+        }
+
+        // Image upload functions
+        function handleImageUpload(event) {
+            if (uploadedImages.length >= 5) {
+                customAlert('Maximum 5 photos allowed. Please remove some photos first.', 'error');
+                event.target.value = '';
+                return;
+            }
+            
+            const files = Array.from(event.target.files);
+            processImageFiles(files);
+            event.target.value = '';
+            updateSessionActivity();
+        }
+
+        function handleDocumentUpload(event) {
+            const files = Array.from(event.target.files);
+            processDocumentFiles(files);
+            updateSessionActivity();
+        }
+
+        function processImageFiles(files) {
+            const maxImages = 5;
+            const currentCount = uploadedImages.length;
+            const availableSlots = maxImages - currentCount;
+            
+            if (availableSlots <= 0) {
+                customAlert('Maximum 5 photos allowed. Please remove some photos to add new ones.', 'error');
+                return;
+            }
+            
+            const filesToProcess = files.slice(0, availableSlots);
+            
+            filesToProcess.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    if (file.size > 5 * 1024 * 1024) {
+                        customAlert(`Image "${file.name}" is too large. Maximum size is 5MB.`, 'error');
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = new Image();
+                        img.onload = function() {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            
+                            const maxWidth = 800;
+                            const maxHeight = 600;
+                            let { width, height } = calculateDimensions(img.width, img.height, maxWidth, maxHeight);
+                            
+                            canvas.width = width;
+                            canvas.height = height;
+                            ctx.drawImage(img, 0, 0, width, height);
+                            
+                            canvas.toBlob(function(blob) {
+                                const resizedImageUrl = URL.createObjectURL(blob);
+                                
+                                uploadedImages.push({
+                                    file: blob,
+                                    url: resizedImageUrl,
+                                    name: file.name,
+                                    size: blob.size,
+                                    originalSize: file.size,
+                                    dimensions: `${width}x${height}`
+                                });
+                                
+                                displayImagePreviews();
+                                updatePhotoCount();
+                                updateUploadUI();
+                                hasUnsavedChanges = true;
+                            }, 'image/jpeg', 0.85);
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        function calculateDimensions(originalWidth, originalHeight, maxWidth, maxHeight) {
+            let width = originalWidth;
+            let height = originalHeight;
+            
+            const aspectRatio = originalWidth / originalHeight;
+            
+            if (width > maxWidth) {
+                width = maxWidth;
+                height = width / aspectRatio;
+            }
+            
+            if (height > maxHeight) {
+                height = maxHeight;
+                width = height * aspectRatio;
+            }
+            
+            return { width: Math.round(width), height: Math.round(height) };
+        }
+
+        function processDocumentFiles(files) {
+            files.forEach(file => {
+                uploadedDocuments.push({
+                    file: file,
+                    name: file.name,
+                    size: file.size,
+                    type: file.type
+                });
+            });
+            displayDocumentPreviews();
+            updateDocumentCount();
+            hasUnsavedChanges = true;
+        }
+
+        function displayImagePreviews() {
+            const container = document.getElementById('image-previews');
+            if (!container) return;
+            container.innerHTML = '';
+
+            uploadedImages.forEach((image, index) => {
+                const preview = document.createElement('div');
+                preview.className = 'image-preview';
+                
+                const img = document.createElement('img');
+                img.src = image.url || image;
+                img.alt = `Preview ${index + 1}`;
+                img.loading = 'lazy';
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'image-preview-remove';
+                removeBtn.innerHTML = '×';
+                removeBtn.title = 'Remove image';
+                removeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    removeImage(index);
+                };
+                
+                preview.appendChild(img);
+                preview.appendChild(removeBtn);
+                container.appendChild(preview);
+            });
+        }
+
+        function displayDocumentPreviews() {
+            const container = document.getElementById('document-previews');
+            if (!container) return;
+            container.innerHTML = '';
+
+            uploadedDocuments.forEach((doc, index) => {
+                const preview = document.createElement('div');
+                preview.className = 'flex items-center justify-between bg-gray-50 p-3 rounded-lg mb-2';
+                
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'flex items-center';
+                fileInfo.innerHTML = `
+                    <div class="text-blue-600 mr-3">📄</div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">${doc.name}</div>
+                        <div class="text-xs text-gray-500">${formatFileSize(doc.size)}</div>
+                    </div>
+                `;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'text-red-600 hover:text-red-800 ml-2';
+                removeBtn.innerHTML = '×';
+                removeBtn.onclick = () => removeDocument(index);
+                
+                preview.appendChild(fileInfo);
+                preview.appendChild(removeBtn);
+                container.appendChild(preview);
+            });
+        }
+
+        function removeImage(index) {
+            const image = uploadedImages[index];
+            if (image && image.url && image.url.startsWith('blob:')) {
+                URL.revokeObjectURL(image.url);
+            }
+            
+            uploadedImages.splice(index, 1);
+            displayImagePreviews();
+            updatePhotoCount();
+            updateUploadUI();
+            hasUnsavedChanges = true;
+            updateSessionActivity();
+        }
+
+        function removeDocument(index) {
+            uploadedDocuments.splice(index, 1);
+            displayDocumentPreviews();
+            updateDocumentCount();
+            hasUnsavedChanges = true;
+            updateSessionActivity();
+        }
+
+        function updatePhotoCount() {
+            const countElement = document.getElementById('photo-count');
+            if (countElement) {
+                countElement.textContent = uploadedImages.length;
+            }
+        }
+
+        function updateDocumentCount() {
+            const countElement = document.getElementById('document-count');
+            if (countElement) {
+                countElement.textContent = uploadedDocuments.length;
+            }
+        }
+
+        function updateUploadUI() {
+            const maxImages = 5;
+            const currentCount = uploadedImages.length;
+            const uploadArea = document.getElementById('photo-upload-area');
+            const uploadButton = document.getElementById('photo-upload-btn');
+            const warningElement = document.getElementById('photo-limit-warning');
+            
+            if (currentCount >= maxImages) {
+                uploadArea.classList.add('disabled');
+                uploadButton.disabled = true;
+                uploadButton.innerHTML = '<span class="upload-button-icon">🚫</span> Maximum Photos Reached';
+                warningElement.style.display = 'block';
+            } else {
+                uploadArea.classList.remove('disabled');
+                uploadButton.disabled = false;
+                uploadButton.innerHTML = '<span class="upload-button-icon">📷</span> Choose Photos';
+                warningElement.style.display = 'none';
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Drag and Drop functionality
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('dragover');
+            updateSessionActivity();
+        }
+
+        function handleDragLeave(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(event, type) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('dragover');
+            
+            if (type === 'photos' && uploadedImages.length >= 5) {
+                customAlert('Maximum 5 photos allowed. Please remove some photos first.', 'error');
+                return;
+            }
+            
+            const files = Array.from(event.dataTransfer.files);
+            
+            if (type === 'photos') {
+                const imageFiles = files.filter(file => file.type.startsWith('image/'));
+                processImageFiles(imageFiles);
+            } else if (type === 'documents') {
+                const docFiles = files.filter(file => 
+                    file.type === 'application/pdf' || 
+                    file.type.includes('document') ||
+                    file.name.endsWith('.pdf') ||
+                    file.name.endsWith('.doc') ||
+                    file.name.endsWith('.docx')
+                );
+                processDocumentFiles(docFiles);
+            }
+            
+            updateSessionActivity();
+        }
+
+        // Auto-resize textarea
+        document.addEventListener('DOMContentLoaded', () => {
+            const textarea = document.getElementById('additionalNotes');
+            if (textarea) {
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = (this.scrollHeight) + 'px';
+                    updateSessionActivity();
+                });
+            }
+        });
+
+        // Enhanced session monitoring with UI updates
+        function enhancedSessionCheck() {
+            if (!sessionManager) return;
+            
+            const sessionData = sessionManager.getSessionData();
+            if (!sessionData) {
+                updateSessionStatusUI();
+                return;
+            }
+            
+            const now = Date.now();
+            const lastActivity = sessionData.lastActivity || 0;
+            const timeSinceActivity = now - lastActivity;
+            const sessionTimeout = 30 * 60 * 1000; // 30 minutes
+            const warningTimeout = 25 * 60 * 1000; // 25 minutes
+            
+            const statusElement = document.getElementById('sessionStatus');
+            const textElement = document.getElementById('sessionStatusText');
+            
+            if (timeSinceActivity > sessionTimeout) {
+                // Session expired
+                statusElement.className = 'session-status error';
+                textElement.textContent = 'Session Expired';
+                handleSessionTimeout();
+            } else if (timeSinceActivity > warningTimeout) {
+                // Session warning
+                statusElement.className = 'session-status warning';
+                const minutesLeft = Math.ceil((sessionTimeout - timeSinceActivity) / 60000);
+                textElement.textContent = `Session expires in ${minutesLeft}min`;
+                
+                if (!sessionManager.sessionWarningShown) {
+                    sessionManager.sessionWarningShown = true;
+                    customConfirm(`Your session will expire in ${minutesLeft} minutes due to inactivity. Click OK to extend your session.`, (confirmed) => {
+                        if (confirmed) {
+                            updateSessionActivity();
+                            statusElement.className = 'session-status';
+                            textElement.textContent = 'Session Active';
+                            sessionManager.sessionWarningShown = false;
+                        }
+                    });
+                }
+            } else {
+                // Session active
+                statusElement.className = 'session-status';
+                textElement.textContent = 'Session Active';
+                sessionManager.sessionWarningShown = false;
+            }
+        }
+
+        // Start enhanced session monitoring when page loads
+        setInterval(enhancedSessionCheck, 30000); // Check every 30 seconds
+
+        // Keyboard shortcuts for better UX
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+S to save as draft
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveAsDraft();
+                updateSessionActivity();
+            }
+            
+            // Escape to go back (with confirmation if unsaved changes)
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                goBack();
+            }
+            
+            // Any key press updates session activity
+            updateSessionActivity();
+        });
+
+        // Form validation helpers
+        function validateForm() {
+            const requiredFields = [
+                { id: 'askingPrice', name: 'Asking Price' },
+                { id: 'make', name: 'Make' },
+                { id: 'model', name: 'Model' },
+                { id: 'year', name: 'Year' },
+                { id: 'mileage', name: 'Mileage' },
+                { id: 'bodyType', name: 'Body Type' },
+                { id: 'fuelType', name: 'Fuel Type' },
+                { id: 'condition', name: 'Condition' },
+                { id: 'transmission', name: 'Transmission' },
+                { id: 'phoneNumber', name: 'Contact Number' },
+                { id: 'email', name: 'Email Address' }
+            ];
+            
+            const missingFields = [];
+            
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (!element || !element.value.trim()) {
+                    missingFields.push(field.name);
+                }
+            });
+            
+            if (missingFields.length > 0) {
+                customAlert(`Please fill in the following required fields:\n${missingFields.join(', ')}`, 'error');
+                return false;
+            }
+            
+            // Validate email format
+            const email = document.getElementById('email').value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                customAlert('Please enter a valid email address', 'error');
+                return false;
+            }
+            
+            // Validate price
+            const price = parsePriceToNumber(document.getElementById('askingPrice').value);
+            if (price <= 0) {
+                customAlert('Please enter a valid asking price', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Enhanced form submission with validation
+        async function handleFormSubmission(e) {
+            e.preventDefault();
+            
+            // Validate form first
+            if (!validateForm()) {
+                return;
+            }
+            
+            customConfirm('Are you sure you want to update this advertisement?', async (confirmed) => {
+                if (confirmed) {
+                    try {
+                        showCustomPopup('loading', 'Updating Advertisement', 'Please wait while we update your advertisement...');
+                        
+                        const formData = collectFormData();
+                        await updateAdvertisement(formData);
+                        
+                        hideCustomPopup();
+                        hasUnsavedChanges = false;
+                        
+                        customAlert('Advertisement updated successfully!', 'success', () => {
+                            window.location.href = 'dashboard.html';
+                        });
+                        
+                    } catch (error) {
+                        hideCustomPopup();
+                        console.error('Error updating advertisement:', error);
+                        customAlert('Error updating advertisement: ' + error.message, 'error');
+                    }
+                }
+            });
+        }
+
+        // Initialize real-time price estimation (placeholder for AI integration)
+        function initializePriceEstimation() {
+            const relevantFields = ['make', 'model', 'year', 'mileage', 'condition'];
+            
+            relevantFields.forEach(fieldId => {
+                const element = document.getElementById(fieldId);
+                if (element) {
+                    element.addEventListener('change', () => {
+                        updatePriceEstimation();
+                        updateSessionActivity();
+                    });
+                }
+            });
+        }
+
+        function updatePriceEstimation() {
+            // Placeholder for AI price estimation
+            // In a real implementation, this would call your AI service
+            const make = document.getElementById('make').value;
+            const model = document.getElementById('model').value;
+            const year = document.getElementById('year').value;
+            const mileage = document.getElementById('mileage').value;
+            const condition = document.getElementById('condition').value;
+            
+            if (make && model && year && mileage && condition) {
+                // Simulate AI estimation (replace with actual API call)
+                setTimeout(() => {
+                    const estimateElement = document.getElementById('aiEstimate');
+                    if (estimateElement && !estimateElement.value) {
+                        estimateElement.value = 'Calculating...';
+                        // Simulate API delay
+                        setTimeout(() => {
+                            estimateElement.value = '25.0L - 35.0L';
+                        }, 2000);
+                    }
+                }, 500);
+            }
+        }
+
+        // Initialize price estimation when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                initializePriceEstimation();
+            }, 1000);
+        });
+
+        // Activity tracking for session management
+        const activityEvents = ['click', 'scroll', 'keypress', 'mousemove', 'touchstart'];
+        let activityTimeout;
+
+        function trackActivity() {
+            clearTimeout(activityTimeout);
+            activityTimeout = setTimeout(() => {
+                updateSessionActivity();
+            }, 1000); // Debounce activity updates
+        }
+
+        activityEvents.forEach(event => {
+            document.addEventListener(event, trackActivity, { passive: true });
+        });
+
+        // Cleanup function for memory management
+        window.addEventListener('beforeunload', () => {
+            // Cleanup blob URLs to prevent memory leaks
+            uploadedImages.forEach(image => {
+                if (image.url && image.url.startsWith('blob:')) {
+                    URL.revokeObjectURL(image.url);
+                }
+            });
+        });
+
+        // Error boundary for graceful error handling
+        window.addEventListener('error', (e) => {
+            console.error('Global error:', e.error);
+            
+            if (e.error && e.error.message && e.error.message.includes('auth')) {
+                customAlert('Authentication error. Please log in again.', 'error', () => {
+                    if (sessionManager) {
+                        sessionManager.signOut();
+                    } else {
+                        window.location.href = '../html/signin.html';
+                    }
+                });
+            }
+        });
+
+        // Page visibility API for session management
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && sessionManager) {
+                // Page became visible, check session status
+                enhancedSessionCheck();
+                updateSessionActivity();
+            }
+        });
+
+        console.log('Edit advertisement page with session management loaded successfully');
+    </script>
+</body>
+</html>

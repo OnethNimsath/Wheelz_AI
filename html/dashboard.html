@@ -409,6 +409,22 @@
             font-size: 16px;
         }
 
+        .refresh-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: background 0.3s ease;
+        }
+
+        .refresh-button:hover {
+            background: #2563eb;
+        }
+
         /* Responsive design */
         @media (max-width: 768px) {
             .container {
@@ -624,15 +640,51 @@
             }
 
             async loadUserProfile() {
-                if (!this.currentUser) return;
+                if (!this.currentUser) {
+                    console.log('No current user, skipping profile load');
+                    return;
+                }
                 
                 try {
+                    console.log('Loading user profile for UID:', this.currentUser.uid);
+                    
                     const doc = await this.db.collection('users').doc(this.currentUser.uid).get();
+                    
                     if (doc.exists) {
                         this.userProfile = doc.data();
+                        console.log('User profile loaded:', this.userProfile);
+                    } else {
+                        console.log('User profile document does not exist, creating default profile');
+                        
+                        // Create a default user profile if it doesn't exist
+                        const defaultProfile = {
+                            name: this.currentUser.displayName || 'User',
+                            email: this.currentUser.email,
+                            userType: 'seller',
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            profileViews: 0
+                        };
+                        
+                        // Save the default profile to Firestore
+                        await this.db.collection('users').doc(this.currentUser.uid).set(defaultProfile);
+                        this.userProfile = defaultProfile;
+                        
+                        console.log('Default user profile created:', defaultProfile);
                     }
                 } catch (error) {
                     console.error('Error loading user profile:', error);
+                    console.error('Error details:', {
+                        code: error.code,
+                        message: error.message
+                    });
+                    
+                    // Set a minimal default profile
+                    this.userProfile = {
+                        name: this.currentUser.displayName || 'User',
+                        email: this.currentUser.email,
+                        userType: 'seller',
+                        profileViews: 0
+                    };
                 }
             }
 
@@ -675,6 +727,131 @@
                 this.loadAccountStats();
             }
 
+            async loadAccountStats() {
+                try {
+                    console.log('Loading account stats for user:', this.currentUser.uid);
+                    
+                    // Get active advertisements count
+                    const adsQuery = this.db.collection('Advertisements')
+                        .where('userId', '==', this.currentUser.uid)
+                        .where('status', '==', 'active');
+                    
+                    console.log('Executing ads query...');
+                    const adsSnapshot = await adsQuery.get();
+                    console.log('Active ads found:', adsSnapshot.size);
+                    
+                    const activeAdsElement = document.getElementById('active-ads-count');
+                    if (activeAdsElement) {
+                        activeAdsElement.textContent = adsSnapshot.size;
+                    }
+
+                    // Get total listings (all advertisements regardless of status)
+                    const allListingsQuery = this.db.collection('Advertisements')
+                        .where('userId', '==', this.currentUser.uid);
+                    
+                    console.log('Executing total listings query...');
+                    const allListingsSnapshot = await allListingsQuery.get();
+                    console.log('Total listings found:', allListingsSnapshot.size);
+                    
+                    const totalListingsElement = document.getElementById('total-listings');
+                    if (totalListingsElement) {
+                        totalListingsElement.textContent = allListingsSnapshot.size;
+                    }
+
+                    // Calculate account age
+                    if (this.userProfile?.createdAt) {
+                        try {
+                            const createdDate = this.userProfile.createdAt.toDate ? 
+                                this.userProfile.createdAt.toDate() : 
+                                new Date(this.userProfile.createdAt);
+                            
+                            const daysDiff = Math.floor((Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+                            console.log('Account age in days:', daysDiff);
+                            
+                            const accountAgeElement = document.getElementById('account-age-days');
+                            if (accountAgeElement) {
+                                accountAgeElement.textContent = Math.max(1, daysDiff); // Minimum 1 day
+                            }
+                        } catch (dateError) {
+                            console.error('Error calculating account age:', dateError);
+                            const accountAgeElement = document.getElementById('account-age-days');
+                            if (accountAgeElement) {
+                                accountAgeElement.textContent = '1';
+                            }
+                        }
+                    } else {
+                        console.log('No createdAt found in user profile');
+                        const accountAgeElement = document.getElementById('account-age-days');
+                        if (accountAgeElement) {
+                            accountAgeElement.textContent = '1';
+                        }
+                    }
+
+                    // Profile views (get from user profile or default to 0)
+                    const profileViews = this.userProfile?.profileViews || 0;
+                    console.log('Profile views:', profileViews);
+                    
+                    const profileViewsElement = document.getElementById('profile-views-count');
+                    if (profileViewsElement) {
+                        profileViewsElement.textContent = profileViews;
+                    }
+
+                    console.log('Account stats loaded successfully');
+
+                } catch (error) {
+                    console.error('Error loading account stats:', error);
+                    console.error('Error details:', {
+                        code: error.code,
+                        message: error.message,
+                        stack: error.stack
+                    });
+                    
+                    // Set default values if there's an error
+                    const defaultValues = {
+                        'active-ads-count': '0',
+                        'account-age-days': '1',
+                        'total-listings': '0',
+                        'profile-views-count': '0'
+                    };
+                    
+                    Object.entries(defaultValues).forEach(([id, value]) => {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.textContent = value;
+                        }
+                    });
+                    
+                    // Show user-friendly error message
+                    console.warn('Using default values due to error loading stats');
+                }
+            }
+
+            // Add refresh stats method
+            async refreshStats() {
+                console.log('Manually refreshing account stats...');
+                
+                // Show loading state
+                const statElements = [
+                    'active-ads-count',
+                    'total-listings', 
+                    'account-age-days',
+                    'profile-views-count'
+                ];
+                
+                statElements.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = '...';
+                    }
+                });
+                
+                // Reload user profile and stats
+                await this.loadUserProfile();
+                await this.loadAccountStats();
+                
+                console.log('Stats refresh completed');
+            }
+
             updateSessionTime() {
                 const sessionTimeElement = document.getElementById('session-time');
                 if (sessionTimeElement) {
@@ -694,43 +871,6 @@
                 // Hide session warning if shown
                 this.sessionWarningShown = false;
                 this.hideSessionWarning();
-            }
-
-            async loadAccountStats() {
-                try {
-                    // Get active advertisements count
-                    const adsQuery = this.db.collection('advertisements')
-                        .where('userId', '==', this.currentUser.uid)
-                        .where('status', '==', 'active');
-                    const adsSnapshot = await adsQuery.get();
-                    document.getElementById('active-ads-count').textContent = adsSnapshot.size;
-
-                    // Calculate account age
-                    if (this.userProfile?.createdAt) {
-                        const createdDate = this.userProfile.createdAt.toDate ? 
-                            this.userProfile.createdAt.toDate() : 
-                            new Date(this.userProfile.createdAt);
-                        const daysDiff = Math.floor((Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
-                        document.getElementById('account-age-days').textContent = daysDiff;
-                    }
-
-                    // Get total listings
-                    const allListingsQuery = this.db.collection('advertisements')
-                        .where('userId', '==', this.currentUser.uid);
-                    const allListingsSnapshot = await allListingsQuery.get();
-                    document.getElementById('total-listings').textContent = allListingsSnapshot.size;
-
-                    // Profile views (placeholder)
-                    document.getElementById('profile-views-count').textContent = this.userProfile?.profileViews || 0;
-
-                } catch (error) {
-                    console.error('Error loading account stats:', error);
-                    // Set default values if there's an error
-                    document.getElementById('active-ads-count').textContent = '0';
-                    document.getElementById('account-age-days').textContent = '1';
-                    document.getElementById('total-listings').textContent = '0';
-                    document.getElementById('profile-views-count').textContent = '0';
-                }
             }
 
             setupActivityListeners() {
@@ -876,6 +1016,32 @@
             sessionManager.showActivityIndicator();
         }
 
+        // Global function for refreshing stats
+        window.refreshDashboardStats = function() {
+            if (window.sessionManager) {
+                window.sessionManager.refreshStats();
+            }
+        };
+
+        // Function to add refresh button (optional)
+        function addRefreshButton() {
+            const statsSection = document.querySelector('.stats-section');
+            if (statsSection && !document.querySelector('.refresh-button')) {
+                const refreshButton = document.createElement('button');
+                refreshButton.textContent = '🔄 Refresh Stats';
+                refreshButton.className = 'refresh-button';
+                
+                refreshButton.addEventListener('click', () => {
+                    window.refreshDashboardStats();
+                });
+                
+                const statsTitle = statsSection.querySelector('.stats-title');
+                if (statsTitle) {
+                    statsTitle.insertAdjacentElement('afterend', refreshButton);
+                }
+            }
+        }
+
         // Initialize session manager
         const sessionManager = new SessionManager();
 
@@ -883,6 +1049,9 @@
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('Dashboard initializing...');
             await sessionManager.init();
+            
+            // Add refresh button for testing
+            addRefreshButton();
             
             // Set up logout button
             const logoutButton = document.getElementById('logoutButton');
