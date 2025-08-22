@@ -664,258 +664,42 @@ function formatLKR(amount) {
     }
 }
 
-// Enhanced vehicle data for Sri Lankan market (fallback data)
+// Vehicle valuation data for Sri Lankan market (in LKR) - Fallback data
 const vehicleData = {
     toyota: {
         vios: { base: 4500000, yearDepreciation: 200000, mileageDepreciation: 15 },
         corolla: { base: 6500000, yearDepreciation: 300000, mileageDepreciation: 20 },
         camry: { base: 12000000, yearDepreciation: 500000, mileageDepreciation: 25 },
         prius: { base: 7500000, yearDepreciation: 350000, mileageDepreciation: 18 },
-        aqua: { base: 8000000, yearDepreciation: 300000, mileageDepreciation: 16 },
-        allion: { base: 7000000, yearDepreciation: 280000, mileageDepreciation: 17 },
-        premio: { base: 10000000, yearDepreciation: 380000, mileageDepreciation: 20 },
-        axio: { base: 9000000, yearDepreciation: 350000, mileageDepreciation: 19 },
-        chr: { base: 12500000, yearDepreciation: 400000, mileageDepreciation: 22 },
-        harrier: { base: 16000000, yearDepreciation: 500000, mileageDepreciation: 25 }
+        aqua: { base: 8000000, yearDepreciation: 300000, mileageDepreciation: 16 }
     },
     honda: {
         civic: { base: 8500000, yearDepreciation: 400000, mileageDepreciation: 22 },
         fit: { base: 5500000, yearDepreciation: 250000, mileageDepreciation: 16 },
         accord: { base: 15000000, yearDepreciation: 600000, mileageDepreciation: 28 },
         city: { base: 6000000, yearDepreciation: 280000, mileageDepreciation: 18 },
-        grace: { base: 6200000, yearDepreciation: 270000, mileageDepreciation: 17 },
-        shuttle: { base: 7500000, yearDepreciation: 290000, mileageDepreciation: 18 },
-        vezel: { base: 10800000, yearDepreciation: 420000, mileageDepreciation: 23 },
-        freed: { base: 8200000, yearDepreciation: 310000, mileageDepreciation: 19 }
+        grace: { base: 6200000, yearDepreciation: 270000, mileageDepreciation: 17 }
     },
     nissan: {
         march: { base: 4200000, yearDepreciation: 180000, mileageDepreciation: 14 },
         sunny: { base: 5800000, yearDepreciation: 260000, mileageDepreciation: 17 },
         teana: { base: 8500000, yearDepreciation: 400000, mileageDepreciation: 24 },
-        leaf: { base: 7200000, yearDepreciation: 300000, mileageDepreciation: 15 },
-        sylphy: { base: 7500000, yearDepreciation: 290000, mileageDepreciation: 18 },
-        note: { base: 5500000, yearDepreciation: 240000, mileageDepreciation: 16 },
-        kicks: { base: 8800000, yearDepreciation: 350000, mileageDepreciation: 20 }
+        leaf: { base: 7200000, yearDepreciation: 300000, mileageDepreciation: 15 }
     },
     suzuki: {
         swift: { base: 4800000, yearDepreciation: 200000, mileageDepreciation: 15 },
         wagon_r: { base: 3800000, yearDepreciation: 170000, mileageDepreciation: 13 },
-        alto: { base: 3200000, yearDepreciation: 150000, mileageDepreciation: 12 },
-        hustler: { base: 5200000, yearDepreciation: 210000, mileageDepreciation: 16 },
-        vitara: { base: 8500000, yearDepreciation: 320000, mileageDepreciation: 19 },
-        jimny: { base: 7800000, yearDepreciation: 280000, mileageDepreciation: 17 }
-    },
-    mazda: {
-        demio: { base: 5200000, yearDepreciation: 220000, mileageDepreciation: 16 },
-        axela: { base: 7800000, yearDepreciation: 300000, mileageDepreciation: 19 },
-        atenza: { base: 10500000, yearDepreciation: 400000, mileageDepreciation: 22 },
-        cx5: { base: 13500000, yearDepreciation: 450000, mileageDepreciation: 24 }
-    },
-    mitsubishi: {
-        lancer: { base: 6500000, yearDepreciation: 270000, mileageDepreciation: 18 },
-        outlander: { base: 11500000, yearDepreciation: 430000, mileageDepreciation: 23 },
-        montero: { base: 15000000, yearDepreciation: 550000, mileageDepreciation: 27 },
-        colt: { base: 4800000, yearDepreciation: 200000, mileageDepreciation: 15 }
-    },
-    hyundai: {
-        i10: { base: 4800000, yearDepreciation: 200000, mileageDepreciation: 15 },
-        i20: { base: 6500000, yearDepreciation: 260000, mileageDepreciation: 17 },
-        elantra: { base: 9500000, yearDepreciation: 380000, mileageDepreciation: 21 },
-        tucson: { base: 12800000, yearDepreciation: 480000, mileageDepreciation: 25 }
-    },
-    kia: {
-        picanto: { base: 4500000, yearDepreciation: 190000, mileageDepreciation: 14 },
-        rio: { base: 6200000, yearDepreciation: 250000, mileageDepreciation: 16 },
-        cerato: { base: 8800000, yearDepreciation: 340000, mileageDepreciation: 20 },
-        sportage: { base: 13200000, yearDepreciation: 470000, mileageDepreciation: 24 }
+        alto: { base: 3200000, yearDepreciation: 150000, mileageDepreciation: 12 }
     },
     bmw: {
         "3series": { base: 18000000, yearDepreciation: 800000, mileageDepreciation: 35 },
-        "5series": { base: 25000000, yearDepreciation: 1200000, mileageDepreciation: 45 },
-        x1: { base: 18500000, yearDepreciation: 750000, mileageDepreciation: 32 },
-        x3: { base: 28000000, yearDepreciation: 1100000, mileageDepreciation: 40 }
+        "5series": { base: 25000000, yearDepreciation: 1200000, mileageDepreciation: 45 }
     },
     mercedes: {
         "c-class": { base: 20000000, yearDepreciation: 900000, mileageDepreciation: 38 },
-        "e-class": { base: 30000000, yearDepreciation: 1400000, mileageDepreciation: 50 },
-        "a-class": { base: 18000000, yearDepreciation: 720000, mileageDepreciation: 30 },
-        glc: { base: 30000000, yearDepreciation: 1200000, mileageDepreciation: 42 }
-    },
-    audi: {
-        a3: { base: 18500000, yearDepreciation: 750000, mileageDepreciation: 32 },
-        a4: { base: 24000000, yearDepreciation: 960000, mileageDepreciation: 38 },
-        q3: { base: 22000000, yearDepreciation: 880000, mileageDepreciation: 35 },
-        q5: { base: 28000000, yearDepreciation: 1120000, mileageDepreciation: 40 }
-    },
-    volkswagen: {
-        polo: { base: 5800000, yearDepreciation: 240000, mileageDepreciation: 16 },
-        golf: { base: 8500000, yearDepreciation: 340000, mileageDepreciation: 20 },
-        jetta: { base: 9800000, yearDepreciation: 390000, mileageDepreciation: 22 },
-        tiguan: { base: 15500000, yearDepreciation: 580000, mileageDepreciation: 26 }
-    },
-    ford: {
-        fiesta: { base: 5500000, yearDepreciation: 230000, mileageDepreciation: 16 },
-        focus: { base: 7800000, yearDepreciation: 310000, mileageDepreciation: 19 },
-        mondeo: { base: 11200000, yearDepreciation: 440000, mileageDepreciation: 23 },
-        ecosport: { base: 8200000, yearDepreciation: 320000, mileageDepreciation: 19 }
-    },
-    chevrolet: {
-        spark: { base: 4200000, yearDepreciation: 180000, mileageDepreciation: 14 },
-        cruze: { base: 8500000, yearDepreciation: 340000, mileageDepreciation: 20 },
-        captiva: { base: 12500000, yearDepreciation: 470000, mileageDepreciation: 24 }
+        "e-class": { base: 30000000, yearDepreciation: 1400000, mileageDepreciation: 50 }
     }
 };
-
-// Global variables for dynamic data
-let availableMakes = [];
-let availableModels = {};
-let isApiConnected = false;
-
-// Function to populate makes dropdown dynamically
-async function populateMakesDropdown() {
-    const makeSelect = document.querySelector('select[required]'); // First required select (Make)
-    
-    if (!makeSelect) {
-        console.error('Make select element not found');
-        return;
-    }
-    
-    // Clear existing options except placeholder
-    const placeholder = makeSelect.querySelector('option[value=""]');
-    makeSelect.innerHTML = '';
-    makeSelect.appendChild(placeholder);
-    
-    try {
-        // Try to get makes from API first
-        if (isApiConnected) {
-            console.log('Fetching makes from API...');
-            const response = await fetch(`${API_BASE_URL}/get-makes`);
-            
-            if (response.ok) {
-                const data = await response.json();
-                console.log('API makes data:', data);
-                
-                if (data.makes && Array.isArray(data.makes)) {
-                    // API returns makes with additional info
-                    data.makes.forEach(makeInfo => {
-                        const option = document.createElement('option');
-                        option.value = makeInfo.name.toLowerCase();
-                        option.textContent = makeInfo.name;
-                        option.setAttribute('data-popularity', makeInfo.popularity || 0);
-                        option.setAttribute('data-category', makeInfo.category || 'Standard');
-                        makeSelect.appendChild(option);
-                    });
-                    
-                    availableMakes = data.makes.map(m => m.name.toLowerCase());
-                    console.log('✅ Makes loaded from API:', availableMakes.length, 'makes');
-                    return;
-                }
-            }
-        }
-    } catch (error) {
-        console.warn('Failed to fetch makes from API:', error);
-    }
-    
-    // Fallback to local vehicle data
-    console.log('Using fallback vehicle data for makes...');
-    const localMakes = Object.keys(vehicleData).map(make => ({
-        name: make.charAt(0).toUpperCase() + make.slice(1),
-        value: make,
-        modelCount: Object.keys(vehicleData[make]).length,
-        popularity: calculateMakePopularity(make)
-    }));
-    
-    // Sort by popularity (most popular first)
-    localMakes.sort((a, b) => b.popularity - a.popularity);
-    
-    localMakes.forEach(makeInfo => {
-        const option = document.createElement('option');
-        option.value = makeInfo.value;
-        option.textContent = `${makeInfo.name} (${makeInfo.modelCount} models)`;
-        option.setAttribute('data-popularity', makeInfo.popularity);
-        makeSelect.appendChild(option);
-    });
-    
-    availableMakes = localMakes.map(m => m.value);
-    console.log('✅ Makes loaded from fallback data:', availableMakes.length, 'makes');
-}
-
-// Function to calculate make popularity based on model count and base prices
-function calculateMakePopularity(make) {
-    const models = vehicleData[make];
-    if (!models) return 0;
-    
-    const modelCount = Object.keys(models).length;
-    const avgPrice = Object.values(models).reduce((sum, model) => sum + model.base, 0) / modelCount;
-    
-    // Popular makes in Sri Lanka get higher scores
-    const popularMakes = { toyota: 0.95, honda: 0.90, nissan: 0.85, suzuki: 0.80, mazda: 0.75 };
-    const basePopularity = popularMakes[make] || 0.5;
-    
-    return basePopularity;
-}
-
-// Function to populate models dropdown based on selected make
-async function populateModelsDropdown(selectedMake) {
-    const modelInput = document.querySelector('input[required]'); // Model input field
-    
-    if (!modelInput || !selectedMake) {
-        return;
-    }
-    
-    try {
-        // Try to get models from API first
-        if (isApiConnected) {
-            console.log(`Fetching models for ${selectedMake} from API...`);
-            const response = await fetch(`${API_BASE_URL}/get-models/${selectedMake}`);
-            
-            if (response.ok) {
-                const data = await response.json();
-                console.log('API models data:', data);
-                
-                if (data.models && Array.isArray(data.models)) {
-                    availableModels[selectedMake] = data.models.map(modelInfo => ({
-                        name: modelInfo.name,
-                        popularity: modelInfo.popularity || 0,
-                        basePrice: modelInfo.base_price || 0
-                    }));
-                    
-                    // Update model input placeholder with popular models
-                    const popularModels = data.models
-                        .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
-                        .slice(0, 3)
-                        .map(m => m.name)
-                        .join(', ');
-                    
-                    modelInput.placeholder = `e.g., ${popularModels}`;
-                    console.log(`✅ Models loaded from API for ${selectedMake}:`, data.models.length, 'models');
-                    return;
-                }
-            }
-        }
-    } catch (error) {
-        console.warn(`Failed to fetch models for ${selectedMake} from API:`, error);
-    }
-    
-    // Fallback to local vehicle data
-    console.log(`Using fallback vehicle data for ${selectedMake} models...`);
-    if (vehicleData[selectedMake]) {
-        const models = Object.keys(vehicleData[selectedMake]).map(model => ({
-            name: model.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-            popularity: 0.8, // Default popularity
-            basePrice: vehicleData[selectedMake][model].base
-        }));
-        
-        availableModels[selectedMake] = models;
-        
-        // Update placeholder with available models
-        const modelNames = models.slice(0, 3).map(m => m.name).join(', ');
-        modelInput.placeholder = `e.g., ${modelNames}`;
-        console.log(`✅ Models loaded from fallback data for ${selectedMake}:`, models.length, 'models');
-    } else {
-        modelInput.placeholder = `Enter ${selectedMake} model`;
-    }
-}
 
 // Function to populate year dropdown dynamically
 function populateYearDropdown() {
@@ -1013,43 +797,9 @@ async function calculateAIEstimate() {
             const prediction = data.prediction;
             const marketAnalysis = data.market_analysis;
             
-            // Calculate average from individual predictions for consistency
-            let calculatedAverage = prediction.estimated_price;
-            
-            if (prediction.individual_predictions) {
-                const individualPrices = Object.values(prediction.individual_predictions);
-                // Extract numeric values from formatted prices (remove "LKR" and convert)
-                const numericPrices = individualPrices.map(price => {
-                    if (typeof price === 'string') {
-                        // Remove "LKR" and any formatting, convert to number
-                        const cleanPrice = price.replace(/[^\d.]/g, '');
-                        const numValue = parseFloat(cleanPrice);
-                        
-                        // Check if the price contains "Cr", "L", "Million", etc.
-                        if (price.includes('Cr')) {
-                            return numValue * 10000000; // Convert Crore to LKR
-                        } else if (price.includes('L')) {
-                            return numValue * 100000; // Convert Lakh to LKR
-                        } else if (price.includes('Million')) {
-                            return numValue * 1000000; // Convert Million to LKR
-                        } else {
-                            return numValue; // Assume already in LKR
-                        }
-                    }
-                    return price; // If already numeric
-                }).filter(price => !isNaN(price) && price > 0);
-                
-                if (numericPrices.length > 0) {
-                    calculatedAverage = numericPrices.reduce((sum, price) => sum + price, 0) / numericPrices.length;
-                    console.log('Individual model prices (LKR):', numericPrices);
-                    console.log('Calculated average (LKR):', calculatedAverage);
-                }
-            }
-            
-            // Use calculated average for the main estimate
-            const margin = calculatedAverage * 0.1; // ±10% range
-            const lowerBound = Math.round(calculatedAverage - margin);
-            const upperBound = Math.round(calculatedAverage + margin);
+            // Update AI estimate display with enhanced formatting
+            const lowerBound = prediction.price_range.lower;
+            const upperBound = prediction.price_range.upper;
             
             if (aiEstimateElement) {
                 aiEstimateElement.innerHTML = `LKR ${formatLKR(lowerBound)} - ${formatLKR(upperBound)}`;
@@ -1060,7 +810,6 @@ async function calculateAIEstimate() {
                 confidenceElement.innerHTML = `
                     Based on Sri Lankan market data, vehicle condition, and mileage
                     <br><strong>Confidence:</strong> ${prediction.confidence_level || 'High'}
-                    <br><strong>Average of ${Object.keys(prediction.individual_predictions || {}).length} AI Models:</strong> ${formatLKR(calculatedAverage)}
                     ${marketAnalysis.market_data_available ? 
                         `<br><strong>Market Status:</strong> ${marketAnalysis.demand_status || 'Market data available'}` : 
                         '<br><strong>Market Status:</strong> General market estimation'
@@ -1077,8 +826,8 @@ async function calculateAIEstimate() {
                 }
             }
             
-            // Add detailed breakdown with corrected average
-            addPredictionBreakdown(data, calculatedAverage);
+            // Add detailed breakdown (optional enhancement)
+            addPredictionBreakdown(data);
             
         } else {
             throw new Error(data.message || 'Failed to get price prediction');
@@ -1176,67 +925,30 @@ function calculateBasicEstimate() {
     }
 }
 
-// Add detailed prediction breakdown with corrected calculations
-function addPredictionBreakdown(apiData, calculatedAverage) {
+// Add detailed prediction breakdown
+function addPredictionBreakdown(apiData) {
     const breakdown = apiData.prediction.individual_predictions;
     if (!breakdown) return;
     
     const aiEstimateContainer = document.querySelector('.bg-gradient-to-r.from-purple-50.to-blue-50');
     if (!aiEstimateContainer) return;
     
-    // Remove existing breakdown if present
-    const existingBreakdown = aiEstimateContainer.querySelector('.prediction-breakdown');
-    if (existingBreakdown) {
-        existingBreakdown.remove();
-    }
-    
-    // Convert individual predictions to numeric values for display
-    const modelEntries = Object.entries(breakdown).map(([model, price]) => {
-        let numericPrice = 0;
-        if (typeof price === 'string') {
-            const cleanPrice = price.replace(/[^\d.]/g, '');
-            const numValue = parseFloat(cleanPrice);
-            
-            if (price.includes('Cr')) {
-                numericPrice = numValue * 10000000;
-            } else if (price.includes('L')) {
-                numericPrice = numValue * 100000;
-            } else if (price.includes('Million')) {
-                numericPrice = numValue * 1000000;
-            } else {
-                numericPrice = numValue;
-            }
-        } else {
-            numericPrice = price;
-        }
-        
-        return {
-            model: model,
-            originalPrice: price,
-            numericPrice: numericPrice,
-            formattedPrice: formatLKR(numericPrice)
-        };
-    });
+    // Check if breakdown already exists
+    if (aiEstimateContainer.querySelector('.prediction-breakdown')) return;
     
     const breakdownHtml = `
         <div class="prediction-breakdown mt-4 p-3 bg-white bg-opacity-50 rounded-lg border border-purple-200">
             <h4 class="text-sm font-semibold text-gray-700 mb-2">🔍 AI Model Breakdown:</h4>
             <div class="grid grid-cols-2 gap-2 text-xs">
-                ${modelEntries.map(entry => 
+                ${Object.entries(breakdown).map(([model, price]) => 
                     `<div class="flex justify-between">
-                        <span class="text-gray-600">${entry.model.toUpperCase()}:</span>
-                        <span class="font-medium">LKR ${entry.formattedPrice}</span>
+                        <span class="text-gray-600">${model.toUpperCase()}:</span>
+                        <span class="font-medium">${price}</span>
                     </div>`
                 ).join('')}
             </div>
-            <div class="mt-3 pt-2 border-t border-purple-200">
-                <div class="flex justify-between text-sm font-semibold text-purple-700">
-                    <span>Ensemble Average:</span>
-                    <span>LKR ${formatLKR(calculatedAverage)}</span>
-                </div>
-            </div>
             <div class="mt-2 text-xs text-gray-500">
-                Final estimate calculated as average of ${modelEntries.length} ML models with ±10% range
+                Final estimate uses weighted ensemble of multiple ML models
             </div>
         </div>
     `;
@@ -1291,38 +1003,8 @@ async function submitFormWithAPI() {
         
         if (finalPrediction.ok) {
             const predictionData = await finalPrediction.json();
-            
-            // Calculate consistent average from individual predictions
-            let calculatedAverage = predictionData.prediction.estimated_price;
-            
-            if (predictionData.prediction.individual_predictions) {
-                const individualPrices = Object.values(predictionData.prediction.individual_predictions);
-                const numericPrices = individualPrices.map(price => {
-                    if (typeof price === 'string') {
-                        const cleanPrice = price.replace(/[^\d.]/g, '');
-                        const numValue = parseFloat(cleanPrice);
-                        
-                        if (price.includes('Cr')) {
-                            return numValue * 10000000;
-                        } else if (price.includes('L')) {
-                            return numValue * 100000;
-                        } else if (price.includes('Million')) {
-                            return numValue * 1000000;
-                        } else {
-                            return numValue;
-                        }
-                    }
-                    return price;
-                }).filter(price => !isNaN(price) && price > 0);
-                
-                if (numericPrices.length > 0) {
-                    calculatedAverage = numericPrices.reduce((sum, price) => sum + price, 0) / numericPrices.length;
-                }
-            }
-            
             formData.aiPrediction = predictionData;
-            formData.aiEstimate = `LKR ${formatLKR(calculatedAverage * 0.9)} - ${formatLKR(calculatedAverage * 1.1)}`;
-            formData.averageModelPrice = calculatedAverage;
+            formData.aiEstimate = `LKR ${formatLKR(predictionData.prediction.price_range.lower)} - ${formatLKR(predictionData.prediction.price_range.upper)}`;
         }
         
     } catch (error) {
@@ -1357,17 +1039,6 @@ document.querySelectorAll('input, select, textarea').forEach(element => {
         
         // Initial check
         updateLabel();
-    }
-});
-
-// Enhanced event listener for make selection
-document.addEventListener('change', function(e) {
-    if (e.target.matches('select[required]')) { // Make dropdown
-        const selectedMake = e.target.value;
-        if (selectedMake) {
-            console.log('Make selected:', selectedMake);
-            populateModelsDropdown(selectedMake);
-        }
     }
 });
 
@@ -1806,39 +1477,41 @@ document.getElementById('vehicleForm').addEventListener('submit', async function
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
-    // Test API connection first
+    // Populate year dropdown with dynamic years
+    populateYearDropdown();
+    
+    // Set initial AI estimate
+    const aiEstimateElement = document.getElementById('aiEstimate');
+    if (aiEstimateElement) {
+        aiEstimateElement.innerHTML = 'Enter vehicle details for AI estimate';
+    }
+    
+    showStep(1);
+    
+    // Test API connection on page load
     setTimeout(async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/health`);
             if (response.ok) {
                 const data = await response.json();
                 console.log('✅ API connected:', data.message);
-                isApiConnected = true;
                 
                 // Update initial estimate text to show API is available
                 const aiEstimateElement = document.getElementById('aiEstimate');
-                if (aiEstimateElement) {
+                if (aiEstimateElement && aiEstimateElement.textContent.includes('Enter vehicle details')) {
                     aiEstimateElement.innerHTML = 'Enter vehicle details for enhanced AI estimate';
                 }
             }
         } catch (error) {
             console.warn('⚠️ API not available, using basic calculations:', error.message);
-            isApiConnected = false;
             
             // Update initial estimate text to show API is unavailable
             const aiEstimateElement = document.getElementById('aiEstimate');
-            if (aiEstimateElement) {
+            if (aiEstimateElement && aiEstimateElement.textContent.includes('Enter vehicle details')) {
                 aiEstimateElement.innerHTML = 'Enter vehicle details for basic estimate (API offline)';
             }
         }
-        
-        // Populate dropdowns after API check
-        await populateMakesDropdown();
-        populateYearDropdown();
-        
     }, 1000);
-    
-    showStep(1);
 });
     </script>
 </body>
