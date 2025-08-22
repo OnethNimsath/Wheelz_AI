@@ -9,6 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <!-- Session Management - Embedded -->
     <script>
         // Session Manager Class - Embedded for reliability
@@ -510,6 +511,11 @@
             pointer-events: none;
         }
 
+        .upload-area.uploading {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+
         .upload-icon {
             font-size: 48px;
             margin-bottom: 12px;
@@ -576,6 +582,21 @@
             display: none;
         }
 
+        .upload-progress {
+            background: #e5e7eb;
+            border-radius: 4px;
+            height: 8px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .upload-progress-bar {
+            background: linear-gradient(45deg, #3b82f6, #2563eb);
+            height: 100%;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
         .image-preview-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -591,6 +612,11 @@
             overflow: hidden;
             border: 2px solid #e5e7eb;
             background: #f3f4f6;
+        }
+
+        .image-preview.uploading {
+            border-color: #f59e0b;
+            opacity: 0.7;
         }
 
         .image-preview img {
@@ -621,6 +647,19 @@
         .image-preview-remove:hover {
             background: rgba(239, 68, 68, 1);
             transform: scale(1.1);
+        }
+
+        .image-upload-status {
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            right: 4px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 10px;
+            padding: 2px 4px;
+            border-radius: 4px;
+            text-align: center;
         }
 
         /* Session status indicator */
@@ -889,6 +928,9 @@
                         <div class="upload-limit-warning" id="photo-limit-warning">
                             Maximum 5 photos allowed. Please remove some photos to add new ones.
                         </div>
+                        <div class="upload-progress" id="photo-upload-progress" style="display: none;">
+                            <div class="upload-progress-bar" id="photo-progress-bar"></div>
+                        </div>
                         <div id="image-previews" class="image-preview-container"></div>
                     </div>
                     <div>
@@ -998,6 +1040,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
+        const storage = firebase.storage();
 
         // Global variables for session management
         let sessionManager = null;
@@ -1006,6 +1049,7 @@
         let uploadedImages = [];
         let uploadedDocuments = [];
         let hasUnsavedChanges = false;
+        let uploadInProgress = false;
 
         // Session management integration
         document.addEventListener('DOMContentLoaded', async () => {
@@ -1195,7 +1239,8 @@
                     url: url,
                     name: `existing-image-${index + 1}.jpg`,
                     size: 'Unknown',
-                    isExisting: true
+                    isExisting: true,
+                    uploaded: true
                 }));
                 displayImagePreviews();
                 updatePhotoCount();
@@ -1236,16 +1281,210 @@
 
             // Warn before leaving with unsaved changes
             window.addEventListener('beforeunload', (e) => {
-                if (hasUnsavedChanges) {
+                if (hasUnsavedChanges || uploadInProgress) {
                     e.preventDefault();
-                    e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                    e.returnValue = uploadInProgress ? 
+                        'Images are still uploading. Are you sure you want to leave?' :
+                        'You have unsaved changes. Are you sure you want to leave?';
                 }
             });
+        }
+
+        // Enhanced image upload with Firebase Storage
+        async function uploadImageToStorage(imageBlob, fileName) {
+            try {
+                const userId = sessionManager.currentUser.uid;
+                const timestamp = Date.now();
+                const uniqueFileName = `vehicles/${userId}/${currentAdId}/${timestamp}_${fileName}`;
+                
+                console.log('Uploading image to:', uniqueFileName);
+                
+                const storageRef = storage.ref(uniqueFileName);
+                const uploadTask = storageRef.put(imageBlob);
+                
+                return new Promise((resolve, reject) => {
+                    uploadTask.on('state_changed',
+                        (snapshot) => {
+                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            console.log('Upload progress:', progress + '%');
+                        },
+                        (error) => {
+                            console.error('Upload failed:', error);
+                            reject(error);
+                        },
+                        async () => {
+                            try {
+                                const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                                console.log('Upload successful, download URL:', downloadURL);
+                                resolve(downloadURL);
+                            } catch (error) {
+                                console.error('Error getting download URL:', error);
+                                reject(error);
+                            }
+                        }
+                    );
+                });
+            } catch (error) {
+                console.error('Error setting up upload:', error);
+                throw error;
+            }
+        }
+
+        // Enhanced image processing with Firebase Storage upload
+        function processImageFiles(files) {
+            const maxImages = 5;
+            const currentCount = uploadedImages.length;
+            const availableSlots = maxImages - currentCount;
+            
+            if (availableSlots <= 0) {
+                customAlert('Maximum 5 photos allowed. Please remove some photos to add new ones.', 'error');
+                return;
+            }
+            
+            const filesToProcess = files.slice(0, availableSlots);
+            
+            filesToProcess.forEach(async (file) => {
+                if (file.type.startsWith('image/')) {
+                    if (file.size > 5 * 1024 * 1024) {
+                        customAlert(`Image "${file.name}" is too large. Maximum size is 5MB.`, 'error');
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = async function(e) {
+                        const img = new Image();
+                        img.onload = async function() {
+                            try {
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                
+                                const maxWidth = 800;
+                                const maxHeight = 600;
+                                let { width, height } = calculateDimensions(img.width, img.height, maxWidth, maxHeight);
+                                
+                                canvas.width = width;
+                                canvas.height = height;
+                                ctx.drawImage(img, 0, 0, width, height);
+                                
+                                canvas.toBlob(async function(blob) {
+                                    try {
+                                        // Create temporary preview with local blob URL
+                                        const tempImageUrl = URL.createObjectURL(blob);
+                                        
+                                        const imageObj = {
+                                            file: blob,
+                                            url: tempImageUrl,
+                                            name: file.name,
+                                            size: blob.size,
+                                            originalSize: file.size,
+                                            dimensions: `${width}x${height}`,
+                                            uploading: true,
+                                            uploaded: false
+                                        };
+                                        
+                                        uploadedImages.push(imageObj);
+                                        displayImagePreviews();
+                                        updatePhotoCount();
+                                        updateUploadUI();
+                                        hasUnsavedChanges = true;
+                                        uploadInProgress = true;
+                                        
+                                        // Upload to Firebase Storage
+                                        try {
+                                            const downloadURL = await uploadImageToStorage(blob, file.name);
+                                            
+                                            // Update the image object with the Firebase URL
+                                            const imageIndex = uploadedImages.findIndex(img => img.url === tempImageUrl);
+                                            if (imageIndex !== -1) {
+                                                // Clean up the temporary blob URL
+                                                URL.revokeObjectURL(tempImageUrl);
+                                                
+                                                // Update with Firebase URL
+                                                uploadedImages[imageIndex].url = downloadURL;
+                                                uploadedImages[imageIndex].uploading = false;
+                                                uploadedImages[imageIndex].uploaded = true;
+                                                
+                                                displayImagePreviews();
+                                                console.log('Image uploaded successfully:', downloadURL);
+                                            }
+                                        } catch (uploadError) {
+                                            console.error('Failed to upload image:', uploadError);
+                                            
+                                            // Remove the failed upload from the array
+                                            const imageIndex = uploadedImages.findIndex(img => img.url === tempImageUrl);
+                                            if (imageIndex !== -1) {
+                                                URL.revokeObjectURL(tempImageUrl);
+                                                uploadedImages.splice(imageIndex, 1);
+                                                displayImagePreviews();
+                                                updatePhotoCount();
+                                                updateUploadUI();
+                                            }
+                                            
+                                            customAlert(`Failed to upload "${file.name}". Please try again.`, 'error');
+                                        }
+                                        
+                                        // Check if all uploads are complete
+                                        const stillUploading = uploadedImages.some(img => img.uploading);
+                                        if (!stillUploading) {
+                                            uploadInProgress = false;
+                                        }
+                                        
+                                    } catch (error) {
+                                        console.error('Error processing image:', error);
+                                        customAlert(`Error processing "${file.name}". Please try again.`, 'error');
+                                    }
+                                }, 'image/jpeg', 0.85);
+                            } catch (error) {
+                                console.error('Error creating canvas:', error);
+                                customAlert(`Error processing "${file.name}". Please try again.`, 'error');
+                            }
+                        };
+                        img.onerror = function() {
+                            customAlert(`Invalid image file: "${file.name}"`, 'error');
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.onerror = function() {
+                        customAlert(`Error reading file: "${file.name}"`, 'error');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        function calculateDimensions(originalWidth, originalHeight, maxWidth, maxHeight) {
+            let width = originalWidth;
+            let height = originalHeight;
+            
+            const aspectRatio = originalWidth / originalHeight;
+            
+            if (width > maxWidth) {
+                width = maxWidth;
+                height = width / aspectRatio;
+            }
+            
+            if (height > maxHeight) {
+                height = maxHeight;
+                width = height * aspectRatio;
+            }
+            
+            return { width: Math.round(width), height: Math.round(height) };
         }
 
         // Handle form submission
         async function handleFormSubmission(e) {
             e.preventDefault();
+            
+            // Check if uploads are still in progress
+            if (uploadInProgress) {
+                customAlert('Please wait for image uploads to complete before saving.', 'warning');
+                return;
+            }
+            
+            // Validate form first
+            if (!validateForm()) {
+                return;
+            }
             
             customConfirm('Are you sure you want to update this advertisement?', async (confirmed) => {
                 if (confirmed) {
@@ -1304,8 +1543,8 @@
                 // Contact Methods
                 contactMethods: getSelectedContactMethods(),
                 
-                // Media
-                photos: uploadedImages.map(img => img.url || img),
+                // Media - only include successfully uploaded images
+                photos: uploadedImages.filter(img => img.uploaded || img.isExisting).map(img => img.url),
                 documents: uploadedDocuments.map(doc => ({
                     name: doc.name,
                     size: doc.size,
@@ -1347,6 +1586,9 @@
             }
             
             try {
+                // Add userId to ensure ownership
+                formData.userId = sessionManager.currentUser.uid;
+                
                 await db.collection('Advertisements').doc(currentAdId).update(formData);
                 console.log('Advertisement updated successfully');
                 
@@ -1357,6 +1599,263 @@
                 console.error('Error updating advertisement:', error);
                 throw error;
             }
+        }
+
+        // Enhanced image display with upload status
+        function displayImagePreviews() {
+            const container = document.getElementById('image-previews');
+            if (!container) return;
+            container.innerHTML = '';
+
+            uploadedImages.forEach((image, index) => {
+                const preview = document.createElement('div');
+                preview.className = `image-preview ${image.uploading ? 'uploading' : ''}`;
+                
+                const img = document.createElement('img');
+                img.src = image.url;
+                img.alt = `Preview ${index + 1}`;
+                img.loading = 'lazy';
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'image-preview-remove';
+                removeBtn.innerHTML = '×';
+                removeBtn.title = 'Remove image';
+                removeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    removeImage(index);
+                };
+                
+                // Add upload status indicator
+                const statusDiv = document.createElement('div');
+                statusDiv.className = 'image-upload-status';
+                if (image.uploading) {
+                    statusDiv.textContent = 'Uploading...';
+                } else if (image.uploaded || image.isExisting) {
+                    statusDiv.textContent = image.isExisting ? 'Existing' : 'Uploaded';
+                } else {
+                    statusDiv.textContent = 'Failed';
+                }
+                
+                preview.appendChild(img);
+                preview.appendChild(removeBtn);
+                preview.appendChild(statusDiv);
+                container.appendChild(preview);
+            });
+        }
+
+        // Enhanced remove image with Firebase Storage cleanup
+        async function removeImage(index) {
+            const image = uploadedImages[index];
+            
+            try {
+                // If it's a Firebase Storage URL and not an existing image, try to delete it
+                if (image.url && image.url.includes('firebasestorage.googleapis.com') && !image.isExisting) {
+                    try {
+                        const storageRef = storage.refFromURL(image.url);
+                        await storageRef.delete();
+                        console.log('Image deleted from storage:', image.url);
+                    } catch (deleteError) {
+                        console.warn('Could not delete image from storage:', deleteError);
+                        // Continue with removal from array even if storage deletion fails
+                    }
+                }
+                
+                // Clean up blob URL if it exists
+                if (image.url && image.url.startsWith('blob:')) {
+                    URL.revokeObjectURL(image.url);
+                }
+                
+                uploadedImages.splice(index, 1);
+                displayImagePreviews();
+                updatePhotoCount();
+                updateUploadUI();
+                hasUnsavedChanges = true;
+                updateSessionActivity();
+                
+                // Check if all uploads are complete
+                const stillUploading = uploadedImages.some(img => img.uploading);
+                if (!stillUploading) {
+                    uploadInProgress = false;
+                }
+                
+            } catch (error) {
+                console.error('Error removing image:', error);
+                customAlert('Error removing image. Please try again.', 'error');
+            }
+        }
+
+        // Document upload functions
+        function handleDocumentUpload(event) {
+            const files = Array.from(event.target.files);
+            processDocumentFiles(files);
+            updateSessionActivity();
+        }
+
+        function processDocumentFiles(files) {
+            files.forEach(file => {
+                uploadedDocuments.push({
+                    file: file,
+                    name: file.name,
+                    size: file.size,
+                    type: file.type
+                });
+            });
+            displayDocumentPreviews();
+            updateDocumentCount();
+            hasUnsavedChanges = true;
+        }
+
+        function displayDocumentPreviews() {
+            const container = document.getElementById('document-previews');
+            if (!container) return;
+            container.innerHTML = '';
+
+            uploadedDocuments.forEach((doc, index) => {
+                const preview = document.createElement('div');
+                preview.className = 'flex items-center justify-between bg-gray-50 p-3 rounded-lg mb-2';
+                
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'flex items-center';
+                fileInfo.innerHTML = `
+                    <div class="text-blue-600 mr-3">📄</div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">${doc.name}</div>
+                        <div class="text-xs text-gray-500">${formatFileSize(doc.size)}</div>
+                    </div>
+                `;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'text-red-600 hover:text-red-800 ml-2';
+                removeBtn.innerHTML = '×';
+                removeBtn.onclick = () => removeDocument(index);
+                
+                preview.appendChild(fileInfo);
+                preview.appendChild(removeBtn);
+                container.appendChild(preview);
+            });
+        }
+
+        function removeDocument(index) {
+            uploadedDocuments.splice(index, 1);
+            displayDocumentPreviews();
+            updateDocumentCount();
+            hasUnsavedChanges = true;
+            updateSessionActivity();
+        }
+
+        // Image upload event handlers
+        function handleImageUpload(event) {
+            if (uploadedImages.length >= 5) {
+                customAlert('Maximum 5 photos allowed. Please remove some photos first.', 'error');
+                event.target.value = '';
+                return;
+            }
+            
+            const files = Array.from(event.target.files);
+            processImageFiles(files);
+            event.target.value = '';
+            updateSessionActivity();
+        }
+
+        function updatePhotoCount() {
+            const countElement = document.getElementById('photo-count');
+            if (countElement) {
+                countElement.textContent = uploadedImages.length;
+            }
+        }
+
+        function updateDocumentCount() {
+            const countElement = document.getElementById('document-count');
+            if (countElement) {
+                countElement.textContent = uploadedDocuments.length;
+            }
+        }
+
+        function updateUploadUI() {
+            const maxImages = 5;
+            const currentCount = uploadedImages.length;
+            const uploadArea = document.getElementById('photo-upload-area');
+            const uploadButton = document.getElementById('photo-upload-btn');
+            const warningElement = document.getElementById('photo-limit-warning');
+            
+            if (currentCount >= maxImages) {
+                uploadArea.classList.add('disabled');
+                uploadButton.disabled = true;
+                uploadButton.innerHTML = '<span class="upload-button-icon">🚫</span> Maximum Photos Reached';
+                warningElement.style.display = 'block';
+            } else if (uploadInProgress) {
+                uploadButton.disabled = true;
+                uploadButton.innerHTML = '<span class="upload-button-icon">⏳</span> Uploading...';
+                warningElement.style.display = 'none';
+            } else {
+                uploadArea.classList.remove('disabled');
+                uploadButton.disabled = false;
+                uploadButton.innerHTML = '<span class="upload-button-icon">📷</span> Choose Photos';
+                warningElement.style.display = 'none';
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Form validation helpers
+        function validateForm() {
+            const requiredFields = [
+                { id: 'askingPrice', name: 'Asking Price' },
+                { id: 'make', name: 'Make' },
+                { id: 'model', name: 'Model' },
+                { id: 'year', name: 'Year' },
+                { id: 'mileage', name: 'Mileage' },
+                { id: 'bodyType', name: 'Body Type' },
+                { id: 'fuelType', name: 'Fuel Type' },
+                { id: 'condition', name: 'Condition' },
+                { id: 'transmission', name: 'Transmission' },
+                { id: 'phoneNumber', name: 'Contact Number' },
+                { id: 'email', name: 'Email Address' }
+            ];
+            
+            const missingFields = [];
+            
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (!element || !element.value.trim()) {
+                    missingFields.push(field.name);
+                }
+            });
+            
+            if (missingFields.length > 0) {
+                customAlert(`Please fill in the following required fields:\n${missingFields.join(', ')}`, 'error');
+                return false;
+            }
+            
+            // Validate email format
+            const email = document.getElementById('email').value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                customAlert('Please enter a valid email address', 'error');
+                return false;
+            }
+            
+            // Validate price
+            const price = parsePriceToNumber(document.getElementById('askingPrice').value);
+            if (price <= 0) {
+                customAlert('Please enter a valid asking price', 'error');
+                return false;
+            }
+            
+            // Check if any images are still uploading
+            const stillUploading = uploadedImages.some(img => img.uploading);
+            if (stillUploading) {
+                customAlert('Please wait for all images to finish uploading before saving.', 'warning');
+                return false;
+            }
+            
+            return true;
         }
 
         // Session management functions
@@ -1411,8 +1910,12 @@
 
         // Navigation functions
         function goBack() {
-            if (hasUnsavedChanges) {
-                customConfirm('You have unsaved changes. Are you sure you want to go back?', (confirmed) => {
+            if (hasUnsavedChanges || uploadInProgress) {
+                const message = uploadInProgress ? 
+                    'Images are still uploading. Are you sure you want to go back?' :
+                    'You have unsaved changes. Are you sure you want to go back?';
+                    
+                customConfirm(message, (confirmed) => {
                     if (confirmed) {
                         window.location.href = 'dashboard.html';
                     }
@@ -1423,8 +1926,12 @@
         }
 
         async function handleLogout() {
-            if (hasUnsavedChanges) {
-                customConfirm('You have unsaved changes. Are you sure you want to logout?', async (confirmed) => {
+            if (hasUnsavedChanges || uploadInProgress) {
+                const message = uploadInProgress ? 
+                    'Images are still uploading. Are you sure you want to logout?' :
+                    'You have unsaved changes. Are you sure you want to logout?';
+                    
+                customConfirm(message, async (confirmed) => {
                     if (confirmed) {
                         await sessionManager.signOut();
                     }
@@ -1444,6 +1951,11 @@
         }
 
         function saveAsDraft() {
+            if (uploadInProgress) {
+                customAlert('Please wait for image uploads to complete before saving as draft.', 'warning');
+                return;
+            }
+            
             customConfirm('Save current changes as draft?', async (confirmed) => {
                 if (confirmed) {
                     try {
@@ -1605,241 +2117,6 @@
             }, 10);
         }
 
-        // Image upload functions
-        function handleImageUpload(event) {
-            if (uploadedImages.length >= 5) {
-                customAlert('Maximum 5 photos allowed. Please remove some photos first.', 'error');
-                event.target.value = '';
-                return;
-            }
-            
-            const files = Array.from(event.target.files);
-            processImageFiles(files);
-            event.target.value = '';
-            updateSessionActivity();
-        }
-
-        function handleDocumentUpload(event) {
-            const files = Array.from(event.target.files);
-            processDocumentFiles(files);
-            updateSessionActivity();
-        }
-
-        function processImageFiles(files) {
-            const maxImages = 5;
-            const currentCount = uploadedImages.length;
-            const availableSlots = maxImages - currentCount;
-            
-            if (availableSlots <= 0) {
-                customAlert('Maximum 5 photos allowed. Please remove some photos to add new ones.', 'error');
-                return;
-            }
-            
-            const filesToProcess = files.slice(0, availableSlots);
-            
-            filesToProcess.forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    if (file.size > 5 * 1024 * 1024) {
-                        customAlert(`Image "${file.name}" is too large. Maximum size is 5MB.`, 'error');
-                        return;
-                    }
-                    
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const img = new Image();
-                        img.onload = function() {
-                            const canvas = document.createElement('canvas');
-                            const ctx = canvas.getContext('2d');
-                            
-                            const maxWidth = 800;
-                            const maxHeight = 600;
-                            let { width, height } = calculateDimensions(img.width, img.height, maxWidth, maxHeight);
-                            
-                            canvas.width = width;
-                            canvas.height = height;
-                            ctx.drawImage(img, 0, 0, width, height);
-                            
-                            canvas.toBlob(function(blob) {
-                                const resizedImageUrl = URL.createObjectURL(blob);
-                                
-                                uploadedImages.push({
-                                    file: blob,
-                                    url: resizedImageUrl,
-                                    name: file.name,
-                                    size: blob.size,
-                                    originalSize: file.size,
-                                    dimensions: `${width}x${height}`
-                                });
-                                
-                                displayImagePreviews();
-                                updatePhotoCount();
-                                updateUploadUI();
-                                hasUnsavedChanges = true;
-                            }, 'image/jpeg', 0.85);
-                        };
-                        img.src = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
-
-        function calculateDimensions(originalWidth, originalHeight, maxWidth, maxHeight) {
-            let width = originalWidth;
-            let height = originalHeight;
-            
-            const aspectRatio = originalWidth / originalHeight;
-            
-            if (width > maxWidth) {
-                width = maxWidth;
-                height = width / aspectRatio;
-            }
-            
-            if (height > maxHeight) {
-                height = maxHeight;
-                width = height * aspectRatio;
-            }
-            
-            return { width: Math.round(width), height: Math.round(height) };
-        }
-
-        function processDocumentFiles(files) {
-            files.forEach(file => {
-                uploadedDocuments.push({
-                    file: file,
-                    name: file.name,
-                    size: file.size,
-                    type: file.type
-                });
-            });
-            displayDocumentPreviews();
-            updateDocumentCount();
-            hasUnsavedChanges = true;
-        }
-
-        function displayImagePreviews() {
-            const container = document.getElementById('image-previews');
-            if (!container) return;
-            container.innerHTML = '';
-
-            uploadedImages.forEach((image, index) => {
-                const preview = document.createElement('div');
-                preview.className = 'image-preview';
-                
-                const img = document.createElement('img');
-                img.src = image.url || image;
-                img.alt = `Preview ${index + 1}`;
-                img.loading = 'lazy';
-                
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'image-preview-remove';
-                removeBtn.innerHTML = '×';
-                removeBtn.title = 'Remove image';
-                removeBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    removeImage(index);
-                };
-                
-                preview.appendChild(img);
-                preview.appendChild(removeBtn);
-                container.appendChild(preview);
-            });
-        }
-
-        function displayDocumentPreviews() {
-            const container = document.getElementById('document-previews');
-            if (!container) return;
-            container.innerHTML = '';
-
-            uploadedDocuments.forEach((doc, index) => {
-                const preview = document.createElement('div');
-                preview.className = 'flex items-center justify-between bg-gray-50 p-3 rounded-lg mb-2';
-                
-                const fileInfo = document.createElement('div');
-                fileInfo.className = 'flex items-center';
-                fileInfo.innerHTML = `
-                    <div class="text-blue-600 mr-3">📄</div>
-                    <div>
-                        <div class="text-sm font-medium text-gray-900">${doc.name}</div>
-                        <div class="text-xs text-gray-500">${formatFileSize(doc.size)}</div>
-                    </div>
-                `;
-                
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'text-red-600 hover:text-red-800 ml-2';
-                removeBtn.innerHTML = '×';
-                removeBtn.onclick = () => removeDocument(index);
-                
-                preview.appendChild(fileInfo);
-                preview.appendChild(removeBtn);
-                container.appendChild(preview);
-            });
-        }
-
-        function removeImage(index) {
-            const image = uploadedImages[index];
-            if (image && image.url && image.url.startsWith('blob:')) {
-                URL.revokeObjectURL(image.url);
-            }
-            
-            uploadedImages.splice(index, 1);
-            displayImagePreviews();
-            updatePhotoCount();
-            updateUploadUI();
-            hasUnsavedChanges = true;
-            updateSessionActivity();
-        }
-
-        function removeDocument(index) {
-            uploadedDocuments.splice(index, 1);
-            displayDocumentPreviews();
-            updateDocumentCount();
-            hasUnsavedChanges = true;
-            updateSessionActivity();
-        }
-
-        function updatePhotoCount() {
-            const countElement = document.getElementById('photo-count');
-            if (countElement) {
-                countElement.textContent = uploadedImages.length;
-            }
-        }
-
-        function updateDocumentCount() {
-            const countElement = document.getElementById('document-count');
-            if (countElement) {
-                countElement.textContent = uploadedDocuments.length;
-            }
-        }
-
-        function updateUploadUI() {
-            const maxImages = 5;
-            const currentCount = uploadedImages.length;
-            const uploadArea = document.getElementById('photo-upload-area');
-            const uploadButton = document.getElementById('photo-upload-btn');
-            const warningElement = document.getElementById('photo-limit-warning');
-            
-            if (currentCount >= maxImages) {
-                uploadArea.classList.add('disabled');
-                uploadButton.disabled = true;
-                uploadButton.innerHTML = '<span class="upload-button-icon">🚫</span> Maximum Photos Reached';
-                warningElement.style.display = 'block';
-            } else {
-                uploadArea.classList.remove('disabled');
-                uploadButton.disabled = false;
-                uploadButton.innerHTML = '<span class="upload-button-icon">📷</span> Choose Photos';
-                warningElement.style.display = 'none';
-            }
-        }
-
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
         // Drag and Drop functionality
         function handleDragOver(event) {
             event.preventDefault();
@@ -1963,87 +2240,6 @@
             updateSessionActivity();
         });
 
-        // Form validation helpers
-        function validateForm() {
-            const requiredFields = [
-                { id: 'askingPrice', name: 'Asking Price' },
-                { id: 'make', name: 'Make' },
-                { id: 'model', name: 'Model' },
-                { id: 'year', name: 'Year' },
-                { id: 'mileage', name: 'Mileage' },
-                { id: 'bodyType', name: 'Body Type' },
-                { id: 'fuelType', name: 'Fuel Type' },
-                { id: 'condition', name: 'Condition' },
-                { id: 'transmission', name: 'Transmission' },
-                { id: 'phoneNumber', name: 'Contact Number' },
-                { id: 'email', name: 'Email Address' }
-            ];
-            
-            const missingFields = [];
-            
-            requiredFields.forEach(field => {
-                const element = document.getElementById(field.id);
-                if (!element || !element.value.trim()) {
-                    missingFields.push(field.name);
-                }
-            });
-            
-            if (missingFields.length > 0) {
-                customAlert(`Please fill in the following required fields:\n${missingFields.join(', ')}`, 'error');
-                return false;
-            }
-            
-            // Validate email format
-            const email = document.getElementById('email').value;
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                customAlert('Please enter a valid email address', 'error');
-                return false;
-            }
-            
-            // Validate price
-            const price = parsePriceToNumber(document.getElementById('askingPrice').value);
-            if (price <= 0) {
-                customAlert('Please enter a valid asking price', 'error');
-                return false;
-            }
-            
-            return true;
-        }
-
-        // Enhanced form submission with validation
-        async function handleFormSubmission(e) {
-            e.preventDefault();
-            
-            // Validate form first
-            if (!validateForm()) {
-                return;
-            }
-            
-            customConfirm('Are you sure you want to update this advertisement?', async (confirmed) => {
-                if (confirmed) {
-                    try {
-                        showCustomPopup('loading', 'Updating Advertisement', 'Please wait while we update your advertisement...');
-                        
-                        const formData = collectFormData();
-                        await updateAdvertisement(formData);
-                        
-                        hideCustomPopup();
-                        hasUnsavedChanges = false;
-                        
-                        customAlert('Advertisement updated successfully!', 'success', () => {
-                            window.location.href = 'dashboard.html';
-                        });
-                        
-                    } catch (error) {
-                        hideCustomPopup();
-                        console.error('Error updating advertisement:', error);
-                        customAlert('Error updating advertisement: ' + error.message, 'error');
-                    }
-                }
-            });
-        }
-
         // Initialize real-time price estimation (placeholder for AI integration)
         function initializePriceEstimation() {
             const relevantFields = ['make', 'model', 'year', 'mileage', 'condition'];
@@ -2124,7 +2320,7 @@
                     if (sessionManager) {
                         sessionManager.signOut();
                     } else {
-                        window.location.href = '../html/signin.html';
+                        window.location.href = 'signin.html';
                     }
                 });
             }
@@ -2139,7 +2335,7 @@
             }
         });
 
-        console.log('Edit advertisement page with session management loaded successfully');
+        console.log('Edit advertisement page with Firebase Storage integration loaded successfully');
     </script>
 </body>
 </html>

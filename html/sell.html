@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sell Your Vehicle - WheelzAI</title>
+    <script src="/Wheelz_AI/Javascript/price_predictor_client.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Firebase SDK -->
@@ -635,591 +636,1210 @@
 
     <script>
         let currentStep = 1;
-        const totalSteps = 4;
-        
-        // Elements
-        const steps = document.querySelectorAll('.form-step');
-        const stepIndicators = document.querySelectorAll('.step-indicator');
-        const progressBar = document.getElementById('progressBar');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const submitBtn = document.getElementById('submitBtn');
-        
-        // Vehicle valuation data for Sri Lankan market (in LKR)
-        const vehicleData = {
-            toyota: {
-                vios: { base: 4500000, yearDepreciation: 200000, mileageDepreciation: 15 },
-                corolla: { base: 6500000, yearDepreciation: 300000, mileageDepreciation: 20 },
-                camry: { base: 12000000, yearDepreciation: 500000, mileageDepreciation: 25 },
-                prius: { base: 7500000, yearDepreciation: 350000, mileageDepreciation: 18 }
-            },
-            honda: {
-                civic: { base: 8500000, yearDepreciation: 400000, mileageDepreciation: 22 },
-                fit: { base: 5500000, yearDepreciation: 250000, mileageDepreciation: 16 },
-                accord: { base: 15000000, yearDepreciation: 600000, mileageDepreciation: 28 },
-                city: { base: 6000000, yearDepreciation: 280000, mileageDepreciation: 18 }
-            },
-            nissan: {
-                march: { base: 4200000, yearDepreciation: 180000, mileageDepreciation: 14 },
-                sunny: { base: 5800000, yearDepreciation: 260000, mileageDepreciation: 17 },
-                teana: { base: 8500000, yearDepreciation: 400000, mileageDepreciation: 24 }
-            },
-            bmw: {
-                "3series": { base: 18000000, yearDepreciation: 800000, mileageDepreciation: 35 },
-                "5series": { base: 25000000, yearDepreciation: 1200000, mileageDepreciation: 45 }
-            },
-            mercedes: {
-                "c-class": { base: 20000000, yearDepreciation: 900000, mileageDepreciation: 38 },
-                "e-class": { base: 30000000, yearDepreciation: 1400000, mileageDepreciation: 50 }
+const totalSteps = 4;
+
+// Elements
+const steps = document.querySelectorAll('.form-step');
+const stepIndicators = document.querySelectorAll('.step-indicator');
+const progressBar = document.getElementById('progressBar');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const submitBtn = document.getElementById('submitBtn');
+
+// API Configuration
+const API_BASE_URL = 'http://localhost:5000'; // Your Flask API URL
+
+// Enhanced LKR formatting function
+function formatLKR(amount) {
+    if (amount >= 1000000000) {
+        return `${(amount / 1000000000).toFixed(1)} Billion`;
+    } else if (amount >= 10000000) {
+        return `${(amount / 10000000).toFixed(1)} Crore`;
+    } else if (amount >= 1000000) {
+        return `${(amount / 1000000).toFixed(1)} Million`;
+    } else if (amount >= 100000) {
+        return `${(amount / 100000).toFixed(1)} Lakh`;
+    } else {
+        return amount.toLocaleString();
+    }
+}
+
+// Enhanced vehicle data for Sri Lankan market (fallback data)
+const vehicleData = {
+    toyota: {
+        vios: { base: 4500000, yearDepreciation: 200000, mileageDepreciation: 15 },
+        corolla: { base: 6500000, yearDepreciation: 300000, mileageDepreciation: 20 },
+        camry: { base: 12000000, yearDepreciation: 500000, mileageDepreciation: 25 },
+        prius: { base: 7500000, yearDepreciation: 350000, mileageDepreciation: 18 },
+        aqua: { base: 8000000, yearDepreciation: 300000, mileageDepreciation: 16 },
+        allion: { base: 7000000, yearDepreciation: 280000, mileageDepreciation: 17 },
+        premio: { base: 10000000, yearDepreciation: 380000, mileageDepreciation: 20 },
+        axio: { base: 9000000, yearDepreciation: 350000, mileageDepreciation: 19 },
+        chr: { base: 12500000, yearDepreciation: 400000, mileageDepreciation: 22 },
+        harrier: { base: 16000000, yearDepreciation: 500000, mileageDepreciation: 25 }
+    },
+    honda: {
+        civic: { base: 8500000, yearDepreciation: 400000, mileageDepreciation: 22 },
+        fit: { base: 5500000, yearDepreciation: 250000, mileageDepreciation: 16 },
+        accord: { base: 15000000, yearDepreciation: 600000, mileageDepreciation: 28 },
+        city: { base: 6000000, yearDepreciation: 280000, mileageDepreciation: 18 },
+        grace: { base: 6200000, yearDepreciation: 270000, mileageDepreciation: 17 },
+        shuttle: { base: 7500000, yearDepreciation: 290000, mileageDepreciation: 18 },
+        vezel: { base: 10800000, yearDepreciation: 420000, mileageDepreciation: 23 },
+        freed: { base: 8200000, yearDepreciation: 310000, mileageDepreciation: 19 }
+    },
+    nissan: {
+        march: { base: 4200000, yearDepreciation: 180000, mileageDepreciation: 14 },
+        sunny: { base: 5800000, yearDepreciation: 260000, mileageDepreciation: 17 },
+        teana: { base: 8500000, yearDepreciation: 400000, mileageDepreciation: 24 },
+        leaf: { base: 7200000, yearDepreciation: 300000, mileageDepreciation: 15 },
+        sylphy: { base: 7500000, yearDepreciation: 290000, mileageDepreciation: 18 },
+        note: { base: 5500000, yearDepreciation: 240000, mileageDepreciation: 16 },
+        kicks: { base: 8800000, yearDepreciation: 350000, mileageDepreciation: 20 }
+    },
+    suzuki: {
+        swift: { base: 4800000, yearDepreciation: 200000, mileageDepreciation: 15 },
+        wagon_r: { base: 3800000, yearDepreciation: 170000, mileageDepreciation: 13 },
+        alto: { base: 3200000, yearDepreciation: 150000, mileageDepreciation: 12 },
+        hustler: { base: 5200000, yearDepreciation: 210000, mileageDepreciation: 16 },
+        vitara: { base: 8500000, yearDepreciation: 320000, mileageDepreciation: 19 },
+        jimny: { base: 7800000, yearDepreciation: 280000, mileageDepreciation: 17 }
+    },
+    mazda: {
+        demio: { base: 5200000, yearDepreciation: 220000, mileageDepreciation: 16 },
+        axela: { base: 7800000, yearDepreciation: 300000, mileageDepreciation: 19 },
+        atenza: { base: 10500000, yearDepreciation: 400000, mileageDepreciation: 22 },
+        cx5: { base: 13500000, yearDepreciation: 450000, mileageDepreciation: 24 }
+    },
+    mitsubishi: {
+        lancer: { base: 6500000, yearDepreciation: 270000, mileageDepreciation: 18 },
+        outlander: { base: 11500000, yearDepreciation: 430000, mileageDepreciation: 23 },
+        montero: { base: 15000000, yearDepreciation: 550000, mileageDepreciation: 27 },
+        colt: { base: 4800000, yearDepreciation: 200000, mileageDepreciation: 15 }
+    },
+    hyundai: {
+        i10: { base: 4800000, yearDepreciation: 200000, mileageDepreciation: 15 },
+        i20: { base: 6500000, yearDepreciation: 260000, mileageDepreciation: 17 },
+        elantra: { base: 9500000, yearDepreciation: 380000, mileageDepreciation: 21 },
+        tucson: { base: 12800000, yearDepreciation: 480000, mileageDepreciation: 25 }
+    },
+    kia: {
+        picanto: { base: 4500000, yearDepreciation: 190000, mileageDepreciation: 14 },
+        rio: { base: 6200000, yearDepreciation: 250000, mileageDepreciation: 16 },
+        cerato: { base: 8800000, yearDepreciation: 340000, mileageDepreciation: 20 },
+        sportage: { base: 13200000, yearDepreciation: 470000, mileageDepreciation: 24 }
+    },
+    bmw: {
+        "3series": { base: 18000000, yearDepreciation: 800000, mileageDepreciation: 35 },
+        "5series": { base: 25000000, yearDepreciation: 1200000, mileageDepreciation: 45 },
+        x1: { base: 18500000, yearDepreciation: 750000, mileageDepreciation: 32 },
+        x3: { base: 28000000, yearDepreciation: 1100000, mileageDepreciation: 40 }
+    },
+    mercedes: {
+        "c-class": { base: 20000000, yearDepreciation: 900000, mileageDepreciation: 38 },
+        "e-class": { base: 30000000, yearDepreciation: 1400000, mileageDepreciation: 50 },
+        "a-class": { base: 18000000, yearDepreciation: 720000, mileageDepreciation: 30 },
+        glc: { base: 30000000, yearDepreciation: 1200000, mileageDepreciation: 42 }
+    },
+    audi: {
+        a3: { base: 18500000, yearDepreciation: 750000, mileageDepreciation: 32 },
+        a4: { base: 24000000, yearDepreciation: 960000, mileageDepreciation: 38 },
+        q3: { base: 22000000, yearDepreciation: 880000, mileageDepreciation: 35 },
+        q5: { base: 28000000, yearDepreciation: 1120000, mileageDepreciation: 40 }
+    },
+    volkswagen: {
+        polo: { base: 5800000, yearDepreciation: 240000, mileageDepreciation: 16 },
+        golf: { base: 8500000, yearDepreciation: 340000, mileageDepreciation: 20 },
+        jetta: { base: 9800000, yearDepreciation: 390000, mileageDepreciation: 22 },
+        tiguan: { base: 15500000, yearDepreciation: 580000, mileageDepreciation: 26 }
+    },
+    ford: {
+        fiesta: { base: 5500000, yearDepreciation: 230000, mileageDepreciation: 16 },
+        focus: { base: 7800000, yearDepreciation: 310000, mileageDepreciation: 19 },
+        mondeo: { base: 11200000, yearDepreciation: 440000, mileageDepreciation: 23 },
+        ecosport: { base: 8200000, yearDepreciation: 320000, mileageDepreciation: 19 }
+    },
+    chevrolet: {
+        spark: { base: 4200000, yearDepreciation: 180000, mileageDepreciation: 14 },
+        cruze: { base: 8500000, yearDepreciation: 340000, mileageDepreciation: 20 },
+        captiva: { base: 12500000, yearDepreciation: 470000, mileageDepreciation: 24 }
+    }
+};
+
+// Global variables for dynamic data
+let availableMakes = [];
+let availableModels = {};
+let isApiConnected = false;
+
+// Function to populate makes dropdown dynamically
+async function populateMakesDropdown() {
+    const makeSelect = document.querySelector('select[required]'); // First required select (Make)
+    
+    if (!makeSelect) {
+        console.error('Make select element not found');
+        return;
+    }
+    
+    // Clear existing options except placeholder
+    const placeholder = makeSelect.querySelector('option[value=""]');
+    makeSelect.innerHTML = '';
+    makeSelect.appendChild(placeholder);
+    
+    try {
+        // Try to get makes from API first
+        if (isApiConnected) {
+            console.log('Fetching makes from API...');
+            const response = await fetch(`${API_BASE_URL}/get-makes`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('API makes data:', data);
+                
+                if (data.makes && Array.isArray(data.makes)) {
+                    // API returns makes with additional info
+                    data.makes.forEach(makeInfo => {
+                        const option = document.createElement('option');
+                        option.value = makeInfo.name.toLowerCase();
+                        option.textContent = makeInfo.name;
+                        option.setAttribute('data-popularity', makeInfo.popularity || 0);
+                        option.setAttribute('data-category', makeInfo.category || 'Standard');
+                        makeSelect.appendChild(option);
+                    });
+                    
+                    availableMakes = data.makes.map(m => m.name.toLowerCase());
+                    console.log('✅ Makes loaded from API:', availableMakes.length, 'makes');
+                    return;
+                }
             }
+        }
+    } catch (error) {
+        console.warn('Failed to fetch makes from API:', error);
+    }
+    
+    // Fallback to local vehicle data
+    console.log('Using fallback vehicle data for makes...');
+    const localMakes = Object.keys(vehicleData).map(make => ({
+        name: make.charAt(0).toUpperCase() + make.slice(1),
+        value: make,
+        modelCount: Object.keys(vehicleData[make]).length,
+        popularity: calculateMakePopularity(make)
+    }));
+    
+    // Sort by popularity (most popular first)
+    localMakes.sort((a, b) => b.popularity - a.popularity);
+    
+    localMakes.forEach(makeInfo => {
+        const option = document.createElement('option');
+        option.value = makeInfo.value;
+        option.textContent = `${makeInfo.name} (${makeInfo.modelCount} models)`;
+        option.setAttribute('data-popularity', makeInfo.popularity);
+        makeSelect.appendChild(option);
+    });
+    
+    availableMakes = localMakes.map(m => m.value);
+    console.log('✅ Makes loaded from fallback data:', availableMakes.length, 'makes');
+}
+
+// Function to calculate make popularity based on model count and base prices
+function calculateMakePopularity(make) {
+    const models = vehicleData[make];
+    if (!models) return 0;
+    
+    const modelCount = Object.keys(models).length;
+    const avgPrice = Object.values(models).reduce((sum, model) => sum + model.base, 0) / modelCount;
+    
+    // Popular makes in Sri Lanka get higher scores
+    const popularMakes = { toyota: 0.95, honda: 0.90, nissan: 0.85, suzuki: 0.80, mazda: 0.75 };
+    const basePopularity = popularMakes[make] || 0.5;
+    
+    return basePopularity;
+}
+
+// Function to populate models dropdown based on selected make
+async function populateModelsDropdown(selectedMake) {
+    const modelInput = document.querySelector('input[required]'); // Model input field
+    
+    if (!modelInput || !selectedMake) {
+        return;
+    }
+    
+    try {
+        // Try to get models from API first
+        if (isApiConnected) {
+            console.log(`Fetching models for ${selectedMake} from API...`);
+            const response = await fetch(`${API_BASE_URL}/get-models/${selectedMake}`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('API models data:', data);
+                
+                if (data.models && Array.isArray(data.models)) {
+                    availableModels[selectedMake] = data.models.map(modelInfo => ({
+                        name: modelInfo.name,
+                        popularity: modelInfo.popularity || 0,
+                        basePrice: modelInfo.base_price || 0
+                    }));
+                    
+                    // Update model input placeholder with popular models
+                    const popularModels = data.models
+                        .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
+                        .slice(0, 3)
+                        .map(m => m.name)
+                        .join(', ');
+                    
+                    modelInput.placeholder = `e.g., ${popularModels}`;
+                    console.log(`✅ Models loaded from API for ${selectedMake}:`, data.models.length, 'models');
+                    return;
+                }
+            }
+        }
+    } catch (error) {
+        console.warn(`Failed to fetch models for ${selectedMake} from API:`, error);
+    }
+    
+    // Fallback to local vehicle data
+    console.log(`Using fallback vehicle data for ${selectedMake} models...`);
+    if (vehicleData[selectedMake]) {
+        const models = Object.keys(vehicleData[selectedMake]).map(model => ({
+            name: model.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            popularity: 0.8, // Default popularity
+            basePrice: vehicleData[selectedMake][model].base
+        }));
+        
+        availableModels[selectedMake] = models;
+        
+        // Update placeholder with available models
+        const modelNames = models.slice(0, 3).map(m => m.name).join(', ');
+        modelInput.placeholder = `e.g., ${modelNames}`;
+        console.log(`✅ Models loaded from fallback data for ${selectedMake}:`, models.length, 'models');
+    } else {
+        modelInput.placeholder = `Enter ${selectedMake} model`;
+    }
+}
+
+// Function to populate year dropdown dynamically
+function populateYearDropdown() {
+    const yearSelect = document.querySelectorAll('select[required]')[1]; // Year dropdown (second required select)
+    
+    if (yearSelect && yearSelect.querySelector('option[value=""]')) {
+        // Clear existing options except the placeholder
+        const placeholder = yearSelect.querySelector('option[value=""]');
+        yearSelect.innerHTML = '';
+        yearSelect.appendChild(placeholder);
+        
+        // Generate years from 1990 to current year + 1 (2025)
+        const currentYear = new Date().getFullYear();
+        const startYear = 1990;
+        const endYear = Math.max(currentYear + 1, 2025); // Ensure it goes at least to 2025
+        
+        // Add years in descending order (newest first)
+        for (let year = endYear; year >= startYear; year--) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearSelect.appendChild(option);
+        }
+        
+        console.log(`Year dropdown populated with years ${startYear}-${endYear}`);
+    }
+}
+
+// Enhanced AI estimate calculation using API
+async function calculateAIEstimate() {
+    const makeSelect = document.querySelector('select[required]');
+    const modelInput = document.querySelector('input[required]');
+    const yearSelect = document.querySelectorAll('select[required]')[1];
+    const mileageInput = document.querySelector('input[type="number"]');
+    const bodyTypeSelect = document.querySelectorAll('select[required]')[2];
+    const fuelTypeSelect = document.querySelectorAll('select[required]')[3];
+    
+    // Check if all required fields are filled
+    if (!makeSelect.value || !modelInput.value || !yearSelect.value || 
+        !mileageInput.value || !bodyTypeSelect.value || !fuelTypeSelect.value) {
+        return;
+    }
+    
+    const aiEstimateElement = document.getElementById('aiEstimate');
+    const confidenceElement = document.querySelector('.text-gray-600.text-sm');
+    const comparableElement = document.querySelector('.text-xs.text-gray-500 span');
+    
+    // Show loading state
+    if (aiEstimateElement) {
+        aiEstimateElement.innerHTML = `
+            <div class="flex items-center space-x-2">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+                <span>Calculating...</span>
+            </div>
+        `;
+    }
+    
+    try {
+        // Get condition if selected
+        const selectedCondition = document.querySelector('input[name="condition"]:checked');
+        const condition = selectedCondition ? selectedCondition.value : 'good';
+        
+        // Prepare API request data
+        const requestData = {
+            make: makeSelect.value,
+            model: modelInput.value,
+            year: parseInt(yearSelect.value),
+            mileage: parseInt(mileageInput.value),
+            fuel_type: fuelTypeSelect.value,
+            body_type: bodyTypeSelect.value,
+            condition: condition,
+            engine_size: 1500, // Default
+            transmission: 'automatic' // Default
         };
         
-        // Function to calculate AI estimate
-        function calculateAIEstimate() {
-            const makeSelect = document.querySelector('select[required]');
-            const modelInput = document.querySelector('input[required]');
-            const yearSelect = document.querySelectorAll('select[required]')[1];
-            const mileageInput = document.querySelector('input[type="number"]');
-            const conditionInputs = document.querySelectorAll('input[name="condition"]');
+        console.log('Sending API request:', requestData);
+        
+        // Call the enhanced API
+        const response = await fetch(`${API_BASE_URL}/predict-price`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('API response:', data);
+        
+        if (data.success && data.prediction) {
+            const prediction = data.prediction;
+            const marketAnalysis = data.market_analysis;
             
-            if (!makeSelect.value || !modelInput.value || !yearSelect.value || !mileageInput.value) {
-                return;
-            }
+            // Calculate average from individual predictions for consistency
+            let calculatedAverage = prediction.estimated_price;
             
-            const make = makeSelect.value.toLowerCase();
-            const model = modelInput.value.toLowerCase().replace(/\s+/g, '').replace('-', '');
-            const year = parseInt(yearSelect.value);
-            const mileage = parseInt(mileageInput.value);
-            const currentYear = new Date().getFullYear();
-            
-            // Get condition multiplier
-            let conditionMultiplier = 1.0;
-            const selectedCondition = document.querySelector('input[name="condition"]:checked');
-            if (selectedCondition) {
-                switch(selectedCondition.value) {
-                    case 'excellent': conditionMultiplier = 1.15; break;
-                    case 'good': conditionMultiplier = 1.0; break;
-                    case 'fair': conditionMultiplier = 0.85; break;
-                }
-            }
-            
-            // Default values for unknown makes/models
-            let basePrice = 5000000;
-            let yearDepreciation = 250000;
-            let mileageDepreciation = 20;
-            
-            // Try to find specific vehicle data
-            if (vehicleData[make]) {
-                // Try exact model match first
-                const exactMatch = Object.keys(vehicleData[make]).find(key => 
-                    model.includes(key) || key.includes(model)
-                );
+            if (prediction.individual_predictions) {
+                const individualPrices = Object.values(prediction.individual_predictions);
+                // Extract numeric values from formatted prices (remove "LKR" and convert)
+                const numericPrices = individualPrices.map(price => {
+                    if (typeof price === 'string') {
+                        // Remove "LKR" and any formatting, convert to number
+                        const cleanPrice = price.replace(/[^\d.]/g, '');
+                        const numValue = parseFloat(cleanPrice);
+                        
+                        // Check if the price contains "Cr", "L", "Million", etc.
+                        if (price.includes('Cr')) {
+                            return numValue * 10000000; // Convert Crore to LKR
+                        } else if (price.includes('L')) {
+                            return numValue * 100000; // Convert Lakh to LKR
+                        } else if (price.includes('Million')) {
+                            return numValue * 1000000; // Convert Million to LKR
+                        } else {
+                            return numValue; // Assume already in LKR
+                        }
+                    }
+                    return price; // If already numeric
+                }).filter(price => !isNaN(price) && price > 0);
                 
-                if (exactMatch) {
-                    const vehicleInfo = vehicleData[make][exactMatch];
-                    basePrice = vehicleInfo.base;
-                    yearDepreciation = vehicleInfo.yearDepreciation;
-                    mileageDepreciation = vehicleInfo.mileageDepreciation;
-                } else {
-                    // Use average for the make
-                    const makeModels = Object.values(vehicleData[make]);
-                    basePrice = makeModels.reduce((sum, model) => sum + model.base, 0) / makeModels.length;
-                    yearDepreciation = makeModels.reduce((sum, model) => sum + model.yearDepreciation, 0) / makeModels.length;
-                    mileageDepreciation = makeModels.reduce((sum, model) => sum + model.mileageDepreciation, 0) / makeModels.length;
+                if (numericPrices.length > 0) {
+                    calculatedAverage = numericPrices.reduce((sum, price) => sum + price, 0) / numericPrices.length;
+                    console.log('Individual model prices (LKR):', numericPrices);
+                    console.log('Calculated average (LKR):', calculatedAverage);
                 }
             }
             
-            // Calculate depreciation
-            const ageDepreciation = (currentYear - year) * yearDepreciation;
-            const mileageDepreciationAmount = (mileage / 1000) * mileageDepreciation;
+            // Use calculated average for the main estimate
+            const margin = calculatedAverage * 0.1; // ±10% range
+            const lowerBound = Math.round(calculatedAverage - margin);
+            const upperBound = Math.round(calculatedAverage + margin);
             
-            // Calculate estimated value
-            let estimatedValue = basePrice - ageDepreciation - mileageDepreciationAmount;
-            estimatedValue *= conditionMultiplier;
-            
-            // Ensure minimum value
-            estimatedValue = Math.max(estimatedValue, 1000000);
-            
-            // Create range (±15%)
-            const lowerBound = Math.round(estimatedValue * 0.85);
-            const upperBound = Math.round(estimatedValue * 1.15);
-            
-            // Update the display
-            const aiEstimateElement = document.getElementById('aiEstimate');
             if (aiEstimateElement) {
                 aiEstimateElement.innerHTML = `LKR ${formatLKR(lowerBound)} - ${formatLKR(upperBound)}`;
             }
-        }
-        
-        // Function to format LKR amounts
-        function formatLKR(amount) {
-            if (amount >= 10000000) {
-                return (amount / 10000000).toFixed(1) + 'Cr'; // Crores
-            } else if (amount >= 100000) {
-                return (amount / 100000).toFixed(1) + 'L'; // Lakhs
-            } else {
-                return amount.toLocaleString();
-            }
-        }
-
-        // Floating label functionality
-        document.querySelectorAll('input, select, textarea').forEach(element => {
-            const label = element.parentElement.querySelector('.floating-label');
             
-            if (label) {
-                function updateLabel() {
-                    if (element.value || element.tagName === 'SELECT') {
-                        label.classList.add('active');
-                    } else {
-                        label.classList.remove('active');
+            // Update confidence and market info
+            if (confidenceElement) {
+                confidenceElement.innerHTML = `
+                    Based on Sri Lankan market data, vehicle condition, and mileage
+                    <br><strong>Confidence:</strong> ${prediction.confidence_level || 'High'}
+                    <br><strong>Average of ${Object.keys(prediction.individual_predictions || {}).length} AI Models:</strong> ${formatLKR(calculatedAverage)}
+                    ${marketAnalysis.market_data_available ? 
+                        `<br><strong>Market Status:</strong> ${marketAnalysis.demand_status || 'Market data available'}` : 
+                        '<br><strong>Market Status:</strong> General market estimation'
                     }
-                }
-                
-                element.addEventListener('focus', () => label.classList.add('active'));
-                element.addEventListener('blur', updateLabel);
-                element.addEventListener('input', () => {
-                    updateLabel();
-                    // Recalculate AI estimate when key fields change
-                    if (element.required || element.name === 'condition' || element.type === 'number') {
-                        setTimeout(calculateAIEstimate, 100);
-                    }
-                });
-                
-                // Initial check
-                updateLabel();
-            }
-        });
-
-        // Condition selection
-        document.querySelectorAll('input[name="condition"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                document.querySelectorAll('.condition-card').forEach(card => {
-                    card.classList.remove('bg-purple-100', 'border-purple-400', 'text-purple-800');
-                    card.classList.add('text-gray-800', 'border-gray-200');
-                });
-                
-                if (this.checked) {
-                    const card = this.parentElement.querySelector('.condition-card');
-                    card.classList.remove('text-gray-800', 'border-gray-200');
-                    card.classList.add('bg-purple-100', 'border-purple-400', 'text-purple-800');
-                    
-                    // Recalculate AI estimate when condition changes
-                    setTimeout(calculateAIEstimate, 100);
-                }
-            });
-        });
-
-        // File upload functionality with Firebase Storage
-        let uploadedFiles = {
-            vehiclePhotos: [],
-            documents: {
-                title: null,
-                registration: null
-            }
-        };
-
-        document.querySelectorAll('.upload-area').forEach(area => {
-            const input = area.querySelector('input[type="file"]');
-            
-            if (input) {
-                area.addEventListener('click', () => input.click());
-                
-                area.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    area.classList.add('dragover');
-                });
-                
-                area.addEventListener('dragleave', () => {
-                    area.classList.remove('dragover');
-                });
-                
-                area.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    area.classList.remove('dragover');
-                    input.files = e.dataTransfer.files;
-                    handleFileSelection(area, input.files, input);
-                });
-                
-                input.addEventListener('change', () => {
-                    handleFileSelection(area, input.files, input);
-                });
-            }
-        });
-        
-        function handleFileSelection(area, files, inputElement) {
-            if (files.length > 0) {
-                const fileList = Array.from(files).map(file => file.name).join(', ');
-                const multiple = inputElement && inputElement.multiple;
-                const accept = inputElement && inputElement.accept;
-                
-                // Store files for later upload
-                if (multiple) {
-                    // Vehicle photos
-                    uploadedFiles.vehiclePhotos = Array.from(files);
-                } else {
-                    // Documents
-                    const docType = area.closest('.grid') ? 
-                        (area === area.closest('.grid').children[0] ? 'title' : 'registration') : 'title';
-                    uploadedFiles.documents[docType] = files[0];
-                }
-                
-                area.innerHTML = `
-                    <div class="text-gray-700">
-                        <svg class="mx-auto h-8 w-8 mb-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        <p class="text-sm font-medium">${files.length} file(s) selected</p>
-                        <p class="text-xs text-gray-500">${fileList}</p>
-                    </div>
-                    <input type="file" class="hidden" ${multiple ? 'multiple' : ''} accept="${accept || ''}">
                 `;
             }
-        }
-
-        // Function to upload files to Firebase Storage
-        async function uploadFilesToStorage(files, folder, listingId) {
-            console.log(`🔄 Starting upload for ${files.length} files to folder: ${folder}, listingId: ${listingId}`);
             
-            const uploadPromises = files.map(async (file, index) => {
-                if (!file) {
-                    console.log(`⚠️ File ${index} is null, skipping...`);
-                    return null;
+            // Update comparable vehicles info
+            if (comparableElement && marketAnalysis.market_data_available) {
+                const basePrice = marketAnalysis.current_market_value;
+                if (basePrice) {
+                    const basePriceFormatted = basePrice.replace(/LKR\s/, '');
+                    comparableElement.innerHTML = `📊 Market base value: ${basePriceFormatted} | Trend: ${marketAnalysis.market_trend || 'Stable'}`;
                 }
-                
-                const timestamp = Date.now();
-                const fileExtension = file.name.split('.').pop();
-                const fileName = `vehicles/${listingId}/${folder}/${timestamp}_${index}.${fileExtension}`;
-                
-                console.log(`📁 Uploading file: ${file.name}`);
-                console.log(`📍 Storage path: ${fileName}`);
-                console.log(`📊 File size: ${file.size} bytes`);
-                console.log(`🔧 File type: ${file.type}`);
-                
-                const storageRef = window.ref(window.storage, fileName);
-                
-                try {
-                    console.log(`⬆️ Starting upload for ${file.name}...`);
-                    const snapshot = await window.uploadBytes(storageRef, file);
-                    console.log(`✅ Upload completed for ${file.name}`);
-                    console.log(`📦 Snapshot:`, snapshot);
-                    
-                    const downloadURL = await window.getDownloadURL(snapshot.ref);
-                    console.log(`🔗 Download URL: ${downloadURL}`);
-                    
-                    return downloadURL;
-                } catch (error) {
-                    console.error(`❌ Upload failed for ${file.name}:`, error);
-                    console.error(`🔍 Error details:`, {
-                        code: error.code,
-                        message: error.message,
-                        serverResponse: error.serverResponse
-                    });
-                    return null;
-                }
-            });
-            
-            const results = await Promise.all(uploadPromises);
-            console.log(`🎯 Upload results:`, results);
-            return results;
-        }
-
-        // Function to collect form data
-        function collectFormData() {
-            const currentUser = window.getCurrentUser();
-            
-            const formData = {
-                // User Information
-                userId: currentUser?.uid || null,
-                userEmail: currentUser?.email || null,
-                userName: currentUser?.displayName || null,
-                
-                // Basic Information
-                make: document.querySelector('select[required]').value,
-                model: document.querySelector('input[required]').value,
-                year: parseInt(document.querySelectorAll('select[required]')[1].value),
-                mileage: parseInt(document.querySelector('input[type="number"]').value),
-                bodyType: document.querySelectorAll('select[required]')[2].value,
-                fuelType: document.querySelectorAll('select[required]')[3].value,
-                
-                // Vehicle Condition
-                condition: document.querySelector('input[name="condition"]:checked')?.value || '',
-                accidentHistory: document.querySelectorAll('select')[4].value,
-                serviceHistory: document.querySelectorAll('select')[5].value,
-                additionalNotes: document.querySelector('textarea').value,
-                
-                // Pricing & Contact
-                askingPrice: parseInt(document.querySelector('input[placeholder="4500000"]').value),
-                negotiable: document.querySelectorAll('select')[6].value === 'yes',
-                sellerName: document.querySelectorAll('input[required]')[1].value,
-                phoneNumber: document.querySelector('input[type="tel"]').value,
-                email: document.querySelector('input[type="email"]').value,
-                
-                // Contact preferences
-                contactMethods: Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
-                    .map(cb => cb.nextElementSibling.textContent),
-                
-                // Metadata
-                listingId: 'VH-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
-                status: 'active',
-                location: 'Sri Lanka',
-                createdAt: window.serverTimestamp(),
-                updatedAt: window.serverTimestamp()
-            };
-            
-            return formData;
-        }
-
-        // Navigation functions
-        function showStep(step) {
-            console.log('Showing step:', step);
-            
-            // Hide all steps
-            steps.forEach(s => s.classList.remove('active'));
-            
-            // Show current step
-            const targetStep = document.querySelector(`[data-step="${step}"]`);
-            if (targetStep) {
-                targetStep.classList.add('active');
-                console.log('Step', step, 'is now active');
-            } else {
-                console.error('Step element not found for step:', step);
             }
             
-            // Update step indicators
-            stepIndicators.forEach((indicator, index) => {
-                indicator.classList.remove('step-active', 'step-completed', 'step-default');
-                if (index + 1 < step) {
-                    indicator.classList.add('step-completed');
-                } else if (index + 1 === step) {
-                    indicator.classList.add('step-active');
-                } else {
-                    indicator.classList.add('step-default');
-                }
-            });
+            // Add detailed breakdown with corrected average
+            addPredictionBreakdown(data, calculatedAverage);
             
-            // Update progress bar
-            progressBar.style.width = `${(step / totalSteps) * 100}%`;
-            
-            // Update navigation buttons
-            prevBtn.style.display = step === 1 ? 'none' : 'block';
-            nextBtn.style.display = step === totalSteps ? 'none' : 'block';
-            submitBtn.style.display = step === totalSteps ? 'block' : 'none';
+        } else {
+            throw new Error(data.message || 'Failed to get price prediction');
         }
         
-        function nextStep() {
-            // Basic validation for current step
-            const currentStepElement = document.querySelector(`[data-step="${currentStep}"]`);
-            const requiredFields = currentStepElement.querySelectorAll('[required]');
-            let isValid = true;
-            
-            // Check if all required fields are filled
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    isValid = false;
-                    field.style.borderColor = '#ef4444';
-                    // Reset border color after 3 seconds
-                    setTimeout(() => {
-                        field.style.borderColor = '';
-                    }, 3000);
-                } else {
-                    field.style.borderColor = '';
-                }
-            });
-            
-            // For step 2, check if condition is selected
-            if (currentStep === 2) {
-                const conditionSelected = document.querySelector('input[name="condition"]:checked');
-                if (!conditionSelected) {
-                    isValid = false;
-                    // Highlight condition cards
-                    document.querySelectorAll('.condition-card').forEach(card => {
-                        card.style.borderColor = '#ef4444';
-                    });
-                    setTimeout(() => {
-                        document.querySelectorAll('.condition-card').forEach(card => {
-                            card.style.borderColor = '';
-                        });
-                    }, 3000);
-                }
-            }
-            
-            if (isValid && currentStep < totalSteps) {
-                currentStep++;
-                showStep(currentStep);
-            } else if (!isValid) {
-                // Show validation message
-                alert('Please fill in all required fields before proceeding.');
-            }
-        }
+    } catch (error) {
+        console.error('API request failed:', error);
         
-        function prevStep() {
-            if (currentStep > 1) {
-                currentStep--;
-                showStep(currentStep);
-            }
-        }
+        // Fallback to basic calculation
+        calculateBasicEstimate();
         
-        // Event listeners
-        nextBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log('Next button clicked, current step:', currentStep);
-            nextStep();
-        });
-        
-        prevBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log('Previous button clicked, current step:', currentStep);
-            prevStep();
-        });
-
-        // Form submission with Firebase integration
-        document.getElementById('vehicleForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            console.log('Form submission started...');
-            
-            // Check if Firebase is ready
-            if (!window.db) {
-                alert('Firebase is not initialized. Please refresh the page and try again.');
-                return;
-            }
-            
-            // Check if user is authenticated
-            if (!window.getCurrentUser()) {
-                alert('You must be logged in to list a vehicle. Please log in and try again.');
-                return;
-            }
-            
-            // Show loading state
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = `
-                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Saving...
+        // Show error info
+        if (confidenceElement) {
+            confidenceElement.innerHTML = `
+                Using basic market calculation (API unavailable)
+                <br><small class="text-orange-600">For accurate pricing, please ensure API is running</small>
             `;
-            submitBtn.disabled = true;
+        }
+    }
+}
+
+// Fallback basic calculation (enhanced version of your original logic)
+function calculateBasicEstimate() {
+    const makeSelect = document.querySelector('select[required]');
+    const modelInput = document.querySelector('input[required]');
+    const yearSelect = document.querySelectorAll('select[required]')[1];
+    const mileageInput = document.querySelector('input[type="number"]');
+    
+    if (!makeSelect.value || !modelInput.value || !yearSelect.value || !mileageInput.value) {
+        return;
+    }
+    
+    const make = makeSelect.value.toLowerCase();
+    const model = modelInput.value.toLowerCase().replace(/\s+/g, '').replace('-', '');
+    const year = parseInt(yearSelect.value);
+    const mileage = parseInt(mileageInput.value);
+    const currentYear = new Date().getFullYear();
+    
+    // Get condition multiplier
+    let conditionMultiplier = 1.0;
+    const selectedCondition = document.querySelector('input[name="condition"]:checked');
+    if (selectedCondition) {
+        switch(selectedCondition.value) {
+            case 'excellent': conditionMultiplier = 1.15; break;
+            case 'good': conditionMultiplier = 1.0; break;
+            case 'fair': conditionMultiplier = 0.85; break;
+        }
+    }
+    
+    // Default values for unknown makes/models
+    let basePrice = 5000000;
+    let yearDepreciation = 250000;
+    let mileageDepreciation = 20;
+    
+    // Try to find specific vehicle data
+    if (vehicleData[make]) {
+        // Try exact model match first
+        const exactMatch = Object.keys(vehicleData[make]).find(key => 
+            model.includes(key) || key.includes(model)
+        );
+        
+        if (exactMatch) {
+            const vehicleInfo = vehicleData[make][exactMatch];
+            basePrice = vehicleInfo.base;
+            yearDepreciation = vehicleInfo.yearDepreciation;
+            mileageDepreciation = vehicleInfo.mileageDepreciation;
+        } else {
+            // Use average for the make
+            const makeModels = Object.values(vehicleData[make]);
+            basePrice = makeModels.reduce((sum, model) => sum + model.base, 0) / makeModels.length;
+            yearDepreciation = makeModels.reduce((sum, model) => sum + model.yearDepreciation, 0) / makeModels.length;
+            mileageDepreciation = makeModels.reduce((sum, model) => sum + model.mileageDepreciation, 0) / makeModels.length;
+        }
+    }
+    
+    // Calculate depreciation (modified for Sri Lankan market - less depreciation)
+    const ageDepreciation = (currentYear - year) * yearDepreciation * 0.8; // Reduced depreciation
+    const mileageDepreciationAmount = (mileage / 1000) * mileageDepreciation * 0.7; // Reduced mileage impact
+    
+    // Calculate estimated value
+    let estimatedValue = basePrice - ageDepreciation - mileageDepreciationAmount;
+    estimatedValue *= conditionMultiplier;
+    
+    // Ensure minimum value
+    estimatedValue = Math.max(estimatedValue, 1000000);
+    
+    // Create range (±15%)
+    const lowerBound = Math.round(estimatedValue * 0.85);
+    const upperBound = Math.round(estimatedValue * 1.15);
+    
+    // Update the display with enhanced formatting
+    const aiEstimateElement = document.getElementById('aiEstimate');
+    if (aiEstimateElement) {
+        aiEstimateElement.innerHTML = `LKR ${formatLKR(lowerBound)} - ${formatLKR(upperBound)}`;
+    }
+}
+
+// Add detailed prediction breakdown with corrected calculations
+function addPredictionBreakdown(apiData, calculatedAverage) {
+    const breakdown = apiData.prediction.individual_predictions;
+    if (!breakdown) return;
+    
+    const aiEstimateContainer = document.querySelector('.bg-gradient-to-r.from-purple-50.to-blue-50');
+    if (!aiEstimateContainer) return;
+    
+    // Remove existing breakdown if present
+    const existingBreakdown = aiEstimateContainer.querySelector('.prediction-breakdown');
+    if (existingBreakdown) {
+        existingBreakdown.remove();
+    }
+    
+    // Convert individual predictions to numeric values for display
+    const modelEntries = Object.entries(breakdown).map(([model, price]) => {
+        let numericPrice = 0;
+        if (typeof price === 'string') {
+            const cleanPrice = price.replace(/[^\d.]/g, '');
+            const numValue = parseFloat(cleanPrice);
             
-            try {
-                // Collect form data
-                console.log('Collecting form data...');
-                const formData = collectFormData();
-                console.log('Form data collected:', formData);
+            if (price.includes('Cr')) {
+                numericPrice = numValue * 10000000;
+            } else if (price.includes('L')) {
+                numericPrice = numValue * 100000;
+            } else if (price.includes('Million')) {
+                numericPrice = numValue * 1000000;
+            } else {
+                numericPrice = numValue;
+            }
+        } else {
+            numericPrice = price;
+        }
+        
+        return {
+            model: model,
+            originalPrice: price,
+            numericPrice: numericPrice,
+            formattedPrice: formatLKR(numericPrice)
+        };
+    });
+    
+    const breakdownHtml = `
+        <div class="prediction-breakdown mt-4 p-3 bg-white bg-opacity-50 rounded-lg border border-purple-200">
+            <h4 class="text-sm font-semibold text-gray-700 mb-2">🔍 AI Model Breakdown:</h4>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                ${modelEntries.map(entry => 
+                    `<div class="flex justify-between">
+                        <span class="text-gray-600">${entry.model.toUpperCase()}:</span>
+                        <span class="font-medium">LKR ${entry.formattedPrice}</span>
+                    </div>`
+                ).join('')}
+            </div>
+            <div class="mt-3 pt-2 border-t border-purple-200">
+                <div class="flex justify-between text-sm font-semibold text-purple-700">
+                    <span>Ensemble Average:</span>
+                    <span>LKR ${formatLKR(calculatedAverage)}</span>
+                </div>
+            </div>
+            <div class="mt-2 text-xs text-gray-500">
+                Final estimate calculated as average of ${modelEntries.length} ML models with ±10% range
+            </div>
+        </div>
+    `;
+    
+    aiEstimateContainer.insertAdjacentHTML('beforeend', breakdownHtml);
+}
+
+// Enhanced form submission with API validation
+async function submitFormWithAPI() {
+    const formData = collectFormData();
+    
+    try {
+        // Validate vehicle with API first
+        const validationResponse = await fetch(`${API_BASE_URL}/validate-vehicle`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                make: formData.make,
+                model: formData.model
+            })
+        });
+        
+        if (validationResponse.ok) {
+            const validationData = await validationResponse.json();
+            console.log('Vehicle validation:', validationData);
+            
+            // Add validation info to form data
+            formData.vehicleValidation = validationData;
+        }
+        
+        // Get final price prediction
+        const finalPrediction = await fetch(`${API_BASE_URL}/predict-price`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                make: formData.make,
+                model: formData.model,
+                year: formData.year,
+                mileage: formData.mileage,
+                fuel_type: formData.fuelType,
+                body_type: formData.bodyType,
+                condition: formData.condition,
+                transmission: 'automatic',
+                accident_history: formData.accidentHistory || 'none',
+                service_records: formData.serviceHistory || 'complete'
+            })
+        });
+        
+        if (finalPrediction.ok) {
+            const predictionData = await finalPrediction.json();
+            
+            // Calculate consistent average from individual predictions
+            let calculatedAverage = predictionData.prediction.estimated_price;
+            
+            if (predictionData.prediction.individual_predictions) {
+                const individualPrices = Object.values(predictionData.prediction.individual_predictions);
+                const numericPrices = individualPrices.map(price => {
+                    if (typeof price === 'string') {
+                        const cleanPrice = price.replace(/[^\d.]/g, '');
+                        const numValue = parseFloat(cleanPrice);
+                        
+                        if (price.includes('Cr')) {
+                            return numValue * 10000000;
+                        } else if (price.includes('L')) {
+                            return numValue * 100000;
+                        } else if (price.includes('Million')) {
+                            return numValue * 1000000;
+                        } else {
+                            return numValue;
+                        }
+                    }
+                    return price;
+                }).filter(price => !isNaN(price) && price > 0);
                 
-                // Generate unique listing ID first (needed for storage path)
-                const listingId = formData.listingId;
-                console.log('Using listing ID for storage:', listingId);
-                
-                // Validate required fields
-                if (!formData.make || !formData.model || !formData.year || !formData.askingPrice) {
-                    throw new Error('Please fill in all required fields');
+                if (numericPrices.length > 0) {
+                    calculatedAverage = numericPrices.reduce((sum, price) => sum + price, 0) / numericPrices.length;
                 }
-                
-                // Upload files to Firebase Storage under vehicles/{listingId}/
-                console.log('Starting file uploads...');
-                console.log('Files to upload:', uploadedFiles);
-                
-                // Upload vehicle photos to vehicles/{listingId}/photos/
-                let photoURLs = [];
-                if (uploadedFiles.vehiclePhotos && uploadedFiles.vehiclePhotos.length > 0) {
-                    console.log(`Uploading ${uploadedFiles.vehiclePhotos.length} vehicle photos...`);
-                    photoURLs = await uploadFilesToStorage(uploadedFiles.vehiclePhotos, 'photos', listingId);
-                    console.log('Photo URLs:', photoURLs);
-                }
-                
-                // Upload documents to vehicles/{listingId}/documents/
-                const documentURLs = {};
-                if (uploadedFiles.documents.title) {
-                    console.log('Uploading title document...');
-                    const titleURL = await uploadFilesToStorage([uploadedFiles.documents.title], 'documents', listingId);
-                    documentURLs.title = titleURL[0];
-                }
-                if (uploadedFiles.documents.registration) {
-                    console.log('Uploading registration document...');
-                    const regURL = await uploadFilesToStorage([uploadedFiles.documents.registration], 'documents', listingId);
-                    documentURLs.registration = regURL[0];
-                }
-                
-                console.log('Document URLs:', documentURLs);
-                
-                // Add file URLs to form data
-                formData.photos = photoURLs.filter(url => url !== null);
-                formData.documents = documentURLs;
-                
-                // Calculate AI estimate for storage
-                const aiEstimateElement = document.getElementById('aiEstimate');
-                formData.aiEstimate = aiEstimateElement ? aiEstimateElement.textContent : 'Not calculated';
-                
-                // Add additional metadata
-                formData.createdAt = window.serverTimestamp();
-                formData.updatedAt = window.serverTimestamp();
-                formData.status = 'active';
-                
-                console.log('Final form data to save:', formData);
-                
-                // Save to Firestore - Create Advertisements collection
-                console.log('Saving to Firestore Advertisements collection...');
-                const docRef = await window.addDoc(window.collection(window.db, 'Advertisements'), formData);
-                
-                console.log('✅ Advertisement saved successfully! Document ID:', docRef.id);
-                
-                // Show success message
-                const container = document.querySelector('.glass-effect');
-                container.innerHTML = `
-                    <div class="text-center py-16">
-                        <div class="text-6xl mb-6">🎉</div>
-                        <h2 class="text-3xl font-bold text-gray-800 mb-4">Vehicle Listed Successfully!</h2>
-                        <p class="text-gray-600 mb-8">Your vehicle has been saved to the database and is now available for buyers.</p>
-                        <div class="space-y-4">
-                            <div class="bg-gray-100 rounded-lg p-4">
-                                <p class="text-gray-800 font-medium">Listing ID: ${formData.listingId}</p>
-                                <p class="text-gray-600 text-sm">Database ID: ${docRef.id}</p>
-                                <p class="text-gray-600 text-sm">Collection: Advertisements</p>
-                                <p class="text-gray-600 text-sm">Listed by: ${formData.userName || formData.userEmail}</p>
-                            </div>
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                
-                            </div>
-                            <div class="flex space-x-4 justify-center">
-                                <button class="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg font-medium hover:from-purple-600 hover:to-blue-600 transition-colors" onclick="window.location.href='dashboard.html'">
-                                    🏠 Return to Dashboard
-                                </button>
-                                <button class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors" onclick="window.location.reload()">
-                                    ➕ List Another Vehicle
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-            } catch (error) {
-                console.error('❌ Error saving advertisement:', error);
-                console.error('Error details:', {
-                    message: error.message,
-                    code: error.code,
-                    stack: error.stack
-                });
-                
-                // Show detailed error message
-                alert(`Error saving your listing: ${error.message}\n\nPlease check the browser console for more details and try again.`);
-                
-                // Reset button
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
+            }
+            
+            formData.aiPrediction = predictionData;
+            formData.aiEstimate = `LKR ${formatLKR(calculatedAverage * 0.9)} - ${formatLKR(calculatedAverage * 1.1)}`;
+            formData.averageModelPrice = calculatedAverage;
+        }
+        
+    } catch (error) {
+        console.warn('API validation/prediction failed, proceeding with basic data:', error);
+    }
+    
+    return formData;
+}
+
+// Floating label functionality
+document.querySelectorAll('input, select, textarea').forEach(element => {
+    const label = element.parentElement.querySelector('.floating-label');
+    
+    if (label) {
+        function updateLabel() {
+            if (element.value || element.tagName === 'SELECT') {
+                label.classList.add('active');
+            } else {
+                label.classList.remove('active');
+            }
+        }
+        
+        element.addEventListener('focus', () => label.classList.add('active'));
+        element.addEventListener('blur', updateLabel);
+        element.addEventListener('input', () => {
+            updateLabel();
+            // Recalculate AI estimate when key fields change
+            if (element.required || element.name === 'condition' || element.type === 'number') {
+                setTimeout(calculateAIEstimate, 500); // Increased delay to avoid too many API calls
             }
         });
+        
+        // Initial check
+        updateLabel();
+    }
+});
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set initial AI estimate
+// Enhanced event listener for make selection
+document.addEventListener('change', function(e) {
+    if (e.target.matches('select[required]')) { // Make dropdown
+        const selectedMake = e.target.value;
+        if (selectedMake) {
+            console.log('Make selected:', selectedMake);
+            populateModelsDropdown(selectedMake);
+        }
+    }
+});
+
+// Condition selection
+document.querySelectorAll('input[name="condition"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        document.querySelectorAll('.condition-card').forEach(card => {
+            card.classList.remove('bg-purple-100', 'border-purple-400', 'text-purple-800');
+            card.classList.add('text-gray-800', 'border-gray-200');
+        });
+        
+        if (this.checked) {
+            const card = this.parentElement.querySelector('.condition-card');
+            card.classList.remove('text-gray-800', 'border-gray-200');
+            card.classList.add('bg-purple-100', 'border-purple-400', 'text-purple-800');
+            
+            // Recalculate AI estimate when condition changes
+            setTimeout(calculateAIEstimate, 300);
+        }
+    });
+});
+
+// File upload functionality with Firebase Storage
+let uploadedFiles = {
+    vehiclePhotos: [],
+    documents: {
+        title: null,
+        registration: null
+    }
+};
+
+document.querySelectorAll('.upload-area').forEach(area => {
+    const input = area.querySelector('input[type="file"]');
+    
+    if (input) {
+        area.addEventListener('click', () => input.click());
+        
+        area.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            area.classList.add('dragover');
+        });
+        
+        area.addEventListener('dragleave', () => {
+            area.classList.remove('dragover');
+        });
+        
+        area.addEventListener('drop', (e) => {
+            e.preventDefault();
+            area.classList.remove('dragover');
+            input.files = e.dataTransfer.files;
+            handleFileSelection(area, input.files, input);
+        });
+        
+        input.addEventListener('change', () => {
+            handleFileSelection(area, input.files, input);
+        });
+    }
+});
+
+function handleFileSelection(area, files, inputElement) {
+    if (files.length > 0) {
+        const fileList = Array.from(files).map(file => file.name).join(', ');
+        const multiple = inputElement && inputElement.multiple;
+        const accept = inputElement && inputElement.accept;
+        
+        // Store files for later upload
+        if (multiple) {
+            // Vehicle photos
+            uploadedFiles.vehiclePhotos = Array.from(files);
+        } else {
+            // Documents
+            const docType = area.closest('.grid') ? 
+                (area === area.closest('.grid').children[0] ? 'title' : 'registration') : 'title';
+            uploadedFiles.documents[docType] = files[0];
+        }
+        
+        area.innerHTML = `
+            <div class="text-gray-700">
+                <svg class="mx-auto h-8 w-8 mb-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <p class="text-sm font-medium">${files.length} file(s) selected</p>
+                <p class="text-xs text-gray-500">${fileList}</p>
+            </div>
+            <input type="file" class="hidden" ${multiple ? 'multiple' : ''} accept="${accept || ''}">
+        `;
+    }
+}
+
+// Function to upload files to Firebase Storage
+async function uploadFilesToStorage(files, folder, listingId) {
+    console.log(`🔄 Starting upload for ${files.length} files to folder: ${folder}, listingId: ${listingId}`);
+    
+    const uploadPromises = files.map(async (file, index) => {
+        if (!file) {
+            console.log(`⚠️ File ${index} is null, skipping...`);
+            return null;
+        }
+        
+        const timestamp = Date.now();
+        const fileExtension = file.name.split('.').pop();
+        const fileName = `vehicles/${listingId}/${folder}/${timestamp}_${index}.${fileExtension}`;
+        
+        console.log(`📁 Uploading file: ${file.name}`);
+        console.log(`📍 Storage path: ${fileName}`);
+        console.log(`📊 File size: ${file.size} bytes`);
+        console.log(`🔧 File type: ${file.type}`);
+        
+        const storageRef = window.ref(window.storage, fileName);
+        
+        try {
+            console.log(`⬆️ Starting upload for ${file.name}...`);
+            const snapshot = await window.uploadBytes(storageRef, file);
+            console.log(`✅ Upload completed for ${file.name}`);
+            console.log(`📦 Snapshot:`, snapshot);
+            
+            const downloadURL = await window.getDownloadURL(snapshot.ref);
+            console.log(`🔗 Download URL: ${downloadURL}`);
+            
+            return downloadURL;
+        } catch (error) {
+            console.error(`❌ Upload failed for ${file.name}:`, error);
+            console.error(`🔍 Error details:`, {
+                code: error.code,
+                message: error.message,
+                serverResponse: error.serverResponse
+            });
+            return null;
+        }
+    });
+    
+    const results = await Promise.all(uploadPromises);
+    console.log(`🎯 Upload results:`, results);
+    return results;
+}
+
+// Enhanced form data collection
+function collectFormData() {
+    const currentUser = window.getCurrentUser();
+    
+    return {
+        // User Information
+        userId: currentUser?.uid || null,
+        userEmail: currentUser?.email || null,
+        userName: currentUser?.displayName || null,
+        
+        // Basic Information
+        make: document.querySelector('select[required]').value,
+        model: document.querySelector('input[required]').value,
+        year: parseInt(document.querySelectorAll('select[required]')[1].value),
+        mileage: parseInt(document.querySelector('input[type="number"]').value),
+        bodyType: document.querySelectorAll('select[required]')[2].value,
+        fuelType: document.querySelectorAll('select[required]')[3].value,
+        
+        // Vehicle Condition
+        condition: document.querySelector('input[name="condition"]:checked')?.value || '',
+        accidentHistory: document.querySelectorAll('select')[4].value,
+        serviceHistory: document.querySelectorAll('select')[5].value,
+        additionalNotes: document.querySelector('textarea').value,
+        
+        // Pricing & Contact
+        askingPrice: parseInt(document.querySelector('input[placeholder="4500000"]').value),
+        negotiable: document.querySelectorAll('select')[6].value === 'yes',
+        sellerName: document.querySelectorAll('input[required]')[1].value,
+        phoneNumber: document.querySelector('input[type="tel"]').value,
+        email: document.querySelector('input[type="email"]').value,
+        
+        // Contact preferences
+        contactMethods: Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+            .map(cb => cb.nextElementSibling.textContent),
+        
+        // Metadata
+        listingId: 'VH-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+        status: 'active',
+        location: 'Sri Lanka',
+        createdAt: window.serverTimestamp(),
+        updatedAt: window.serverTimestamp()
+    };
+}
+
+// Navigation functions
+function showStep(step) {
+    console.log('Showing step:', step);
+    
+    // Hide all steps
+    steps.forEach(s => s.classList.remove('active'));
+    
+    // Show current step
+    const targetStep = document.querySelector(`[data-step="${step}"]`);
+    if (targetStep) {
+        targetStep.classList.add('active');
+        console.log('Step', step, 'is now active');
+    } else {
+        console.error('Step element not found for step:', step);
+    }
+    
+    // Update step indicators
+    stepIndicators.forEach((indicator, index) => {
+        indicator.classList.remove('step-active', 'step-completed', 'step-default');
+        if (index + 1 < step) {
+            indicator.classList.add('step-completed');
+        } else if (index + 1 === step) {
+            indicator.classList.add('step-active');
+        } else {
+            indicator.classList.add('step-default');
+        }
+    });
+    
+    // Update progress bar
+    progressBar.style.width = `${(step / totalSteps) * 100}%`;
+    
+    // Update navigation buttons
+    prevBtn.style.display = step === 1 ? 'none' : 'block';
+    nextBtn.style.display = step === totalSteps ? 'none' : 'block';
+    submitBtn.style.display = step === totalSteps ? 'block' : 'none';
+}
+
+function nextStep() {
+    // Basic validation for current step
+    const currentStepElement = document.querySelector(`[data-step="${currentStep}"]`);
+    const requiredFields = currentStepElement.querySelectorAll('[required]');
+    let isValid = true;
+    
+    // Check if all required fields are filled
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            isValid = false;
+            field.style.borderColor = '#ef4444';
+            // Reset border color after 3 seconds
+            setTimeout(() => {
+                field.style.borderColor = '';
+            }, 3000);
+        } else {
+            field.style.borderColor = '';
+        }
+    });
+    
+    // For step 2, check if condition is selected
+    if (currentStep === 2) {
+        const conditionSelected = document.querySelector('input[name="condition"]:checked');
+        if (!conditionSelected) {
+            isValid = false;
+            // Highlight condition cards
+            document.querySelectorAll('.condition-card').forEach(card => {
+                card.style.borderColor = '#ef4444';
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.condition-card').forEach(card => {
+                    card.style.borderColor = '';
+                });
+            }, 3000);
+        }
+    }
+    
+    if (isValid && currentStep < totalSteps) {
+        currentStep++;
+        showStep(currentStep);
+    } else if (!isValid) {
+        // Show validation message
+        alert('Please fill in all required fields before proceeding.');
+    }
+}
+
+function prevStep() {
+    if (currentStep > 1) {
+        currentStep--;
+        showStep(currentStep);
+    }
+}
+
+// Event listeners
+nextBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    console.log('Next button clicked, current step:', currentStep);
+    nextStep();
+});
+
+prevBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    console.log('Previous button clicked, current step:', currentStep);
+    prevStep();
+});
+
+// Enhanced form submission with Firebase integration
+document.getElementById('vehicleForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    console.log('Form submission started...');
+    
+    // Check if Firebase is ready
+    if (!window.db) {
+        alert('Firebase is not initialized. Please refresh the page and try again.');
+        return;
+    }
+    
+    // Check if user is authenticated
+    if (!window.getCurrentUser()) {
+        alert('You must be logged in to list a vehicle. Please log in and try again.');
+        return;
+    }
+    
+    // Show loading state
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Saving...
+    `;
+    submitBtn.disabled = true;
+    
+    try {
+        // Collect form data with API integration
+        console.log('Collecting form data with API integration...');
+        const formData = await submitFormWithAPI();
+        console.log('Form data collected:', formData);
+        
+        // Generate unique listing ID first (needed for storage path)
+        const listingId = formData.listingId;
+        console.log('Using listing ID for storage:', listingId);
+        
+        // Validate required fields
+        if (!formData.make || !formData.model || !formData.year || !formData.askingPrice) {
+            throw new Error('Please fill in all required fields');
+        }
+        
+        // Upload files to Firebase Storage under vehicles/{listingId}/
+        console.log('Starting file uploads...');
+        console.log('Files to upload:', uploadedFiles);
+        
+        // Upload vehicle photos to vehicles/{listingId}/photos/
+        let photoURLs = [];
+        if (uploadedFiles.vehiclePhotos && uploadedFiles.vehiclePhotos.length > 0) {
+            console.log(`Uploading ${uploadedFiles.vehiclePhotos.length} vehicle photos...`);
+            photoURLs = await uploadFilesToStorage(uploadedFiles.vehiclePhotos, 'photos', listingId);
+            console.log('Photo URLs:', photoURLs);
+        }
+        
+        // Upload documents to vehicles/{listingId}/documents/
+        const documentURLs = {};
+        if (uploadedFiles.documents.title) {
+            console.log('Uploading title document...');
+            const titleURL = await uploadFilesToStorage([uploadedFiles.documents.title], 'documents', listingId);
+            documentURLs.title = titleURL[0];
+        }
+        if (uploadedFiles.documents.registration) {
+            console.log('Uploading registration document...');
+            const regURL = await uploadFilesToStorage([uploadedFiles.documents.registration], 'documents', listingId);
+            documentURLs.registration = regURL[0];
+        }
+        
+        console.log('Document URLs:', documentURLs);
+        
+        // Add file URLs to form data
+        formData.photos = photoURLs.filter(url => url !== null);
+        formData.documents = documentURLs;
+        
+        // Calculate AI estimate for storage
+        const aiEstimateElement = document.getElementById('aiEstimate');
+        if (!formData.aiEstimate && aiEstimateElement) {
+            formData.aiEstimate = aiEstimateElement.textContent || 'Not calculated';
+        }
+        
+        // Add additional metadata
+        formData.createdAt = window.serverTimestamp();
+        formData.updatedAt = window.serverTimestamp();
+        formData.status = 'active';
+        
+        console.log('Final form data to save:', formData);
+        
+        // Save to Firestore - Create Advertisements collection
+        console.log('Saving to Firestore Advertisements collection...');
+        const docRef = await window.addDoc(window.collection(window.db, 'Advertisements'), formData);
+        
+        console.log('✅ Advertisement saved successfully! Document ID:', docRef.id);
+        
+        // Enhanced success message with API data
+        const apiInfo = formData.aiPrediction ? 
+            `<p class="text-green-600 text-sm">✅ Enhanced AI prediction applied</p>` :
+            `<p class="text-orange-600 text-sm">⚠️ Basic estimation used (API unavailable)</p>`;
+        
+        // Show success message
+        const container = document.querySelector('.glass-effect');
+        container.innerHTML = `
+            <div class="text-center py-16">
+                <div class="text-6xl mb-6">🎉</div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Vehicle Listed Successfully!</h2>
+                <p class="text-gray-600 mb-6">Your vehicle has been saved to the database and is now available for buyers.</p>
+                ${apiInfo}
+                <div class="space-y-4 mt-6">
+                    <div class="bg-gray-100 rounded-lg p-4">
+                        <p class="text-gray-800 font-medium">Listing ID: ${formData.listingId}</p>
+                        <p class="text-gray-600 text-sm">Database ID: ${docRef.id}</p>
+                        <p class="text-gray-600 text-sm">AI Estimate: ${formData.aiEstimate || 'Not calculated'}</p>
+                        <p class="text-gray-600 text-sm">Collection: Advertisements</p>
+                        <p class="text-gray-600 text-sm">Listed by: ${formData.userName || formData.userEmail}</p>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 class="font-medium text-blue-800 mb-2">📈 Market Information</h4>
+                        <p class="text-blue-700 text-sm">
+                            ${formData.vehicleValidation?.valid ? 
+                                `Vehicle found in database: ${formData.vehicleValidation.vehicle_data?.market_status || 'Available'}` :
+                                'Vehicle estimated using general market data'
+                            }
+                        </p>
+                    </div>
+                    <div class="flex space-x-4 justify-center">
+                        <button class="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg font-medium hover:from-purple-600 hover:to-blue-600 transition-colors" onclick="window.location.href='dashboard.html'">
+                            🏠 Return to Dashboard
+                        </button>
+                        <button class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors" onclick="window.location.reload()">
+                            ➕ List Another Vehicle
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+    } catch (error) {
+        console.error('❌ Error saving advertisement:', error);
+        console.error('Error details:', {
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+        });
+        
+        // Show detailed error message
+        alert(`Error saving your listing: ${error.message}\n\nPlease check the browser console for more details and try again.`);
+        
+        // Reset button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    // Test API connection first
+    setTimeout(async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/health`);
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ API connected:', data.message);
+                isApiConnected = true;
+                
+                // Update initial estimate text to show API is available
+                const aiEstimateElement = document.getElementById('aiEstimate');
+                if (aiEstimateElement) {
+                    aiEstimateElement.innerHTML = 'Enter vehicle details for enhanced AI estimate';
+                }
+            }
+        } catch (error) {
+            console.warn('⚠️ API not available, using basic calculations:', error.message);
+            isApiConnected = false;
+            
+            // Update initial estimate text to show API is unavailable
             const aiEstimateElement = document.getElementById('aiEstimate');
             if (aiEstimateElement) {
-                aiEstimateElement.innerHTML = 'LKR 4.2L - 5.8L';
+                aiEstimateElement.innerHTML = 'Enter vehicle details for basic estimate (API offline)';
             }
-            
-            showStep(1);
-        });
+        }
+        
+        // Populate dropdowns after API check
+        await populateMakesDropdown();
+        populateYearDropdown();
+        
+    }, 1000);
+    
+    showStep(1);
+});
     </script>
 </body>
 </html>
