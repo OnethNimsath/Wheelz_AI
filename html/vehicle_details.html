@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Details - WheelzAI</title>
+    <meta name="description" content="View detailed information about vehicles for sale on WheelzAI. Get comprehensive specs, photos, and seller contact details.">
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&family=Inter%3Awght%40400%3B500%3B700%3B900&family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getStorage, ref, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+        import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
+            authDomain: "wheelzai.firebaseapp.com",
+            projectId: "wheelzai",
+            storageBucket: "wheelzai.firebasestorage.app",
+            messagingSenderId: "132756052907",
+            appId: "1:132756052907:web:b92dc998b4b5bee8d450ee",
+            measurementId: "G-ECQJYZYK43"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        const auth = getAuth(app);
+
+        let currentVehicle = null;
+        let currentImageIndex = 0;
+
+        // Function to get URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            const results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Function to get image URL from Firebase Storage
+        async function getImageUrl(imagePath) {
+            if (!imagePath) return null;
+            
+            try {
+                if (imagePath.startsWith('data:image/')) {
+                    return imagePath; // It's a base64 image
+                }
+                
+                if (imagePath.startsWith('http')) {
+                    return imagePath; // It's already a full URL
+                }
+                
+                // It's a Firebase Storage path
+                const imageRef = ref(storage, imagePath);
+                const url = await getDownloadURL(imageRef);
+                return url;
+            } catch (error) {
+                console.error('Error getting image URL:', error);
+                return 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&h=600&fit=crop&crop=center';
+            }
+        }
+
+        // Function to format price
+        function formatPrice(price) {
+            if (!price || price === 0) return 'Price on request';
+            if (price >= 1000000) {
+                return `LKR ${(price / 1000000).toFixed(1)}M`;
+            }
+            return `LKR ${(price / 1000).toFixed(0)}K`;
+        }
+
+        // Function to format number with commas
+        function formatNumber(num) {
+            if (!num) return 'N/A';
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // Function to load vehicle details
+        async function loadVehicleDetails(vehicleId) {
+            try {
+                const loadingElement = document.getElementById('loadingVehicle');
+                const contentElement = document.getElementById('vehicleContent');
+                const errorElement = document.getElementById('errorMessage');
+
+                // Show loading state
+                loadingElement.classList.remove('hidden');
+                contentElement.classList.add('hidden');
+                errorElement.classList.add('hidden');
+
+                // Fetch vehicle document from Firestore
+                const docRef = doc(db, 'Advertisements', vehicleId);
+                const docSnap = await getDoc(docRef);
+
+                if (!docSnap.exists()) {
+                    throw new Error('Vehicle not found');
+                }
+
+                currentVehicle = { id: docSnap.id, ...docSnap.data() };
+                
+                // Process images
+                currentVehicle.images = [];
+                if (currentVehicle.photos && Array.isArray(currentVehicle.photos)) {
+                    for (const photoPath of currentVehicle.photos) {
+                        const imageUrl = await getImageUrl(photoPath);
+                        if (imageUrl) {
+                            currentVehicle.images.push(imageUrl);
+                        }
+                    }
+                }
+
+                // If no images from photos array, try individual image fields
+                if (currentVehicle.images.length === 0) {
+                    const imageFields = ['mainImage', 'image2', 'image3', 'image4', 'image5', 'image6'];
+                    for (const field of imageFields) {
+                        if (currentVehicle[field]) {
+                            const imageUrl = await getImageUrl(currentVehicle[field]);
+                            if (imageUrl) {
+                                currentVehicle.images.push(imageUrl);
+                            }
+                        }
+                    }
+                }
+
+                // Add fallback image if no images available
+                if (currentVehicle.images.length === 0) {
+                    currentVehicle.images.push('https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&h=600&fit=crop&crop=center');
+                }
+
+                await renderVehicleDetails();
+
+                // Hide loading and show content
+                loadingElement.classList.add('hidden');
+                contentElement.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Error loading vehicle details:', error);
+                
+                // Show error message
+                document.getElementById('loadingVehicle').classList.add('hidden');
+                document.getElementById('errorMessage').classList.remove('hidden');
+                document.getElementById('errorText').textContent = error.message || 'Failed to load vehicle details';
+            }
+        }
+
+        // Function to render vehicle details
+        async function renderVehicleDetails() {
+            if (!currentVehicle) return;
+
+            // Update page title
+            document.title = `${currentVehicle.make || ''} ${currentVehicle.model || ''} ${currentVehicle.year || ''} - WheelzAI`;
+
+            // Render main image gallery
+            renderImageGallery();
+
+            // Render vehicle info
+            renderVehicleInfo();
+
+            // Render specifications
+            renderSpecifications();
+
+            // Render features
+            renderFeatures();
+
+            // Render seller info
+            renderSellerInfo();
+        }
+
+        // Function to render image gallery
+        function renderImageGallery() {
+            const mainImageElement = document.getElementById('mainImage');
+            const thumbnailsElement = document.getElementById('imageThumbnails');
+            const imageCounterElement = document.getElementById('imageCounter');
+
+            if (currentVehicle.images.length > 0) {
+                // Set main image
+                mainImageElement.src = currentVehicle.images[currentImageIndex];
+                mainImageElement.alt = `${currentVehicle.make} ${currentVehicle.model}`;
+
+                // Update counter
+                imageCounterElement.textContent = `${currentImageIndex + 1} / ${currentVehicle.images.length}`;
+
+                // Render thumbnails
+                if (currentVehicle.images.length > 1) {
+                    thumbnailsElement.innerHTML = currentVehicle.images.map((image, index) => `
+                        <img src="${image}" 
+                             alt="Vehicle image ${index + 1}"
+                             class="thumbnail-image ${index === currentImageIndex ? 'active' : ''}"
+                             onclick="changeMainImage(${index})"
+                             onerror="this.src='https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=150&h=100&fit=crop&crop=center'">
+                    `).join('');
+                } else {
+                    thumbnailsElement.innerHTML = '';
+                }
+            }
+        }
+
+        // Function to render vehicle info
+        function renderVehicleInfo() {
+            const titleElement = document.getElementById('vehicleTitle');
+            const priceElement = document.getElementById('vehiclePrice');
+            const locationElement = document.getElementById('vehicleLocation');
+            const postedDateElement = document.getElementById('postedDate');
+
+            // Title
+            titleElement.textContent = `${currentVehicle.make || 'Unknown'} ${currentVehicle.model || ''} ${currentVehicle.year || ''}`.trim();
+
+            // Price
+            priceElement.textContent = formatPrice(currentVehicle.askingPrice || currentVehicle.price || 0);
+
+            // Location
+            locationElement.textContent = currentVehicle.location || currentVehicle.city || 'Location not specified';
+
+            // Posted date
+            const postedDate = currentVehicle.createdAt 
+                ? new Date(currentVehicle.createdAt.toDate()).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                })
+                : 'Recently';
+            postedDateElement.textContent = `Posted on ${postedDate}`;
+        }
+
+        // Function to render specifications
+        function renderSpecifications() {
+            const specsElement = document.getElementById('vehicleSpecs');
+            
+            const specs = [
+                { label: 'Year', value: currentVehicle.year || 'N/A' },
+                { label: 'Mileage', value: currentVehicle.mileage ? `${formatNumber(currentVehicle.mileage)} km` : 'N/A' },
+                { label: 'Fuel Type', value: currentVehicle.fuelType || currentVehicle.fuel || 'N/A' },
+                { label: 'Transmission', value: currentVehicle.transmission || 'N/A' },
+                { label: 'Engine Capacity', value: currentVehicle.engineCapacity ? `${currentVehicle.engineCapacity} CC` : 'N/A' },
+                { label: 'Vehicle Type', value: currentVehicle.vehicleType || 'N/A' },
+                { label: 'Condition', value: currentVehicle.condition || currentVehicle.vehicleCondition || 'N/A' },
+                { label: 'Color', value: currentVehicle.color || 'N/A' }
+            ];
+
+            specsElement.innerHTML = specs.map(spec => `
+                <div class="spec-item">
+                    <span class="spec-label">${spec.label}</span>
+                    <span class="spec-value">${spec.value}</span>
+                </div>
+            `).join('');
+        }
+
+        // Function to render features
+        function renderFeatures() {
+            const featuresElement = document.getElementById('vehicleFeatures');
+            
+            const features = [];
+            
+            // Check various feature fields
+            if (currentVehicle.airCondition) features.push('Air Conditioning');
+            if (currentVehicle.powerSteering) features.push('Power Steering');
+            if (currentVehicle.powerMirror) features.push('Power Mirrors');
+            if (currentVehicle.powerWindow) features.push('Power Windows');
+            if (currentVehicle.centralLocking) features.push('Central Locking');
+            if (currentVehicle.abs) features.push('ABS');
+            if (currentVehicle.airbags) features.push('Airbags');
+            if (currentVehicle.alarm) features.push('Alarm System');
+            if (currentVehicle.alloyWheels) features.push('Alloy Wheels');
+            if (currentVehicle.sunroof) features.push('Sunroof');
+
+            if (features.length > 0) {
+                featuresElement.innerHTML = `
+                    <h3 class="section-title">Features</h3>
+                    <div class="features-grid">
+                        ${features.map(feature => `<span class="feature-tag">${feature}</span>`).join('')}
+                    </div>
+                `;
+            } else {
+                featuresElement.innerHTML = `
+                    <h3 class="section-title">Features</h3>
+                    <p class="text-gray-500">No specific features listed</p>
+                `;
+            }
+
+            // Add description if available
+            if (currentVehicle.description || currentVehicle.additionalInfo) {
+                featuresElement.innerHTML += `
+                    <div class="mt-6">
+                        <h3 class="section-title">Description</h3>
+                        <p class="description-text">${currentVehicle.description || currentVehicle.additionalInfo}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Function to render seller info
+        function renderSellerInfo() {
+            const sellerElement = document.getElementById('sellerInfo');
+            
+            sellerElement.innerHTML = `
+                <h3 class="section-title">Seller Information</h3>
+                <div class="seller-card">
+                    <div class="seller-avatar">
+                        <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                    </div>
+                    <div class="seller-details">
+                        <h4 class="seller-name">${currentVehicle.contactName || currentVehicle.sellerName || 'Private Seller'}</h4>
+                        <p class="seller-phone">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                            </svg>
+                            ${currentVehicle.phoneNumber || currentVehicle.contactNumber || 'Contact for details'}
+                        </p>
+                        <p class="seller-location">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            ${currentVehicle.location || currentVehicle.city || 'Sri Lanka'}
+                        </p>
+                    </div>
+                </div>
+                <div class="contact-buttons">
+                    ${currentVehicle.phoneNumber || currentVehicle.contactNumber ? `
+                        <a href="tel:${currentVehicle.phoneNumber || currentVehicle.contactNumber}" class="contact-btn call-btn">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                            </svg>
+                            Call Seller
+                        </a>
+                    ` : ''}
+                    ${currentVehicle.phoneNumber || currentVehicle.contactNumber ? `
+                        <a href="https://wa.me/94${(currentVehicle.phoneNumber || currentVehicle.contactNumber).replace(/[^\d]/g, '').slice(-9)}?text=Hi, I'm interested in your ${currentVehicle.make} ${currentVehicle.model} ${currentVehicle.year}" target="_blank" class="contact-btn whatsapp-btn">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.109"/>
+                            </svg>
+                            WhatsApp
+                        </a>
+                    ` : ''}
+                    <button onclick="shareVehicle()" class="contact-btn share-btn">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
+                        </svg>
+                        Share
+                    </button>
+                </div>
+            `;
+        }
+
+        // Global functions for image gallery
+        window.changeMainImage = function(index) {
+            currentImageIndex = index;
+            renderImageGallery();
+        };
+
+        window.previousImage = function() {
+            currentImageIndex = currentImageIndex > 0 ? currentImageIndex - 1 : currentVehicle.images.length - 1;
+            renderImageGallery();
+        };
+
+        window.nextImage = function() {
+            currentImageIndex = currentImageIndex < currentVehicle.images.length - 1 ? currentImageIndex + 1 : 0;
+            renderImageGallery();
+        };
+
+        // Global function to share vehicle
+        window.shareVehicle = function() {
+            if (navigator.share) {
+                navigator.share({
+                    title: `${currentVehicle.make} ${currentVehicle.model} ${currentVehicle.year}`,
+                    text: `Check out this ${currentVehicle.make} ${currentVehicle.model} for ${formatPrice(currentVehicle.askingPrice || currentVehicle.price)} on WheelzAI`,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('Link copied to clipboard!');
+                });
+            }
+        };
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('DOM loaded, initializing Firebase...');
+            
+            // Setup authentication
+            try {
+                await signInAnonymously(auth);
+                console.log('Signed in anonymously');
+            } catch (error) {
+                console.error('Auth error:', error);
+            }
+
+            // Get vehicle ID from URL
+            const vehicleId = getUrlParameter('id');
+            
+            if (!vehicleId) {
+                document.getElementById('errorMessage').classList.remove('hidden');
+                document.getElementById('errorText').textContent = 'No vehicle ID provided';
+                return;
+            }
+
+            // Load vehicle details
+            await loadVehicleDetails(vehicleId);
+        });
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8fafc;
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* White Navbar Styles */
+        .navbar-white {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-white.scrolled {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .navbar-white .logo-text {
+            color: #1f2937;
+        }
+        
+        .navbar-white .nav-link {
+            color: #6b7280;
+            transition: color 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .navbar-white .nav-link:hover {
+            color: #1f2937;
+        }
+        
+        .navbar-white .nav-link.active {
+            color: #1f2937;
+            font-weight: 600;
+        }
+        
+        .navbar-white .back-btn {
+            background: #1f2937;
+            color: white;
+            border: 1px solid #1f2937;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .navbar-white .back-btn:hover {
+            background: #374151;
+            border-color: #374151;
+        }
+        
+        /* Main content */
+        .main-content {
+            padding-top: 6rem;
+            min-height: 100vh;
+        }
+        
+        /* Loading and error states */
+        .loading-container, .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(31, 41, 55, 0.3);
+            border-radius: 50%;
+            border-top-color: #1f2937;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Vehicle content layout */
+        .vehicle-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        @media (min-width: 1024px) {
+            .vehicle-content {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+        
+        /* Image gallery */
+        .image-gallery {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .main-image-container {
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+        }
+        
+        .main-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-controls {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .image-controls:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+        
+        .prev-btn {
+            left: 1rem;
+        }
+        
+        .next-btn {
+            right: 1rem;
+        }
+        
+        .image-counter {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .image-thumbnails {
+            padding: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+        }
+        
+        .thumbnail-image {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .thumbnail-image:hover,
+        .thumbnail-image.active {
+            opacity: 1;
+            border-color: #1f2937;
+        }
+        
+        /* Vehicle info sections */
+        .info-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .vehicle-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .vehicle-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        
+        .vehicle-price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #059669;
+            margin-bottom: 0.5rem;
+        }
+        
+        .vehicle-meta {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        
+        .vehicle-meta svg {
+            width: 1rem;
+            height: 1rem;
+        }
+        
+        /* Specifications grid */
+        .specs-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        
+        @media (min-width: 768px) {
+            .specs-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .spec-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .spec-label {
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .spec-value {
+            font-weight: 500;
+            color: #1f2937;
+        }
+        
+        /* Features */
+        .features-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .feature-tag {
+            background: #1f2937;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .description-text {
+            color: #4b5563;
+            line-height: 1.7;
+            margin-top: 0.5rem;
+        }
+        
+        /* Seller info */
+        .seller-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 1rem;
+        }
+        
+        .seller-avatar {
+            width: 60px;
+            height: 60px;
+            background: #e5e7eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .seller-details {
+            flex: 1;
+        }
+        
+        .seller-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+        
+        .seller-phone,
+        .seller-location {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .contact-buttons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        
+        @media (min-width: 768px) {
+            .contact-buttons {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+        
+        .contact-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .call-btn {
+            background: #059669;
+            color: white;
+            border-color: #059669;
+        }
+        
+        .call-btn:hover {
+            background: #047857;
+            border-color: #047857;
+        }
+        
+        .whatsapp-btn {
+            background: #25d366;
+            color: white;
+            border-color: #25d366;
+        }
+        
+        .whatsapp-btn:hover {
+            background: #1db954;
+            border-color: #1db954;
+        }
+        
+        .share-btn {
+            background: #6b7280;
+            color: white;
+            border-color: #6b7280;
+        }
+        
+        .share-btn:hover {
+            background: #4b5563;
+            border-color: #4b5563;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding-top: 5rem;
+            }
+            
+            .vehicle-title {
+                font-size: 2rem;
+            }
+            
+            .vehicle-price {
+                font-size: 1.5rem;
+            }
+            
+            .vehicle-meta {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .main-image-container {
+                height: 250px;
+            }
+            
+            .image-controls {
+                width: 35px;
+                height: 35px;
+            }
+            
+            .prev-btn {
+                left: 0.5rem;
+            }
+            
+            .next-btn {
+                right: 0.5rem;
+            }
+        }
+        
+        /* Error state */
+        .error-icon {
+            width: 64px;
+            height: 64px;
+            color: #ef4444;
+            margin-bottom: 1rem;
+        }
+        
+        .error-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        
+        .error-text {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+        
+        .back-to-browse {
+            background: #1f2937;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .back-to-browse:hover {
+            background: #374151;
+        }
+        
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 navbar-white z-50" id="navbar">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10">
+                        <img src="/Wheelz_AI/Logo/WheelzAI_Logo.png" alt="WheelzAI Logo" class="w-full h-full object-contain">
+                    </div>
+                    <h2 class="text-xl font-bold logo-text">WheelzAI</h2>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="/Wheelz_AI/html/home.html" class="nav-link">Home</a>
+                    <a href="/Wheelz_AI/html/buy.html" class="nav-link">Buy</a>
+                    <a href="/Wheelz_AI/html/about.html" class="nav-link">About</a>
+                    <a href="/Wheelz_AI/html/contact.html" class="nav-link">Contact</a>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    <a href="/Wheelz_AI/html/buy.html" class="back-btn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        Back to Browse
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Loading State -->
+        <div id="loadingVehicle" class="loading-container">
+            <div class="loading-spinner"></div>
+            <h2 class="text-xl font-semibold text-gray-700">Loading vehicle details...</h2>
+            <p class="text-gray-500">Please wait while we fetch the information</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorMessage" class="error-container hidden">
+            <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+            <h2 class="error-title">Vehicle Not Found</h2>
+            <p class="error-text" id="errorText">The vehicle you're looking for could not be found.</p>
+            <a href="/Wheelz_AI/html/buy.html" class="back-to-browse">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back to Browse
+            </a>
+        </div>
+
+        <!-- Vehicle Content -->
+        <div id="vehicleContent" class="hidden">
+            <!-- Vehicle Header -->
+            <div class="vehicle-header">
+                <h1 id="vehicleTitle" class="vehicle-title">Loading...</h1>
+                <div id="vehiclePrice" class="vehicle-price">Loading...</div>
+                <div class="vehicle-meta">
+                    <div class="flex items-center gap-1">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span id="vehicleLocation">Loading...</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 8h6m-6-4h6m6 4v10a2 2 0 01-2 2H4a2 2 0 01-2-2V7a2 2 0 012-2h16a2 2 0 012 2v4"/>
+                        </svg>
+                        <span id="postedDate">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="vehicle-content">
+                <!-- Left Column: Images and Details -->
+                <div>
+                    <!-- Image Gallery -->
+                    <div class="image-gallery">
+                        <div class="main-image-container">
+                            <img id="mainImage" src="" alt="Vehicle" class="main-image">
+                            <button onclick="previousImage()" class="image-controls prev-btn">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                            </button>
+                            <button onclick="nextImage()" class="image-controls next-btn">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </button>
+                            <div id="imageCounter" class="image-counter">1 / 1</div>
+                        </div>
+                        <div id="imageThumbnails" class="image-thumbnails">
+                            <!-- Thumbnails will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Specifications -->
+                    <div class="info-section">
+                        <h3 class="section-title">Specifications</h3>
+                        <div id="vehicleSpecs" class="specs-grid">
+                            <!-- Specs will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Features and Description -->
+                    <div id="vehicleFeatures" class="info-section">
+                        <!-- Features will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Right Column: Seller Info -->
+                <div>
+                    <div id="sellerInfo" class="info-section">
+                        <!-- Seller info will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="container mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <img src="/Wheelz_AI/Logo/WheelzAI_Logo.png" alt="WheelzAI" class="w-8 h-8">
+                        <h3 class="text-xl font-bold">WheelzAI</h3>
+                    </div>
+                    <p class="text-gray-400 mb-4">Sri Lanka's leading AI-powered vehicle trading platform.</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/Wheelz_AI/html/home.html" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
+                        <li><a href="/Wheelz_AI/html/buy.html" class="text-gray-400 hover:text-white transition-colors">Browse Vehicles</a></li>
+                        <li><a href="/Wheelz_AI/html/about.html" class="text-gray-400 hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="/Wheelz_AI/html/contact.html" class="text-gray-400 hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Vehicle Types</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Cars</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Motorcycles</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Vans</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Commercial</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact Info</h4>
+                    <div class="space-y-2 text-gray-400">
+                        <p class="flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            516/4, Dutugamunu Road, Kohuwala
+                        </p>
+                        <p class="flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                            info@wheelzai.com
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
+                <p class="text-gray-400">
+                    © 2025 WheelzAI. All rights reserved. | Powered by AI Technology | Made with ❤️ in Sri Lanka
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Add scroll effect to navigation
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // Performance monitoring
+        window.addEventListener('load', () => {
+            console.log('🚗 Vehicle details page loaded successfully');
+        });
+    </script>
+</body>
+</html>

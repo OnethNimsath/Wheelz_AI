@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Storage & Firestore Sync Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #1a202c; 
+            color: #e2e8f0; 
+        }
+        .console-output {
+            background-color: #2d3748;
+            border: 1px solid #4a5568;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-white mb-8">Firebase Storage & Firestore Sync Tool</h1>
+        
+        <div class="bg-gray-800 p-6 rounded-lg mb-6">
+            <h2 class="text-xl font-semibold mb-4">Configuration</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">App ID</label>
+                    <input type="text" id="appId" value="default-app-id" class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Collection Path</label>
+                    <input type="text" id="collectionPath" value="artifacts/default-app-id/public/data/vehicles" class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-lg font-semibold mb-4">Sync Operations</h3>
+                <div class="space-y-3">
+                    <button id="analyzeBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded">
+                        1. Analyze Current State
+                    </button>
+                    <button id="fixPathsBtn" class="w-full bg-green-600 hover:bg-green-700 text-white p-2 rounded">
+                        2. Fix Storage Paths
+                    </button>
+                    <button id="renameStorageBtn" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white p-2 rounded">
+                        3. Rename Storage Files
+                    </button>
+                    <button id="validateBtn" class="w-full bg-purple-600 hover:bg-purple-700 text-white p-2 rounded">
+                        4. Validate Results
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-lg font-semibold mb-4">Batch Operations</h3>
+                <div class="space-y-3">
+                    <button id="generateUrlsBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded">
+                        Generate Download URLs
+                    </button>
+                    <button id="cleanupBtn" class="w-full bg-red-600 hover:bg-red-700 text-white p-2 rounded">
+                        Cleanup Orphaned Files
+                    </button>
+                    <button id="exportReportBtn" class="w-full bg-gray-600 hover:bg-gray-700 text-white p-2 rounded">
+                        Export Analysis Report
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <h3 class="text-lg font-semibold mb-4">Console Output</h3>
+            <div id="consoleOutput" class="console-output p-4 rounded h-96"></div>
+            <button id="clearConsoleBtn" class="mt-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm">
+                Clear Console
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, listAll, getDownloadURL, getMetadata } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
+            authDomain: "wheelzai.firebaseapp.com",
+            projectId: "wheelzai",
+            storageBucket: "wheelzai.firebasestorage.app",
+            messagingSenderId: "132756052907",
+            appId: "1:132756052907:web:b92dc998b4b5bee8d450ee",
+            measurementId: "G-ECQJYZYK43"
+        };
+
+        let app, db, storage, auth;
+        let analysisResults = {};
+
+        // Initialize Firebase
+        async function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                storage = getStorage(app);
+                auth = getAuth(app);
+                
+                await signInAnonymously(auth);
+                logToConsole("Firebase initialized successfully", "success");
+            } catch (error) {
+                logToConsole(`Firebase initialization failed: ${error.message}`, "error");
+            }
+        }
+
+        // Console logging
+        function logToConsole(message, type = "info") {
+            const console = document.getElementById('consoleOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = {
+                info: '#e2e8f0',
+                success: '#48bb78',
+                warning: '#ed8936',
+                error: '#f56565'
+            }[type];
+            
+            console.innerHTML += `<div style="color: ${color};">[${timestamp}] ${message}</div>`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        // 1. Analyze current state
+        async function analyzeCurrentState() {
+            try {
+                logToConsole("Starting analysis...", "info");
+                
+                const appId = document.getElementById('appId').value;
+                const collectionPath = document.getElementById('collectionPath').value;
+                
+                // Get all Firestore documents
+                const vehiclesRef = collection(db, collectionPath);
+                const snapshot = await getDocs(vehiclesRef);
+                
+                logToConsole(`Found ${snapshot.size} documents in Firestore`, "info");
+                
+                const firestoreData = {};
+                const pathIssues = [];
+                
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    firestoreData[doc.id] = data;
+                    
+                    // Check for path inconsistencies
+                    const imagePaths = [
+                        data.mainImagePath,
+                        data.image2Path,
+                        data.image3Path,
+                        data.image4Path,
+                        data.image5Path,
+                        data.image6Path
+                    ].filter(path => path);
+                    
+                    imagePaths.forEach(path => {
+                        if (path && !path.includes(doc.id)) {
+                            pathIssues.push({
+                                docId: doc.id,
+                                path: path,
+                                issue: 'Path does not contain document ID'
+                            });
+                        }
+                    });
+                });
+                
+                // Analyze storage structure
+                const vehiclesStorageRef = ref(storage, 'vehicles');
+                const storageList = await listAll(vehiclesStorageRef);
+                
+                logToConsole(`Found ${storageList.prefixes.length} storage folders`, "info");
+                
+                const storageStructure = {};
+                for (const folderRef of storageList.prefixes) {
+                    const folderName = folderRef.name;
+                    const folderContents = await listAll(folderRef);
+                    storageStructure[folderName] = folderContents.items.map(item => item.name);
+                }
+                
+                // Store results
+                analysisResults = {
+                    firestoreData,
+                    storageStructure,
+                    pathIssues
+                };
+                
+                logToConsole(`Analysis complete:`, "success");
+                logToConsole(`- Documents with path issues: ${pathIssues.length}`, "warning");
+                logToConsole(`- Storage folders: ${Object.keys(storageStructure).length}`, "info");
+                
+                // Check for orphaned storage folders
+                const orphanedFolders = Object.keys(storageStructure).filter(
+                    folderId => !firestoreData[folderId]
+                );
+                
+                if (orphanedFolders.length > 0) {
+                    logToConsole(`Found ${orphanedFolders.length} orphaned storage folders:`, "warning");
+                    orphanedFolders.forEach(folder => logToConsole(`  - ${folder}`, "warning"));
+                }
+                
+            } catch (error) {
+                logToConsole(`Analysis failed: ${error.message}`, "error");
+            }
+        }
+
+        // 2. Fix storage paths in Firestore
+        async function fixStoragePaths() {
+            try {
+                if (!analysisResults.firestoreData) {
+                    logToConsole("Please run analysis first", "warning");
+                    return;
+                }
+                
+                logToConsole("Starting path fixes...", "info");
+                const batch = writeBatch(db);
+                const collectionPath = document.getElementById('collectionPath').value;
+                let fixCount = 0;
+                
+                for (const [docId, docData] of Object.entries(analysisResults.firestoreData)) {
+                    const updates = {};
+                    let hasUpdates = false;
+                    
+                    // Fix each image path
+                    const imageFields = ['mainImagePath', 'image2Path', 'image3Path', 'image4Path', 'image5Path', 'image6Path'];
+                    
+                    imageFields.forEach((field, index) => {
+                        const currentPath = docData[field];
+                        if (currentPath) {
+                            const correctPath = `vehicles/${docId}/photos/image${index + 1}.jpg`;
+                            if (currentPath !== correctPath) {
+                                updates[field] = correctPath;
+                                hasUpdates = true;
+                            }
+                        }
+                    });
+                    
+                    if (hasUpdates) {
+                        const docRef = doc(db, collectionPath, docId);
+                        batch.update(docRef, updates);
+                        fixCount++;
+                        logToConsole(`Queued fixes for document: ${docId}`, "info");
+                    }
+                }
+                
+                if (fixCount > 0) {
+                    await batch.commit();
+                    logToConsole(`Successfully updated ${fixCount} documents`, "success");
+                } else {
+                    logToConsole("No path fixes needed", "info");
+                }
+                
+            } catch (error) {
+                logToConsole(`Path fix failed: ${error.message}`, "error");
+            }
+        }
+
+        // 3. Generate download URLs and update Firestore
+        async function generateDownloadUrls() {
+            try {
+                if (!analysisResults.storageStructure) {
+                    logToConsole("Please run analysis first", "warning");
+                    return;
+                }
+                
+                logToConsole("Generating download URLs...", "info");
+                const batch = writeBatch(db);
+                const collectionPath = document.getElementById('collectionPath').value;
+                let urlCount = 0;
+                
+                for (const [folderId, files] of Object.entries(analysisResults.storageStructure)) {
+                    if (!analysisResults.firestoreData[folderId]) {
+                        logToConsole(`Skipping orphaned folder: ${folderId}`, "warning");
+                        continue;
+                    }
+                    
+                    const updates = {};
+                    
+                    for (let i = 0; i < files.length; i++) {
+                        const fileName = files[i];
+                        const storagePath = `vehicles/${folderId}/${fileName}`;
+                        
+                        try {
+                            const storageRef = ref(storage, storagePath);
+                            const downloadURL = await getDownloadURL(storageRef);
+                            
+                            const urlField = i === 0 ? 'mainImageUrl' : `image${i + 1}Url`;
+                            updates[urlField] = downloadURL;
+                            urlCount++;
+                            
+                        } catch (error) {
+                            logToConsole(`Failed to get URL for ${storagePath}: ${error.message}`, "error");
+                        }
+                    }
+                    
+                    if (Object.keys(updates).length > 0) {
+                        const docRef = doc(db, collectionPath, folderId);
+                        batch.update(docRef, updates);
+                    }
+                }
+                
+                await batch.commit();
+                logToConsole(`Generated and saved ${urlCount} download URLs`, "success");
+                
+            } catch (error) {
+                logToConsole(`URL generation failed: ${error.message}`, "error");
+            }
+        }
+
+        // 4. Validate results
+        async function validateResults() {
+            try {
+                logToConsole("Validating sync results...", "info");
+                
+                const collectionPath = document.getElementById('collectionPath').value;
+                const vehiclesRef = collection(db, collectionPath);
+                const snapshot = await getDocs(vehiclesRef);
+                
+                let validCount = 0;
+                let invalidCount = 0;
+                
+                for (const doc of snapshot.docs) {
+                    const data = doc.data();
+                    const docId = doc.id;
+                    
+                    // Check if storage paths contain document ID
+                    const imagePaths = [
+                        data.mainImagePath,
+                        data.image2Path,
+                        data.image3Path,
+                        data.image4Path,
+                        data.image5Path,
+                        data.image6Path
+                    ].filter(path => path);
+                    
+                    let isValid = true;
+                    for (const path of imagePaths) {
+                        if (!path.includes(docId)) {
+                            isValid = false;
+                            break;
+                        }
+                        
+                        // Test if URL is accessible
+                        if (data.mainImageUrl) {
+                            try {
+                                const response = await fetch(data.mainImageUrl, { method: 'HEAD' });
+                                if (!response.ok) {
+                                    isValid = false;
+                                }
+                            } catch (error) {
+                                isValid = false;
+                            }
+                        }
+                    }
+                    
+                    if (isValid) {
+                        validCount++;
+                    } else {
+                        invalidCount++;
+                        logToConsole(`Issues found with document: ${docId}`, "warning");
+                    }
+                }
+                
+                logToConsole(`Validation complete:`, "success");
+                logToConsole(`- Valid documents: ${validCount}`, "success");
+                logToConsole(`- Documents with issues: ${invalidCount}`, invalidCount > 0 ? "warning" : "success");
+                
+            } catch (error) {
+                logToConsole(`Validation failed: ${error.message}`, "error");
+            }
+        }
+
+        // Clean up orphaned files
+        async function cleanupOrphanedFiles() {
+            try {
+                if (!analysisResults.storageStructure || !analysisResults.firestoreData) {
+                    logToConsole("Please run analysis first", "warning");
+                    return;
+                }
+                
+                logToConsole("Starting cleanup of orphaned files...", "warning");
+                
+                const orphanedFolders = Object.keys(analysisResults.storageStructure).filter(
+                    folderId => !analysisResults.firestoreData[folderId]
+                );
+                
+                if (orphanedFolders.length === 0) {
+                    logToConsole("No orphaned files found", "success");
+                    return;
+                }
+                
+                logToConsole(`Found ${orphanedFolders.length} orphaned folders to clean up`, "warning");
+                
+                // Note: Actual deletion would require admin SDK or cloud functions
+                // This is just logging what would be deleted
+                orphanedFolders.forEach(folder => {
+                    logToConsole(`Would delete orphaned folder: vehicles/${folder}/`, "warning");
+                });
+                
+                logToConsole("Cleanup complete (simulated - use admin SDK for actual deletion)", "info");
+                
+            } catch (error) {
+                logToConsole(`Cleanup failed: ${error.message}`, "error");
+            }
+        }
+
+        // Export analysis report
+        function exportAnalysisReport() {
+            if (!analysisResults.firestoreData) {
+                logToConsole("Please run analysis first", "warning");
+                return;
+            }
+            
+            const report = {
+                timestamp: new Date().toISOString(),
+                summary: {
+                    totalDocuments: Object.keys(analysisResults.firestoreData).length,
+                    totalStorageFolders: Object.keys(analysisResults.storageStructure).length,
+                    pathIssues: analysisResults.pathIssues.length
+                },
+                details: analysisResults
+            };
+            
+            const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `firebase-sync-report-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            logToConsole("Analysis report exported", "success");
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initializeFirebase();
+            
+            document.getElementById('analyzeBtn').addEventListener('click', analyzeCurrentState);
+            document.getElementById('fixPathsBtn').addEventListener('click', fixStoragePaths);
+            document.getElementById('generateUrlsBtn').addEventListener('click', generateDownloadUrls);
+            document.getElementById('validateBtn').addEventListener('click', validateResults);
+            document.getElementById('cleanupBtn').addEventListener('click', cleanupOrphanedFiles);
+            document.getElementById('exportReportBtn').addEventListener('click', exportAnalysisReport);
+            
+            document.getElementById('clearConsoleBtn').addEventListener('click', () => {
+                document.getElementById('consoleOutput').innerHTML = '';
+            });
+        });
+    </script>
+</body>
+</html>

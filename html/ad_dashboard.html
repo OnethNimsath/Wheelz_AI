@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -709,6 +708,311 @@
             font-size: 14px;
         }
 
+        /* Chatbot Styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .chatbot-toggle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .chatbot-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .chatbot-toggle svg {
+            width: 28px;
+            height: 28px;
+            fill: white;
+        }
+
+        .chatbot-window {
+            position: absolute;
+            bottom: 80px;
+            left: 0;
+            width: 400px;
+            height: 550px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUpLeft 0.3s ease;
+        }
+
+        .chatbot-window.active {
+            display: flex;
+        }
+
+        @keyframes slideUpLeft {
+            from {
+                opacity: 0;
+                transform: translateY(20px) translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) translateX(0);
+            }
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chatbot-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .chatbot-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #f8fafc;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.5;
+            animation: messageSlide 0.3s ease;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.bot {
+            background: white;
+            color: #333;
+            align-self: flex-start;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            align-self: flex-end;
+        }
+
+        .chatbot-input-area {
+            padding: 20px;
+            border-top: 1px solid #e2e8f0;
+            background: white;
+        }
+
+        .chatbot-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .chatbot-input {
+            flex: 1;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 12px 16px;
+            font-size: 14px;
+            resize: none;
+            min-height: 20px;
+            max-height: 100px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .chatbot-input:focus {
+            border-color: #667eea;
+        }
+
+        .chatbot-send {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+        }
+
+        .chatbot-send:hover {
+            transform: scale(1.05);
+        }
+
+        .chatbot-send:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .chatbot-send svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #e2e8f0;
+            max-width: 80px;
+            align-self: flex-start;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #94a3b8;
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        .quick-questions {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .quick-questions-header {
+            font-size: 13px;
+            color: #475569;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .quick-question {
+            background: white;
+            border: 1px solid #d1d5db;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #374151;
+            text-align: left;
+            width: 100%;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .quick-question:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+            transform: translateY(-1px);
+        }
+
+        .ai-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+
+        .gemini-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #4285f4 0%, #ea4335 50%, #fbbc04 100%);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+
+        .error-message-chatbot {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin: 5px 0;
+        }
+
+        .api-status {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            color: #0c4a6e;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin: 5px 0;
+        }
+
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
             .modal-content {
@@ -745,6 +1049,13 @@
 
             .price-main {
                 font-size: 24px;
+            }
+
+            .chatbot-window {
+                width: calc(100vw - 30px);
+                height: 70vh;
+                bottom: 80px;
+                left: 0;
             }
         }
 
@@ -853,6 +1164,48 @@
         </div>
     </div>
 
+    <!-- Enhanced Chatbot Integration for Advertisements -->
+    <div class="chatbot-container">
+        <button class="chatbot-toggle" id="chatbotToggle">
+            <svg viewBox="0 0 24 24">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+            </svg>
+        </button>
+        
+        <div class="chatbot-window" id="chatbotWindow">
+            <div class="chatbot-header">
+                <h3>WheelzAI Ads Assistant 🇱🇰</h3>
+                <button class="chatbot-close" id="chatbotClose">&times;</button>
+            </div>
+            
+            <div class="chatbot-messages" id="chatbotMessages">
+                <!-- Messages will be added here dynamically -->
+            </div>
+            
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+            
+            <div class="chatbot-input-area">
+                <div class="chatbot-input-container">
+                    <textarea 
+                        class="chatbot-input" 
+                        id="chatbotInput" 
+                        placeholder="Ask about managing ads, pricing tips, or vehicle info..."
+                        rows="1"
+                    ></textarea>
+                    <button class="chatbot-send" id="chatbotSend">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase Scripts -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
@@ -883,6 +1236,401 @@
 
         // Global variable to track current main image
         let currentMainImage = 0;
+
+        // Enhanced WheelzAI Chatbot Class for Advertisements Page
+        class EnhancedWheelzAIChatbot {
+            constructor() {
+                this.isOpen = false;
+                this.messages = [];
+                this.conversationHistory = [];
+                this.hasShownWelcome = false;
+                
+                // Enable Gemini API with your key
+                this.GEMINI_API_KEY = 'AIzaSyCLW0c2OF0frOyKJtNnRMDH7WrByySs2Ww';
+                
+                // Advertisement-specific predefined questions and answers
+                this.predefinedQA = {
+                    "How to post a new vehicle advertisement": "To post a new vehicle advertisement:\n\n✅ **Steps:**\n1. Click the '+ Post New Ad' button above\n2. Fill in vehicle details (make, model, year, etc.)\n3. Upload high-quality photos from multiple angles\n4. Set your asking price and negotiation preferences\n5. Add contact information and preferred contact methods\n6. Review and submit your listing\n\n💡 **Pro Tips:**\n• Use good lighting for photos\n• Include interior, exterior, and engine shots\n• Write detailed descriptions\n• Research market prices first\n• Be honest about vehicle condition",
+                    
+                    "How to improve my ad visibility and get more buyers": "To get more buyers for your vehicle ad:\n\n📈 **Boost Visibility:**\n• Upload 6-8 high-quality photos\n• Write detailed, honest descriptions\n• Set competitive pricing\n• Include keywords (hybrid, automatic, etc.)\n• Update your listing regularly\n\n💰 **Pricing Strategy:**\n• Research similar vehicles on WheelzAI\n• Use the AI price estimate as a guide\n• Price slightly above your minimum to allow negotiation\n• Consider market demand for your vehicle type\n\n📞 **Contact & Response:**\n• Respond to inquiries within 2-4 hours\n• Be professional and courteous\n• Provide additional photos if requested\n• Be flexible with viewing appointments",
+                    
+                    "Best practices for vehicle photography": "Professional vehicle photography tips:\n\n📸 **Photo Checklist (8-12 photos):**\n1. Front 3/4 angle (main photo)\n2. Rear 3/4 angle\n3. Both side profiles\n4. Interior dashboard and seats\n5. Engine bay\n6. Odometer reading\n7. Any damage or wear areas\n8. Wheels/tires condition\n\n🌅 **Photography Tips:**\n• Shoot during golden hour (early morning/evening)\n• Clean the vehicle thoroughly first\n• Use natural lighting when possible\n• Avoid harsh shadows\n• Take photos from eye level\n• Show the vehicle in context (nice background)\n• Ensure photos are sharp and well-composed\n\n❌ **Avoid:**\n• Blurry or dark photos\n• Cluttered backgrounds\n• Photos taken at night\n• Hiding vehicle defects",
+                    
+                    "How to price my vehicle competitively": "Smart vehicle pricing strategy:\n\n💡 **Research Methods:**\n• Check similar vehicles on WheelzAI\n• Use the AI price estimation tool\n• Consider vehicle condition honestly\n• Factor in current market demand\n• Check import duties for similar models\n\n🎯 **Pricing Guidelines:**\n• **Excellent condition:** Market price + 5-10%\n• **Good condition:** Market price ± 5%\n• **Fair condition:** Market price - 10-15%\n• **Poor condition:** Market price - 20%+\n\n📊 **Sri Lankan Market Factors:**\n• Popular brands (Toyota, Honda) hold value better\n• Hybrid vehicles command premium\n• Low mileage adds significant value\n• Service history documentation helps\n• Original parts vs aftermarket affects price\n\n💬 **Negotiation Buffer:**\n• Price 10-15% above your minimum\n• Mark as 'negotiable' to attract more buyers\n• Be prepared to justify your asking price",
+                    
+                    "How to manage and track my advertisements": "Advertisement management guide:\n\n📊 **Dashboard Overview:**\n• **Total Ads:** All your listings\n• **Active Ads:** Currently visible to buyers\n• **Pending:** Awaiting approval\n• **Sold:** Completed transactions\n\n🔍 **Filtering & Search:**\n• Use filters to view ads by status\n• Search by vehicle make/model\n• Sort by date posted or price\n\n✏️ **Managing Your Ads:**\n• **View Details:** See complete listing info\n• **Edit:** Update photos, price, or description\n• **Delete:** Remove listings permanently\n• **Mark as Sold:** Update status when sold\n\n📈 **Performance Tracking:**\n• Monitor views and inquiries\n• Update photos if getting low interest\n• Adjust pricing based on market response\n• Refresh listings weekly for better visibility",
+                    
+                    "Popular car brands and pricing in Sri Lanka": "Sri Lankan vehicle market overview:\n\n🏆 **Most Popular Brands:**\n1. **Toyota** - Best resale value, reliable\n2. **Honda** - Fuel efficient, good build quality\n3. **Nissan** - Affordable maintenance\n4. **Suzuki** - Budget-friendly options\n5. **Mitsubishi** - Good for SUVs\n\n💰 **Popular Models & Price Ranges:**\n• **Toyota Vitz:** LKR 5.5M - 6.5M\n• **Honda Fit:** LKR 5.8M - 6.8M\n• **Toyota Aqua:** LKR 6.5M - 8.5M\n• **Honda Grace:** LKR 7M - 9M\n• **Toyota Prius:** LKR 7M - 12M\n\n🔋 **Hybrid Premium:**\n• Hybrid vehicles sell 15-25% higher\n• Better fuel economy attracts buyers\n• Government tax benefits\n• Popular for city driving\n\n📍 **Regional Preferences:**\n• Colombo: Premium brands, hybrids\n• Suburban areas: Family cars, SUVs\n• Rural areas: Reliable, low-maintenance vehicles"
+                };
+                
+                this.quickQuestions = Object.keys(this.predefinedQA);
+                
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.checkAPIStatus();
+            }
+
+            checkAPIStatus() {
+                if (this.GEMINI_API_KEY && this.GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY_HERE') {
+                    console.log('Gemini API enabled with key:', this.GEMINI_API_KEY.substring(0, 10) + '...');
+                } else {
+                    console.warn('Gemini API key not configured properly. Using offline mode only.');
+                }
+            }
+
+            bindEvents() {
+                const toggle = document.getElementById('chatbotToggle');
+                const close = document.getElementById('chatbotClose');
+                const send = document.getElementById('chatbotSend');
+                const input = document.getElementById('chatbotInput');
+
+                if (toggle) toggle.addEventListener('click', () => this.toggleChat());
+                if (close) close.addEventListener('click', () => this.closeChat());
+                if (send) send.addEventListener('click', () => this.sendMessage());
+                
+                if (input) {
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            this.sendMessage();
+                        }
+                    });
+
+                    // Auto-resize textarea
+                    input.addEventListener('input', () => {
+                        input.style.height = 'auto';
+                        input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+                    });
+                }
+            }
+
+            toggleChat() {
+                const window = document.getElementById('chatbotWindow');
+                if (!window) return;
+                
+                this.isOpen = !this.isOpen;
+                
+                if (this.isOpen) {
+                    window.classList.add('active');
+                    const input = document.getElementById('chatbotInput');
+                    if (input) input.focus();
+                    
+                    // Show welcome message only when first opened
+                    if (!this.hasShownWelcome) {
+                        setTimeout(() => {
+                            this.addWelcomeMessage();
+                            this.hasShownWelcome = true;
+                        }, 300);
+                    }
+                } else {
+                    window.classList.remove('active');
+                }
+            }
+
+            closeChat() {
+                const window = document.getElementById('chatbotWindow');
+                if (window) {
+                    window.classList.remove('active');
+                    this.isOpen = false;
+                }
+            }
+
+            addWelcomeMessage() {
+                const welcomeMsg = "Ayubowan! Welcome to WheelzAI Ads Assistant! 🇱🇰\n\nI'm here to help you manage your vehicle advertisements and maximize your selling success. I can assist with:\n\n• Creating effective advertisements\n• Pricing strategies and market insights\n• Photography tips for better visibility\n• Managing your listings\n• Sri Lankan vehicle market information\n\nChoose a quick question below or ask me anything:";
+                this.addMessage('bot', welcomeMsg);
+                
+                // Add questions immediately after welcome message
+                setTimeout(() => {
+                    this.addQuickQuestions();
+                }, 100);
+            }
+
+            addMessage(sender, text, isHtml = false) {
+                const messagesContainer = document.getElementById('chatbotMessages');
+                if (!messagesContainer) return;
+
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+                
+                if (isHtml) {
+                    messageDiv.innerHTML = text;
+                } else {
+                    messageDiv.textContent = text;
+                }
+                
+                this.messages.push({ sender, text, timestamp: new Date() });
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            addQuickQuestions() {
+                const messagesContainer = document.getElementById('chatbotMessages');
+                
+                if (!messagesContainer) {
+                    console.error('Messages container not found');
+                    return;
+                }
+                
+                // Create a visible container for the questions
+                const questionsContainer = document.createElement('div');
+                questionsContainer.className = 'quick-questions';
+                
+                // Add header
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'quick-questions-header';
+                headerDiv.textContent = '💡 Advertisement Help Topics - Click any for instant guidance:';
+                questionsContainer.appendChild(headerDiv);
+                
+                // Add each question as a clickable button
+                this.quickQuestions.forEach((question, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'quick-question';
+                    btn.textContent = `${index + 1}. ${question}`;
+                    
+                    btn.addEventListener('click', () => {
+                        this.handleQuickQuestion(question);
+                    });
+                    
+                    questionsContainer.appendChild(btn);
+                });
+                
+                messagesContainer.appendChild(questionsContainer);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                console.log('Quick questions added successfully');
+            }
+
+            handleQuickQuestion(question) {
+                // Add user message
+                this.addMessage('user', question);
+                
+                // Show typing indicator
+                this.showTypingIndicator();
+                
+                setTimeout(() => {
+                    this.hideTypingIndicator();
+                    const answer = this.predefinedQA[question];
+                    this.addMessage('bot', answer);
+                }, 1000);
+            }
+
+            showTypingIndicator() {
+                const indicator = document.getElementById('typingIndicator');
+                const messagesContainer = document.getElementById('chatbotMessages');
+                if (indicator && messagesContainer) {
+                    indicator.style.display = 'flex';
+                    messagesContainer.appendChild(indicator);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+            }
+
+            hideTypingIndicator() {
+                const indicator = document.getElementById('typingIndicator');
+                if (indicator) {
+                    indicator.style.display = 'none';
+                }
+            }
+
+            async sendMessage() {
+                const input = document.getElementById('chatbotInput');
+                const sendButton = document.getElementById('chatbotSend');
+                if (!input) return;
+
+                const message = input.value.trim();
+                if (!message) return;
+                
+                // Disable input during processing
+                if (sendButton) sendButton.disabled = true;
+                input.disabled = true;
+                
+                // Add user message
+                this.addMessage('user', message);
+                this.conversationHistory.push({ role: "user", content: message });
+                
+                input.value = '';
+                input.style.height = 'auto';
+                
+                // Show typing indicator
+                this.showTypingIndicator();
+                
+                try {
+                    // Try to get response from Gemini API first
+                    const response = await this.getGeminiResponse(message);
+                    this.hideTypingIndicator();
+                    this.addMessage('bot', response + " <span class='gemini-badge'>Gemini</span>", true);
+                    this.conversationHistory.push({ role: "assistant", content: response });
+                } catch (error) {
+                    console.log('Gemini API error, using offline response:', error.message);
+                    this.hideTypingIndicator();
+                    
+                    // Use enhanced fallback responses
+                    const fallbackResponse = this.getEnhancedResponse(message);
+                    this.addMessage('bot', fallbackResponse);
+                    
+                    // Show error message for API issues
+                    if (this.GEMINI_API_KEY && this.GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY_HERE') {
+                        this.addErrorMessage("Gemini API temporarily unavailable. Using offline responses.");
+                    }
+                }
+                
+                // Re-enable input
+                if (sendButton) sendButton.disabled = false;
+                input.disabled = false;
+                input.focus();
+            }
+
+            async getGeminiResponse(message) {
+                if (!this.GEMINI_API_KEY || this.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+                    throw new Error('API key not configured properly');
+                }
+
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.GEMINI_API_KEY}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: `You are WheelzAI Ads Assistant, helping users with their vehicle advertisement management and Sri Lankan vehicle market information. You specialize in:
+
+- Creating effective vehicle advertisements
+- Pricing strategies and market insights for Sri Lankan vehicle market  
+- Photography tips for better ad visibility
+- Advertisement management and optimization
+- Sri Lankan vehicle market trends and popular brands
+- Selling strategies to attract more buyers
+
+Context: The user is currently on their Advertisements dashboard page where they can:
+- View all their posted vehicle advertisements  
+- Filter ads by status (active, pending, sold)
+- Edit, delete, or view details of their listings
+- Track advertisement performance and statistics
+- Post new vehicle advertisements
+
+Current user is managing their vehicle advertisements on WheelzAI platform in Sri Lanka.
+
+User question: ${message}
+
+Please provide helpful, specific guidance related to advertisement management, vehicle selling strategies, or Sri Lankan vehicle market insights. Keep responses practical and actionable (under 300 words).`
+                                }]
+                            }],
+                            generationConfig: {
+                                temperature: 0.7,
+                                topK: 40,
+                                topP: 0.95,
+                                maxOutputTokens: 400,
+                            }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        console.error('Gemini API Error Details:', errorData);
+                        throw new Error(`Gemini API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+                        return data.candidates[0].content.parts[0].text;
+                    } else {
+                        console.error('Invalid Gemini response format:', data);
+                        throw new Error('Invalid response format from Gemini API');
+                    }
+                } catch (error) {
+                    console.error('Gemini API request failed:', error);
+                    throw error;
+                }
+            }
+
+            getEnhancedResponse(message) {
+                const lowerMessage = message.toLowerCase();
+                
+                // Check for exact matches with predefined questions
+                for (const [question, answer] of Object.entries(this.predefinedQA)) {
+                    if (lowerMessage.includes(question.toLowerCase().substring(0, 15))) {
+                        return answer;
+                    }
+                }
+                
+                // Advertisement-specific responses
+                if (lowerMessage.includes('post') || lowerMessage.includes('create') || lowerMessage.includes('new ad')) {
+                    return this.predefinedQA["How to post a new vehicle advertisement"];
+                }
+                
+                if (lowerMessage.includes('photo') || lowerMessage.includes('picture') || lowerMessage.includes('image')) {
+                    return this.predefinedQA["Best practices for vehicle photography"];
+                }
+                
+                if (lowerMessage.includes('price') || lowerMessage.includes('pricing') || lowerMessage.includes('cost')) {
+                    return this.predefinedQA["How to price my vehicle competitively"];
+                }
+                
+                if (lowerMessage.includes('manage') || lowerMessage.includes('track') || lowerMessage.includes('dashboard')) {
+                    return this.predefinedQA["How to manage and track my advertisements"];
+                }
+                
+                if (lowerMessage.includes('visibility') || lowerMessage.includes('buyers') || lowerMessage.includes('sell faster')) {
+                    return this.predefinedQA["How to improve my ad visibility and get more buyers"];
+                }
+                
+                if (lowerMessage.includes('popular') || lowerMessage.includes('brands') || lowerMessage.includes('market')) {
+                    return this.predefinedQA["Popular car brands and pricing in Sri Lanka"];
+                }
+                
+                // Vehicle brand specific queries
+                if (lowerMessage.includes('toyota')) {
+                    return "Toyota is the most popular brand in Sri Lanka! 🚗\n\n**Popular Models:**\n• **Vitz:** LKR 5.5-6.5M (compact, city driving)\n• **Aqua:** LKR 6.5-8.5M (hybrid, fuel efficient)\n• **Prius:** LKR 7-12M (premium hybrid)\n• **Allion:** LKR 6-9M (sedan, family car)\n\n**Selling Tips:**\n• Toyota vehicles have excellent resale value\n• Emphasize service history and original parts\n• Hybrid models command 15-20% premium\n• Include fuel economy figures in your ad";
+                }
+                
+                if (lowerMessage.includes('honda')) {
+                    return "Honda vehicles are highly sought after! 🏆\n\n**Popular Models:**\n• **Fit:** LKR 5.8-6.8M (versatile, reliable)\n• **Grace:** LKR 7-9M (hybrid sedan)\n• **Civic:** LKR 8-12M (premium sedan)\n• **Vezel:** LKR 8-14M (crossover SUV)\n\n**Selling Advantages:**\n• Known for reliability and build quality\n• Strong demand in Sri Lankan market\n• Good fuel efficiency attracts buyers\n• Emphasize Honda's reputation in your listing";
+                }
+                
+                // Edit/Delete queries
+                if (lowerMessage.includes('edit') || lowerMessage.includes('update') || lowerMessage.includes('change')) {
+                    return "To edit your advertisement:\n\n✏️ **Steps:**\n1. Find your ad in the list above\n2. Click the 'Edit' button on your ad card\n3. Update any information (photos, price, description)\n4. Save your changes\n\n💡 **What you can update:**\n• Photos and descriptions\n• Asking price and negotiation settings\n• Contact information\n• Vehicle condition notes\n• Additional features or modifications\n\n🔄 **Pro tip:** Regular updates boost your ad's visibility!";
+                }
+                
+                if (lowerMessage.includes('delete') || lowerMessage.includes('remove')) {
+                    return "To delete an advertisement:\n\n🗑️ **Steps:**\n1. Find the ad you want to remove\n2. Click the 'Delete' button (red)\n3. Confirm deletion in the popup\n\n⚠️ **Important:**\n• Deletion is permanent and cannot be undone\n• Consider editing instead if you just need to update info\n• Mark as 'Sold' instead if the vehicle was sold\n\n💡 **Alternative:** You can also mark ads as inactive if you want to temporarily hide them.";
+                }
+                
+                // Status queries
+                if (lowerMessage.includes('pending') || lowerMessage.includes('approval')) {
+                    return "About pending advertisements:\n\n⏳ **Pending Status Means:**\n• Your ad is under review by our team\n• Usually takes 2-24 hours for approval\n• We check for quality and completeness\n\n✅ **To speed up approval:**\n• Ensure all required fields are filled\n• Upload clear, high-quality photos\n• Provide accurate vehicle information\n• Include proper contact details\n\n❌ **Common rejection reasons:**\n• Blurry or inappropriate photos\n• Incomplete vehicle information\n• Suspicious pricing (too low/high)\n• Invalid contact information";
+                }
+                
+                // Greeting patterns
+                if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey') || lowerMessage.includes('ayubowan')) {
+                    return "Ayubowan! 🙏 I'm your WheelzAI Ads Assistant! I'm here to help you create, manage, and optimize your vehicle advertisements. Whether you need help with pricing, photography, or getting more buyers, I'm here to help. What would you like to know?";
+                }
+                
+                // Thank you
+                if (lowerMessage.includes('thank')) {
+                    return "You're very welcome! 😊 I'm here to help you succeed with your vehicle advertisements. Feel free to ask about posting tips, pricing strategies, photo techniques, or anything else related to selling your vehicle on WheelzAI!";
+                }
+                
+                // Default response with advertisement-focused suggestions
+                return "I can help you with your WheelzAI advertisements! Try asking about:\n\n📝 **Creating Better Ads:**\n• \"How to post a new vehicle advertisement\"\n• \"Best practices for vehicle photography\"\n• \"How to price my vehicle competitively\"\n\n📈 **Growing Your Success:**\n• \"How to get more buyers for my ad\"\n• \"How to manage my advertisements\"\n• \"Popular car brands in Sri Lanka\"\n\n🔧 **Managing Listings:**\n• \"How to edit my advertisement\"\n• \"Why is my ad pending approval\"\n• \"How to delete an advertisement\"\n\nWhat would you like to know?";
+            }
+
+            addErrorMessage(message) {
+                const messagesContainer = document.getElementById('chatbotMessages');
+                if (!messagesContainer) return;
+                
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message-chatbot';
+                errorDiv.textContent = message;
+                messagesContainer.appendChild(errorDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
 
         // Session Manager
         class SessionManager {
@@ -1464,7 +2212,7 @@
         // Initialize everything
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                console.log('Initializing advertisements page...');
+                console.log('Initializing advertisements page with chatbot...');
                 
                 const sessionManager = new SessionManager();
                 await sessionManager.init();
@@ -1473,7 +2221,10 @@
                 window.adsManager = adsManager;
                 await adsManager.init();
 
-                console.log('Advertisements page initialized successfully');
+                // Initialize the chatbot
+                window.enhancedWheelzAIChatbot = new EnhancedWheelzAIChatbot();
+
+                console.log('Advertisements page with chatbot initialized successfully');
             } catch (error) {
                 console.error('Error initializing advertisements page:', error);
                 alert('Error loading advertisements page. Please try again.');

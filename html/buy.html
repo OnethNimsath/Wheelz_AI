@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wheelz AI - Buy Vehicles</title>
+    <title>Buy Vehicles - WheelzAI</title>
+    <meta name="description" content="Browse and buy vehicles on WheelzAI. Find cars, motorcycles, vans and more from verified sellers across Sri Lanka.">
     <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
-    <!-- Removed external buy.css as Tailwind is used and custom styles are embedded -->
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
     <link
       rel="stylesheet"
@@ -14,380 +14,15 @@
       href="https://fonts.googleapis.com/css2?display=swap&family=Inter%3Awght%40400%3B500%3B700%3B900&family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
     />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <style>
-        /* Custom styles to match the provided design */
-        body {
-            font-family: 'Inter', sans-serif; /* Primary font */
-            background-color: #1a202c; /* Dark background color */
-            color: #e2e8f0; /* Light text color */
-        }
-        .design-root {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh; /* Ensure it takes full viewport height */
-        }
-        .layout-container {
-            display: flex;
-            flex-direction: column;
-            flex: 1; /* Allows content to grow */
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 2.5rem; /* px-10 */
-            background-color: #2d3748; /* Darker header background */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        .header-brand {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .header-brand .logo img {
-            height: 40px; /* Adjust logo size */
-            width: auto;
-        }
-        .header-brand h2 {
-            font-size: 1.5rem; /* text-2xl */
-            font-weight: 700; /* font-bold */
-            color: #e2e8f0;
-        }
-        .header-nav {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-        .nav-links a {
-            color: #a0aec0; /* text-gray-400 */
-            font-size: 1rem;
-            font-weight: 500;
-            margin-left: 1rem;
-            transition: color 0.2s ease-in-out;
-        }
-        .nav-links a:hover {
-            color: #e2e8f0; /* text-white */
-        }
-        .sign-in-btn {
-            background-color: #4299e1; /* Blue-500 */
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            transition: background-color 0.2s ease-in-out;
-        }
-        .sign-in-btn:hover {
-            background-color: #3182ce; /* Blue-600 */
-        }
-        .sign-in-btn a {
-            color: inherit;
-            text-decoration: none;
-        }
-
-        /* Main content container adjustments */
-        .layout-content-container {
-            background-color: #2b3540; /* Match search bar background */
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            padding: 20px;
-            margin-top: 20px;
-        }
-        .section-title {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: #e2e8f0; /* Light text color */
-            text-align: center;
-        }
-
-        /* Vehicle Grid and Card styles */
-        .dynamic-vehicle-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Adjusted min-width for better fit */
-            gap: 20px;
-            padding: 1rem; /* p-4 from original markup */
-        }
-        .vehicle-card {
-            background-color: #1a202c; /* Darker card background */
-            padding: 1rem;
-            border-radius: 0.75rem; /* rounded-xl */
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            border: 1px solid #4a5568; /* Subtle border */
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
-        .vehicle-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-        }
-        .vehicle-card h3 {
-            font-size: 1.125rem; /* text-lg */
-            font-weight: 600;
-            color: #e2e8f0;
-            margin-bottom: 0.5rem;
-        }
-        .vehicle-card p {
-            font-size: 0.875rem; /* text-sm */
-            color: #a0aec0;
-            margin-bottom: 0.25rem;
-        }
-        .vehicle-card p strong {
-            color: #e2e8f0;
-        }
-        .vehicle-card .image-gallery {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-            margin-bottom: 1rem;
-            justify-content: center; /* Center images if few */
-        }
-        .vehicle-card .image-gallery img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 0.25rem;
-            border: 1px solid #4a5568;
-        }
-        .vehicle-card .contact-info {
-            margin-top: 1rem;
-            padding-top: 0.5rem;
-            border-top: 1px dashed #4a5568;
-        }
-        .vehicle-card .contact-info p {
-            font-size: 0.8rem;
-            color: #a0aec0;
-        }
-        .vehicle-card .timestamp {
-            font-size: 0.7rem;
-            color: #718096;
-            margin-top: 0.75rem;
-            text-align: right;
-        }
-
-        /* Dropdown styles */
-        .dropdown-menu {
-            max-height: 200px; /* Limit height for scrollability */
-            overflow-y: auto; /* Enable scrolling */
-        }
-        .dropdown-menu a {
-            padding: 8px 16px;
-            display: block;
-            color: white;
-            text-decoration: none;
-        }
-        .dropdown-menu a:hover {
-            background-color: #3a4756;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                padding: 1rem;
-            }
-            .header-nav {
-                margin-top: 1rem;
-                flex-direction: column;
-                gap: 1rem;
-            }
-            .nav-links {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-            .nav-links a {
-                margin-left: 0;
-            }
-            .px-40 {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-            .layout-content-container {
-                padding: 10px;
-            }
-            .dynamic-vehicle-grid {
-                grid-template-columns: 1fr; /* Single column on small screens */
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="design-root">
-        <div class="layout-container">
-            <header class="header">
-                <div class="header-brand">
-                    <div class="logo">
-                        <img src="https://placehold.co/40x40/000000/FFFFFF?text=Logo" alt="WheelzAI Logo">
-                    </div>
-                    <h2>WheelzAI</h2>
-                </div>
-                <div class="header-nav">
-                    <div class="nav-links">
-                        <a href="home.html">Home</a>
-                        <a href="buy.html">Buy</a>
-                        <a href="about.html">About</a>
-                        <a href="contact.html">Contact Us</a>
-                    </div>
-                    <button class="sign-in-btn">
-                        <a href="signin.html">Logout</a>
-                    </button>
-                </div>
-            </header>
-            <div class="px-40 flex flex-1 justify-center py-5">
-                <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
-                    <div class="px-4 py-3">
-                        <label class="flex flex-col min-w-40 h-12 w-full">
-                            <div class="flex w-full flex-1 items-stretch rounded-xl h-full">
-                                <div
-                                    class="text-[#9eacbd] flex border-none bg-[#2b3540] items-center justify-center pl-4 rounded-l-xl border-r-0"
-                                    data-icon="MagnifyingGlass"
-                                    data-size="24px"
-                                    data-weight="regular"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
-                                        <path
-                                            d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"
-                                        ></path>
-                                    </svg>
-                                </div>
-                                <input
-                                    id="searchInput"
-                                    placeholder="Search for make, model, or keyword"
-                                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-white focus:outline-0 focus:ring-0 border-none bg-[#2b3540] focus:border-none h-full placeholder:text-[#9eacbd] px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal"
-                                    value=""
-                                />
-                            </div>
-                        </label>
-                    </div>
-                    <div class="flex gap-3 p-3 flex-wrap pr-4">
-                        <div class="relative">
-                            <button id="brandFilterBtn" class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-[#2b3540] pl-4 pr-4 cursor-pointer">
-                                <p class="text-white text-sm font-medium leading-normal">Brand</p>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
-                                    <path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,45.66,90.34L128,172.69l82.34-82.35A8,8,0,0,1,213.66,101.66Z"></path>
-                                </svg>
-                            </button>
-                            <div id="brandDropdown" class="absolute z-10 mt-2 w-48 rounded-md shadow-lg bg-[#2b3540] ring-1 ring-black ring-opacity-5 hidden dropdown-menu">
-                                <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="brandFilterBtn">
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="brand" data-filter-value="All">All Brands</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="brand" data-filter-value="Toyota">Toyota</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="brand" data-filter-value="Honda">Honda</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="brand" data-filter-value="Nissan">Nissan</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="brand" data-filter-value="Mitsubishi">Mitsubishi</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="brand" data-filter-value="Mercedes-Benz">Mercedes-Benz</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="brand" data-filter-value="BMW">BMW</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="brand" data-filter-value="Audi">Audi</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="brand" data-filter-value="Ford">Ford</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="brand" data-filter-value="Hyundai">Hyundai</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="brand" data-filter-value="Kia">Kia</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="brand" data-filter-value="Mahindra">Mahindra</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="brand" data-filter-value="Tata">Tata</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="brand" data-filter-value="Bajaj">Bajaj</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="brand" data-filter-value="TVS">TVS</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="relative">
-                            <button id="vehicleTypeFilterBtn" class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-[#2b3540] pl-4 pr-4 cursor-pointer">
-                                <p class="text-white text-sm font-medium leading-normal">Vehicle Type</p>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
-                                    <path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,45.66,90.34L128,172.69l82.34-82.35A8,8,0,0,1,213.66,101.66Z"></path>
-                                </svg>
-                            </button>
-                            <div id="vehicleTypeDropdown" class="absolute z-10 mt-2 w-48 rounded-md shadow-lg bg-[#2b3540] ring-1 ring-black ring-opacity-5 hidden dropdown-menu">
-                                <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="vehicleTypeFilterBtn">
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="vehicleType" data-filter-value="All">All Types</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="vehicleType" data-filter-value="Car">Car</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="vehicleType" data-filter-value="Motorcycle">Motorcycle</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="vehicleType" data-filter-value="Van">Van</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="vehicleType" data-filter-value="Bus">Bus</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="vehicleType" data-filter-value="Lorry">Lorry</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="vehicleType" data-filter-value="Three Wheel">Three Wheel</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="vehicleType" data-filter-value="Tractor">Tractor</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="vehicleType" data-filter-value="Heavy Duty">Heavy Duty</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="relative">
-                            <button id="priceRangeFilterBtn" class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-[#2b3540] pl-4 pr-4 cursor-pointer">
-                                <p class="text-white text-sm font-medium leading-normal">Price Range</p>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
-                                    <path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,45.66,90.34L128,172.69l82.34-82.35A8,8,0,0,1,213.66,101.66Z"></path>
-                                </svg>
-                            </button>
-                            <div id="priceRangeDropdown" class="absolute z-10 mt-2 w-60 rounded-md shadow-lg bg-[#2b3540] ring-1 ring-black ring-opacity-5 hidden dropdown-menu">
-                                <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="priceRangeFilterBtn">
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="priceRange" data-filter-value="All">All Prices</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="priceRange" data-filter-value="0-1000000">Under Rs. 1,000,000</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="priceRange" data-filter-value="1000000-3000000">Rs. 1,000,000 - Rs. 3,000,000</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="priceRange" data-filter-value="3000000-5000000">Rs. 3,000,000 - Rs. 5,000,000</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="priceRange" data-filter-value="5000000-10000000">Rs. 5,000,000 - Rs. 10,000,000</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="priceRange" data-filter-value="10000000-20000000">Rs. 10,000,000 - Rs. 20,000,000</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-white hover:bg-[#3a4756] filter-option" data-filter-type="priceRange" data-filter-value="20000000-">Over Rs. 20,000,000</a>
-                                </div>
-                            </div>
-                        </div>
-                        <button id="clearFiltersBtn" class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-red-600 pl-4 pr-4 cursor-pointer">
-                            <p class="text-white text-sm font-medium leading-normal">Clear Filters</p>
-                        </button>
-                    </div>
-                    <div id="dynamicVehiclesGrid" class="dynamic-vehicle-grid">
-                        <p class="text-gray-500 text-center col-span-full" id="loadingVehicles">Loading vehicles...</p>
-                        </div>
-                </div>
-            </div>
-        </div>
-        <footer class="flex justify-center">
-            <div class="flex max-w-[960px] flex-1 flex-col">
-              <footer class="flex flex-col gap-6 px-5 py-10 text-center @container">
-                <div
-                  class="flex flex-wrap items-center justify-center gap-6 @[480px]:flex-row @[480px]:justify-around"
-                >
-                  <a class="text-[#93acc8] text-base font-normal leading-normal min-w-40" href="#">Home</a>
-                  <a class="text-[#93acc8] text-base font-normal leading-normal min-w-40" href="#">Buy</a>
-                  <a class="text-[#93acc8] text-base font-normal leading-normal min-w-40" href="#">About</a>
-                  <a class="text-[#93acc8] text-base font-normal leading-normal min-w-40" href="#">Contact Us</a>
-                  <a class="text-[#93acc8] text-base font-normal leading-normal min-w-40" href="#"
-                    >516/4, Dutugamunu road, Kohuwala</a
-                  >
-                </div>
-                <div class="flex flex-wrap justify-center gap-4">
-                  <a href="#">
-                    <div class="text-[#93acc8]" data-icon="InstagramLogo" data-size="24px" data-weight="regular">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
-                        <path
-                          d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160ZM176,24H80A56.06,56.06,0,0,0,24,80v96a56.06,56.06,0,0,0,56,56h96a56.06,56.06,0,0,0,56-56V80A56.06,56.06,0,0,0,176,24Zm40,152a40,40,0,0,1-40,40H80a40,40,0,0,1-40-40V80A40,40,0,0,1,80,40h96a40,40,0,0,1,40,40ZM192,76a12,12,0,1,1-12-12A12,12,0,0,1,192,76Z"
-                        ></path>
-                      </svg>
-                    </div>
-                  </a>
-                  <a href="#">
-                    <div class="text-[#93acc8]" data-icon="TiktokLogo" data-size="24px" data-weight="regular">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
-                        <path
-                          d="M224,72a48.05,48.05,0,0,1-48-48,8,8,0,0,0-8-8H128a8,8,0,0,0-8,8V156a20,20,0,1,1-28.57-18.08A8,8,0,0,0,96,130.69V88a8,8,0,0,0-9.4-7.88C50.91,86.48,24,119.1,24,156a76,76,0,0,0,152,0V116.29A103.25,103.25,0,0,0,224,128a8,8,0,0,0,8-8V80A8,8,0,0,0,224,72Zm-8,39.64a87.19,87.19,0,0,1-43.33-16.15A8,8,0,0,0,160,102v54a60,60,0,0,1-120,0c0-25.9,16.64-49.13,40-57.6v27.67A36,36,0,1,0,136,156V32h24.5A64.14,64.14,0,0,0,216,87.5Z"
-                        ></path>
-                      </svg>
-                    </div>
-                  </a>
-                </div>
-                <p class="text-[#93acc8] text-base font-normal leading-normal">© 2025 WheelzAI. All rights reserved.</p>
-              </footer>
-            </div>
-        </footer>
-    </div>
-
+    
+    <!-- Firebase SDK -->
     <script type="module">
-        // Firebase SDK imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, getDocs, query, orderBy, limit, onSnapshot, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getStorage, ref, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+        import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-        // Global variables for Firebase configuration and app ID
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
             authDomain: "wheelzai.firebaseapp.com",
@@ -397,13 +32,14 @@
             appId: "1:132756052907:web:b92dc998b4b5bee8d450ee",
             measurementId: "G-ECQJYZYK43"
         };
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        let app;
-        let db;
-        let auth;
-        let userId = 'anonymous'; // Default to anonymous
-        let allVehicles = []; // Store all fetched vehicles for filtering
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        const auth = getAuth(app);
+
+        let allVehicles = [];
         let currentFilters = {
             searchQuery: '',
             brand: 'All',
@@ -411,105 +47,98 @@
             priceRange: 'All'
         };
 
-        // DOM elements (moved inside DOMContentLoaded for safer access)
-        let dynamicVehiclesGrid;
-        let loadingVehicles;
-        let searchInput;
-        let brandFilterBtn;
-        let brandDropdown;
-        let vehicleTypeFilterBtn;
-        let vehicleTypeDropdown;
-        let priceRangeFilterBtn;
-        let priceRangeDropdown;
-        let clearFiltersBtn; // New: Clear Filters button
-
-
-        /**
-         * Initializes Firebase and sets up authentication.
-         */
-        async function initializeFirebase() {
+        // Function to get image URL from Firebase Storage
+        async function getImageUrl(imagePath) {
+            if (!imagePath) return null;
+            
             try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                console.log("Firebase services initialized: app, db, auth.");
-
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                    console.log('Signed in with custom token.');
-                } else {
-                    await signInAnonymously(auth);
-                    console.log('Signed in anonymously.');
+                if (imagePath.startsWith('data:image/')) {
+                    return imagePath; // It's a base64 image
                 }
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        console.log('Auth state changed. User ID:', userId);
-                        setupRealtimeListener();
-                    } else {
-                        signInAnonymously(auth).then(anonUser => {
-                            userId = anonUser.user.uid;
-                            console.log('Auth state changed. Signed in anonymously. User ID:', userId);
-                            setupRealtimeListener();
-                        }).catch(error => {
-                            console.error("Error signing in anonymously:", error);
-                        });
-                    }
-                });
-
+                
+                if (imagePath.startsWith('http')) {
+                    return imagePath; // It's already a full URL
+                }
+                
+                // It's a Firebase Storage path
+                const imageRef = ref(storage, imagePath);
+                const url = await getDownloadURL(imageRef);
+                return url;
             } catch (error) {
-                console.error("Error initializing Firebase or authenticating:", error);
+                console.error('Error getting image URL:', error);
+                return null;
             }
         }
 
-        /**
-         * Sets up a real-time listener for vehicle data from Firestore.
-         */
-        function setupRealtimeListener() {
-            if (!db || !userId) {
-                console.warn("Firestore or User ID not ready for real-time listener.");
-                return;
+        // Function to format price
+        function formatPrice(price) {
+            if (!price || price === 0) return 'Price on request';
+            if (price >= 1000000) {
+                return `LKR ${(price / 1000000).toFixed(1)}M`;
             }
-            const vehiclesCollectionRef = collection(db, `artifacts/${appId}/public/data/vehicles`);
-            const q = query(vehiclesCollectionRef);
-
-            onSnapshot(q, (snapshot) => {
-                loadingVehicles.style.display = 'none';
-                allVehicles = []; // Clear previous data
-                snapshot.forEach((doc) => {
-                    allVehicles.push({ id: doc.id, ...doc.data() });
-                });
-                applyFiltersAndRenderVehicles(); // Render vehicles after fetching
-            }, (error) => {
-                console.error("Error listening to vehicles collection:", error);
-                dynamicVehiclesGrid.innerHTML = '<p class="text-red-500 text-center col-span-full">Failed to load vehicles.</p>';
-                loadingVehicles.style.display = 'none';
-            });
+            return `LKR ${(price / 1000).toFixed(0)}K`;
         }
 
-        /**
-         * Renders the vehicles based on the current filters.
-         */
+        // Function to load vehicles from Firestore
+        async function loadVehicles() {
+            try {
+                const advertisementsRef = collection(db, 'Advertisements');
+                const q = query(advertisementsRef, orderBy('createdAt', 'desc'));
+                
+                const querySnapshot = await getDocs(q);
+                allVehicles = [];
+                
+                for (const doc of querySnapshot.docs) {
+                    const data = doc.data();
+                    const vehicle = {
+                        id: doc.id,
+                        ...data,
+                        // Process images
+                        images: []
+                    };
+                    
+                    // Get image URLs
+                    if (data.photos && Array.isArray(data.photos)) {
+                        for (const photoPath of data.photos) {
+                            const imageUrl = await getImageUrl(photoPath);
+                            if (imageUrl) {
+                                vehicle.images.push(imageUrl);
+                            }
+                        }
+                    }
+                    
+                    allVehicles.push(vehicle);
+                }
+                
+                console.log(`Loaded ${allVehicles.length} vehicles`);
+                applyFiltersAndRenderVehicles();
+            } catch (error) {
+                console.error('Error loading vehicles:', error);
+                const grid = document.getElementById('vehiclesGrid');
+                if (grid) {
+                    grid.innerHTML = '<div class="col-span-full text-center py-12 text-red-400"><p>Error loading vehicles. Please try again later.</p></div>';
+                }
+            }
+        }
+
+        // Function to apply filters and render vehicles
         function applyFiltersAndRenderVehicles() {
-            dynamicVehiclesGrid.innerHTML = ''; // Clear existing vehicles
+            let filteredVehicles = [...allVehicles];
 
-            let filteredVehicles = allVehicles;
-
-            // Apply search query filter
+            // Apply search filter
             if (currentFilters.searchQuery) {
                 const query = currentFilters.searchQuery.toLowerCase();
                 filteredVehicles = filteredVehicles.filter(vehicle =>
-                    (vehicle.vehicleMake && vehicle.vehicleMake.toLowerCase().includes(query)) ||
+                    (vehicle.make && vehicle.make.toLowerCase().includes(query)) ||
                     (vehicle.model && vehicle.model.toLowerCase().includes(query)) ||
-                    (vehicle.additionalInfo && vehicle.additionalInfo.toLowerCase().includes(query))
+                    (vehicle.description && vehicle.description.toLowerCase().includes(query))
                 );
             }
 
             // Apply brand filter
             if (currentFilters.brand !== 'All') {
                 filteredVehicles = filteredVehicles.filter(vehicle =>
-                    vehicle.vehicleMake === currentFilters.brand
+                    vehicle.make === currentFilters.brand
                 );
             }
 
@@ -524,184 +153,822 @@
             if (currentFilters.priceRange !== 'All') {
                 const [minPrice, maxPrice] = currentFilters.priceRange.split('-').map(Number);
                 filteredVehicles = filteredVehicles.filter(vehicle => {
-                    const price = vehicle.price;
-                    if (price === undefined || price === null) return false; // Exclude vehicles without a price
-                    
-                    if (isNaN(maxPrice)) { // Case for "Over X" (e.g., "20000000-")
+                    const price = vehicle.askingPrice || vehicle.price || 0;
+                    if (isNaN(maxPrice)) {
                         return price >= minPrice;
-                    } else { // Case for "X - Y" (e.g., "1000000-3000000")
+                    } else {
                         return price >= minPrice && price <= maxPrice;
                     }
                 });
             }
 
+            renderVehicles(filteredVehicles);
+        }
 
-            if (filteredVehicles.length === 0) {
-                dynamicVehiclesGrid.innerHTML = '<p class="text-gray-500 text-center col-span-full">No vehicles match your criteria.</p>';
+        // Function to render vehicles
+        function renderVehicles(vehicles) {
+            const grid = document.getElementById('vehiclesGrid');
+            const loadingElement = document.getElementById('loadingVehicles');
+            
+            if (loadingElement) {
+                loadingElement.style.display = 'none';
+            }
+
+            if (!grid) return;
+
+            if (vehicles.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <div class="text-gray-400 mb-4">
+                            <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14-4l2.5 2.5L19 12m0 0v6a2 2 0 01-2 2H7a2 2 0 01-2-2v-6m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-600 mb-2">No vehicles found</h3>
+                        <p class="text-gray-500">Try adjusting your search criteria</p>
+                    </div>
+                `;
                 return;
             }
 
-            filteredVehicles.forEach((vehicle) => {
-                const vehicleCard = document.createElement('div');
-                vehicleCard.className = 'vehicle-card';
-                
-                const options = [];
-                if (vehicle.airCondition) options.push("Air Condition");
-                if (vehicle.powerSteering) options.push("Power Steering");
-                if (vehicle.powerMirror) options.push("Power Mirror");
-                if (vehicle.powerWindow) options.push("Power Window");
-                const optionsText = options.length > 0 ? options.join(', ') : 'None';
+            grid.innerHTML = vehicles.map(vehicle => {
+                const primaryImage = vehicle.images && vehicle.images.length > 0 
+                    ? vehicle.images[0] 
+                    : 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400&h=300&fit=crop&crop=center';
 
-                const timestamp = vehicle.timestamp ? new Date(vehicle.timestamp.toDate()).toLocaleString() : 'N/A';
+                const createdDate = vehicle.createdAt 
+                    ? new Date(vehicle.createdAt.toDate()).toLocaleDateString()
+                    : 'Recently';
 
-                let imageGalleryHtml = '';
-                const imageUrls = [
-                    vehicle.mainImageUrl,
-                    vehicle.image2Url,
-                    vehicle.image3Url,
-                    vehicle.image4Url,
-                    vehicle.image5Url,
-                    vehicle.image6Url
-                ].filter(url => url);
-
-                if (imageUrls.length > 0) {
-                    imageGalleryHtml = `<div class="image-gallery">`;
-                    imageUrls.forEach(url => {
-                        imageGalleryHtml += `<img src="${url}" alt="Vehicle Image" onerror="this.onerror=null;this.src='https://placehold.co/80x80/cccccc/ffffff?text=No+Image';">`;
-                    });
-                    imageGalleryHtml += `</div>`;
-                } else {
-                    imageGalleryHtml = `<p class="text-gray-500 text-sm">No images available</p>`;
-                }
-
-                vehicleCard.innerHTML = `
-                    <h3>${vehicle.vehicleMake || 'N/A'} ${vehicle.model || 'N/A'} (${vehicle.manufacturedYear || 'N/A'})</h3>
-                    <p><strong>Price:</strong> Rs. ${vehicle.price ? vehicle.price.toLocaleString() : 'N/A'}</p>
-                    <p><strong>Type:</strong> ${vehicle.vehicleType || 'N/A'} | <strong>Condition:</strong> ${vehicle.vehicleCondition || 'N/A'}</p>
-                    <p><strong>Transmission:</strong> ${vehicle.transmission || 'N/A'} | <strong>Fuel:</strong> ${vehicle.fuelType || 'N/A'}</p>
-                    <p><strong>Mileage:</strong> ${vehicle.mileage ? vehicle.mileage.toLocaleString() : 'N/A'} km | <strong>Engine:</strong> ${vehicle.engineCapacity || 'N/A'} CC</p>
-                    <p><strong>City:</strong> ${vehicle.city || 'N/A'}</p>
-                    <p><strong>Options:</strong> ${optionsText}</p>
-                    <p><strong>Details:</strong> ${vehicle.additionalInfo || 'N/A'}</p>
-                    ${imageGalleryHtml}
-                    <div class="contact-info">
-                        <p><strong>Seller:</strong> ${vehicle.contactName || 'N/A'}</p>
-                        <p><strong>Phone:</strong> ${vehicle.phoneNumber || 'N/A'}</p>
+                return `
+                    <div class="vehicle-card group cursor-pointer" onclick="viewVehicleDetails('${vehicle.id}')">
+                        <div class="vehicle-image">
+                            <img src="${primaryImage}" 
+                                 alt="${vehicle.make} ${vehicle.model}" 
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                 onerror="this.src='https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400&h=300&fit=crop&crop=center'">
+                            <div class="vehicle-overlay">
+                                <span class="vehicle-price">${formatPrice(vehicle.askingPrice || vehicle.price || 0)}</span>
+                                ${vehicle.images && vehicle.images.length > 1 ? `<span class="image-count">${vehicle.images.length} photos</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="vehicle-info">
+                            <h3 class="vehicle-title">${vehicle.make || 'Unknown'} ${vehicle.model || ''} ${vehicle.year || ''}</h3>
+                            <div class="vehicle-details">
+                                <span>${vehicle.year || 'N/A'}</span>
+                                <span>${vehicle.mileage ? `${vehicle.mileage} km` : 'N/A'}</span>
+                                <span>${vehicle.fuelType || 'N/A'}</span>
+                            </div>
+                            <div class="vehicle-location">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                <span>${vehicle.location || vehicle.city || 'Location not specified'}</span>
+                            </div>
+                            <div class="vehicle-posted">
+                                Posted ${createdDate}
+                            </div>
+                        </div>
                     </div>
-                    <p class="timestamp">Posted on: ${timestamp}</p>
                 `;
-                dynamicVehiclesGrid.appendChild(vehicleCard);
-            });
+            }).join('');
         }
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log("DOMContentLoaded event fired for buy.html.");
 
-            // Assign DOM elements here to ensure they are available
-            dynamicVehiclesGrid = document.getElementById('dynamicVehiclesGrid');
-            loadingVehicles = document.getElementById('loadingVehicles');
-            searchInput = document.getElementById('searchInput');
-            brandFilterBtn = document.getElementById('brandFilterBtn');
-            brandDropdown = document.getElementById('brandDropdown');
-            vehicleTypeFilterBtn = document.getElementById('vehicleTypeFilterBtn');
-            vehicleTypeDropdown = document.getElementById('vehicleTypeDropdown');
-            priceRangeFilterBtn = document.getElementById('priceRangeFilterBtn');
-            priceRangeDropdown = document.getElementById('priceRangeDropdown');
-            clearFiltersBtn = document.getElementById('clearFiltersBtn'); // Assign Clear Filters button
+        // Global function for vehicle details
+        window.viewVehicleDetails = function(vehicleId) {
+            window.location.href = `vehicle_details.html?id=${vehicleId}`;
+        };
 
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('DOM loaded, initializing Firebase...');
+            
+            // Setup authentication
+            try {
+                await signInAnonymously(auth);
+                console.log('Signed in anonymously');
+            } catch (error) {
+                console.error('Auth error:', error);
+            }
 
-            // Now attach event listeners
-            searchInput.addEventListener('input', () => {
-                currentFilters.searchQuery = searchInput.value;
-                applyFiltersAndRenderVehicles();
-            });
+            // Load vehicles
+            loadVehicles();
 
-            brandFilterBtn.addEventListener('click', () => {
-                brandDropdown.classList.toggle('hidden');
-                vehicleTypeDropdown.classList.add('hidden'); // Close other dropdown
-                priceRangeDropdown.classList.add('hidden'); // Close other dropdown
-            });
-
-            vehicleTypeFilterBtn.addEventListener('click', () => {
-                vehicleTypeDropdown.classList.toggle('hidden');
-                brandDropdown.classList.add('hidden'); // Close other dropdown
-                priceRangeDropdown.classList.add('hidden'); // Close other dropdown
-            });
-
-            // Event listener for Price Range filter button
-            priceRangeFilterBtn.addEventListener('click', () => {
-                priceRangeDropdown.classList.toggle('hidden');
-                brandDropdown.classList.add('hidden'); // Close other dropdown
-                vehicleTypeDropdown.classList.add('hidden'); // Close other dropdown
-            });
-
-            // New: Event listener for Clear Filters button
-            clearFiltersBtn.addEventListener('click', () => {
-                // Reset currentFilters
-                currentFilters = {
-                    searchQuery: '',
-                    brand: 'All',
-                    vehicleType: 'All',
-                    priceRange: 'All'
-                };
-
-                // Reset search input
-                searchInput.value = '';
-
-                // Reset button texts
-                brandFilterBtn.querySelector('p').textContent = 'Brand';
-                vehicleTypeFilterBtn.querySelector('p').textContent = 'Vehicle Type';
-                priceRangeFilterBtn.querySelector('p').textContent = 'Price Range';
-
-                // Hide all dropdowns
-                brandDropdown.classList.add('hidden');
-                vehicleTypeDropdown.classList.add('hidden');
-                priceRangeDropdown.classList.add('hidden');
-
-                // Apply filters to re-render all vehicles
-                applyFiltersAndRenderVehicles();
-            });
-
-
-            // Handle clicks outside dropdowns to close them
-            document.addEventListener('click', (event) => {
-                if (!brandFilterBtn.contains(event.target) && !brandDropdown.contains(event.target)) {
-                    brandDropdown.classList.add('hidden');
-                }
-                if (!vehicleTypeFilterBtn.contains(event.target) && !vehicleTypeDropdown.contains(event.target)) {
-                    vehicleTypeDropdown.classList.add('hidden');
-                }
-                if (!priceRangeFilterBtn.contains(event.target) && !priceRangeDropdown.contains(event.target)) {
-                    priceRangeDropdown.classList.add('hidden');
-                }
-            });
-
-            // Handle filter option clicks
-            document.querySelectorAll('.filter-option').forEach(option => {
-                option.addEventListener('click', (event) => {
-                    event.preventDefault(); // Prevent default link behavior
-                    const filterType = event.target.dataset.filterType;
-                    const filterValue = event.target.dataset.filterValue;
-
-                    currentFilters[filterType] = filterValue;
+            // Setup search
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    currentFilters.searchQuery = e.target.value;
                     applyFiltersAndRenderVehicles();
+                });
+            }
 
-                    // Update button text to reflect selected filter
+            // Setup filter dropdowns
+            setupFilterDropdowns();
+        });
+
+        function setupFilterDropdowns() {
+            // Brand filter
+            const brandBtn = document.getElementById('brandFilterBtn');
+            const brandDropdown = document.getElementById('brandDropdown');
+            
+            if (brandBtn && brandDropdown) {
+                brandBtn.addEventListener('click', () => {
+                    brandDropdown.classList.toggle('hidden');
+                    // Close other dropdowns
+                    document.getElementById('vehicleTypeDropdown')?.classList.add('hidden');
+                    document.getElementById('priceRangeDropdown')?.classList.add('hidden');
+                });
+            }
+
+            // Vehicle type filter
+            const vehicleTypeBtn = document.getElementById('vehicleTypeFilterBtn');
+            const vehicleTypeDropdown = document.getElementById('vehicleTypeDropdown');
+            
+            if (vehicleTypeBtn && vehicleTypeDropdown) {
+                vehicleTypeBtn.addEventListener('click', () => {
+                    vehicleTypeDropdown.classList.toggle('hidden');
+                    // Close other dropdowns
+                    document.getElementById('brandDropdown')?.classList.add('hidden');
+                    document.getElementById('priceRangeDropdown')?.classList.add('hidden');
+                });
+            }
+
+            // Price range filter
+            const priceRangeBtn = document.getElementById('priceRangeFilterBtn');
+            const priceRangeDropdown = document.getElementById('priceRangeDropdown');
+            
+            if (priceRangeBtn && priceRangeDropdown) {
+                priceRangeBtn.addEventListener('click', () => {
+                    priceRangeDropdown.classList.toggle('hidden');
+                    // Close other dropdowns
+                    document.getElementById('brandDropdown')?.classList.add('hidden');
+                    document.getElementById('vehicleTypeDropdown')?.classList.add('hidden');
+                });
+            }
+
+            // Filter options click handlers
+            document.querySelectorAll('.filter-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const filterType = option.dataset.filterType;
+                    const filterValue = option.dataset.filterValue;
+                    
+                    currentFilters[filterType] = filterValue;
+                    
+                    // Update button text
                     if (filterType === 'brand') {
-                        brandFilterBtn.querySelector('p').textContent = filterValue === 'All' ? 'Brand' : filterValue;
+                        brandBtn.querySelector('span').textContent = filterValue === 'All' ? 'Brand' : filterValue;
                         brandDropdown.classList.add('hidden');
                     } else if (filterType === 'vehicleType') {
-                        vehicleTypeFilterBtn.querySelector('p').textContent = filterValue === 'All' ? 'Vehicle Type' : filterValue;
+                        vehicleTypeBtn.querySelector('span').textContent = filterValue === 'All' ? 'Vehicle Type' : filterValue;
                         vehicleTypeDropdown.classList.add('hidden');
                     } else if (filterType === 'priceRange') {
-                        // Update button text for price range
-                        priceRangeFilterBtn.querySelector('p').textContent = event.target.textContent;
+                        priceRangeBtn.querySelector('span').textContent = option.textContent;
                         priceRangeDropdown.classList.add('hidden');
                     }
+                    
+                    applyFiltersAndRenderVehicles();
                 });
             });
 
-            initializeFirebase();
+            // Clear filters
+            const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+            if (clearFiltersBtn) {
+                clearFiltersBtn.addEventListener('click', () => {
+                    currentFilters = {
+                        searchQuery: '',
+                        brand: 'All',
+                        vehicleType: 'All',
+                        priceRange: 'All'
+                    };
+                    
+                    // Reset UI
+                    document.getElementById('searchInput').value = '';
+                    brandBtn.querySelector('span').textContent = 'Brand';
+                    vehicleTypeBtn.querySelector('span').textContent = 'Vehicle Type';
+                    priceRangeBtn.querySelector('span').textContent = 'Price Range';
+                    
+                    // Close all dropdowns
+                    document.querySelectorAll('.dropdown-menu').forEach(dropdown => {
+                        dropdown.classList.add('hidden');
+                    });
+                    
+                    applyFiltersAndRenderVehicles();
+                });
+            }
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!brandBtn?.contains(e.target) && !brandDropdown?.contains(e.target)) {
+                    brandDropdown?.classList.add('hidden');
+                }
+                if (!vehicleTypeBtn?.contains(e.target) && !vehicleTypeDropdown?.contains(e.target)) {
+                    vehicleTypeDropdown?.classList.add('hidden');
+                }
+                if (!priceRangeBtn?.contains(e.target) && !priceRangeDropdown?.contains(e.target)) {
+                    priceRangeDropdown?.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8fafc;
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* White Navbar Styles */
+        .navbar-white {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-white.scrolled {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .navbar-white .logo-text {
+            color: #1f2937;
+        }
+        
+        .navbar-white .nav-link {
+            color: #6b7280;
+            transition: color 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .navbar-white .nav-link:hover {
+            color: #1f2937;
+        }
+        
+        .navbar-white .nav-link.active {
+            color: #1f2937;
+            font-weight: 600;
+        }
+        
+        .navbar-white .sign-in-btn {
+            background: #1f2937;
+            color: white;
+            border: 1px solid #1f2937;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-white .sign-in-btn:hover {
+            background: #374151;
+            border-color: #374151;
+        }
+        
+        /* Mobile menu for white navbar */
+        .mobile-menu-white {
+            background: white;
+            color: #1f2937;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Main content */
+        .main-content {
+            padding-top: 6rem;
+            min-height: 100vh;
+        }
+        
+        .search-section {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .search-input {
+            background: #f8fafc;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1rem 1.5rem;
+            width: 100%;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        
+        .search-input:focus {
+            border-color: #1f2937;
+            box-shadow: 0 0 0 3px rgba(31, 41, 55, 0.1);
+        }
+        
+        .search-input::placeholder {
+            color: #9ca3af;
+        }
+        
+        /* Filter buttons */
+        .filter-btn {
+            background: #f8fafc;
+            border: 2px solid #e5e7eb;
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .filter-btn:hover {
+            background: #e5e7eb;
+            border-color: #d1d5db;
+        }
+        
+        .clear-filters-btn {
+            background: #ef4444;
+            color: white;
+            border: 2px solid #ef4444;
+        }
+        
+        .clear-filters-btn:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+        }
+        
+        /* Dropdown styles */
+        .dropdown-menu {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 50;
+        }
+        
+        .filter-option {
+            padding: 0.75rem 1rem;
+            color: #374151;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.2s ease;
+        }
+        
+        .filter-option:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+        
+        /* Vehicle Grid */
+        .vehicles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem 0;
+        }
+        
+        .vehicle-card {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .vehicle-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            border-color: #1f2937;
+        }
+        
+        .vehicle-image {
+            height: 220px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .vehicle-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+        }
+        
+        .vehicle-price {
+            color: white;
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+        
+        .image-count {
+            color: white;
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+        
+        .vehicle-info {
+            padding: 1.5rem;
+        }
+        
+        .vehicle-title {
+            font-weight: 600;
+            font-size: 1.125rem;
+            margin-bottom: 0.75rem;
+            color: #1f2937;
+        }
+        
+        .vehicle-details {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        
+        .vehicle-location {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .vehicle-posted {
+            color: #9ca3af;
+            font-size: 0.75rem;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding-top: 5rem;
+            }
+            
+            .search-section {
+                padding: 1rem;
+                margin: 0 1rem 1rem;
+            }
+            
+            .vehicles-grid {
+                grid-template-columns: 1fr;
+                padding: 0 1rem;
+            }
+            
+            .filter-buttons {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+        }
+        
+        /* Loading animation */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(31, 41, 55, 0.3);
+            border-radius: 50%;
+            border-top-color: #1f2937;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 navbar-white z-50" id="navbar">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10">
+                        <img src="/Wheelz_AI/Logo/WheelzAI_Logo.png" alt="WheelzAI Logo" class="w-full h-full object-contain">
+                    </div>
+                    <h2 class="text-xl font-bold logo-text">WheelzAI</h2>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="/Wheelz_AI/html/home.html" class="nav-link">Home</a>
+                    <a href="/Wheelz_AI/html/buy.html" class="nav-link active">Buy</a>
+                    <a href="/Wheelz_AI/html/about.html" class="nav-link">About</a>
+                    <a href="/Wheelz_AI/html/contact.html" class="nav-link">Contact</a>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    <a href="/Wheelz_AI/html/signin.html" class="sign-in-btn">
+                        Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container mx-auto px-4">
+            <!-- Page Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">Browse Vehicles</h1>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Find your perfect vehicle from our wide selection of cars, motorcycles, and more
+                </p>
+            </div>
+
+            <!-- Search and Filters Section -->
+            <div class="search-section">
+                <!-- Search Bar -->
+                <div class="mb-6">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <input
+                            id="searchInput"
+                            type="text"
+                            placeholder="Search for make, model, or keyword..."
+                            class="search-input pl-12"
+                        >
+                    </div>
+                </div>
+
+                <!-- Filter Buttons -->
+                <div class="filter-buttons flex gap-3 flex-wrap">
+                    <!-- Brand Filter -->
+                    <div class="relative">
+                        <button id="brandFilterBtn" class="filter-btn">
+                            <span>Brand</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div id="brandDropdown" class="absolute z-50 mt-2 w-48 dropdown-menu hidden">
+                            <a href="#" class="filter-option" data-filter-type="brand" data-filter-value="All">All Brands</a>
+                            <a href="#" class="filter-option" data-filter-type="brand" data-filter-value="Toyota">Toyota</a>
+                            <a href="#" class="filter-option" data-filter-type="brand" data-filter-value="Honda">Honda</a>
+                            <a href="#" class="filter-option" data-filter-type="brand" data-filter-value="Nissan">Nissan</a>
+                            <a href="#" class="filter-option" data-filter-type="brand" data-filter-value="Mitsubishi">Mitsubishi</a>
+                            <a href="#" class="filter-option" data-filter-type="brand" data-filter-value="Mercedes-Benz">Mercedes-Benz</a>
+                            <a href="#" class="filter-option" data-filter-type="brand" data-filter-value="BMW">BMW</a>
+                            <a href="#" class="filter-option" data-filter-type="brand" data-filter-value="Audi">Audi</a>
+                            <a href="#" class="filter-option" data-filter-type="brand" data-filter-value="Ford">Ford</a>
+                            <a href="#" class="filter-option" data-filter-type="brand" data-filter-value="Hyundai">Hyundai</a>
+                            <a href="#" class="filter-option" data-filter-type="brand" data-filter-value="Kia">Kia</a>
+                            <a href="#" class="filter-option" data-filter-type="brand" data-filter-value="Suzuki">Suzuki</a>
+                            <a href="#" class="filter-option" data-filter-type="brand" data-filter-value="Mazda">Mazda</a>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Type Filter -->
+                    <div class="relative">
+                        <button id="vehicleTypeFilterBtn" class="filter-btn">
+                            <span>Vehicle Type</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div id="vehicleTypeDropdown" class="absolute z-50 mt-2 w-48 dropdown-menu hidden">
+                            <a href="#" class="filter-option" data-filter-type="vehicleType" data-filter-value="All">All Types</a>
+                            <a href="#" class="filter-option" data-filter-type="vehicleType" data-filter-value="Car">Car</a>
+                            <a href="#" class="filter-option" data-filter-type="vehicleType" data-filter-value="Motorcycle">Motorcycle</a>
+                            <a href="#" class="filter-option" data-filter-type="vehicleType" data-filter-value="Van">Van</a>
+                            <a href="#" class="filter-option" data-filter-type="vehicleType" data-filter-value="Bus">Bus</a>
+                            <a href="#" class="filter-option" data-filter-type="vehicleType" data-filter-value="Lorry">Lorry</a>
+                            <a href="#" class="filter-option" data-filter-type="vehicleType" data-filter-value="Three Wheel">Three Wheeler</a>
+                            <a href="#" class="filter-option" data-filter-type="vehicleType" data-filter-value="SUV">SUV</a>
+                        </div>
+                    </div>
+
+                    <!-- Price Range Filter -->
+                    <div class="relative">
+                        <button id="priceRangeFilterBtn" class="filter-btn">
+                            <span>Price Range</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div id="priceRangeDropdown" class="absolute z-50 mt-2 w-60 dropdown-menu hidden">
+                            <a href="#" class="filter-option" data-filter-type="priceRange" data-filter-value="All">All Prices</a>
+                            <a href="#" class="filter-option" data-filter-type="priceRange" data-filter-value="0-1000000">Under Rs. 1,000,000</a>
+                            <a href="#" class="filter-option" data-filter-type="priceRange" data-filter-value="1000000-3000000">Rs. 1,000,000 - Rs. 3,000,000</a>
+                            <a href="#" class="filter-option" data-filter-type="priceRange" data-filter-value="3000000-5000000">Rs. 3,000,000 - Rs. 5,000,000</a>
+                            <a href="#" class="filter-option" data-filter-type="priceRange" data-filter-value="5000000-10000000">Rs. 5,000,000 - Rs. 10,000,000</a>
+                            <a href="#" class="filter-option" data-filter-type="priceRange" data-filter-value="10000000-20000000">Rs. 10,000,000 - Rs. 20,000,000</a>
+                            <a href="#" class="filter-option" data-filter-type="priceRange" data-filter-value="20000000-">Over Rs. 20,000,000</a>
+                        </div>
+                    </div>
+
+                    <!-- Clear Filters -->
+                    <button id="clearFiltersBtn" class="filter-btn clear-filters-btn">
+                        <span>Clear Filters</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingVehicles" class="text-center py-12">
+                <div class="loading-spinner mx-auto mb-4"></div>
+                <p class="text-gray-600">Loading vehicles...</p>
+            </div>
+
+            <!-- Vehicles Grid -->
+            <div id="vehiclesGrid" class="vehicles-grid">
+                <!-- Vehicles will be loaded here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="container mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <img src="/Wheelz_AI/Logo/WheelzAI_Logo.png" alt="WheelzAI" class="w-8 h-8">
+                        <h3 class="text-xl font-bold">WheelzAI</h3>
+                    </div>
+                    <p class="text-gray-400 mb-4">Sri Lanka's leading AI-powered vehicle trading platform.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499-.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.606.069-.606 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.220-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112.026 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 11.974C22 6.465 17.535 2 12.026 2z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 256 256">
+                                <path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160ZM176,24H80A56.06,56.06,0,0,0,24,80v96a56.06,56.06,0,0,0,56,56h96a56.06,56.06,0,0,0,56-56V80A56.06,56.06,0,0,0,176,24Zm40,152a40,40,0,0,1-40,40H80a40,40,0,0,1-40-40V80A40,40,0,0,1,80,40h96a40,40,0,0,1,40,40ZM192,76a12,12,0,1,1-12-12A12,12,0,0,1,192,76Z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/Wheelz_AI/html/home.html" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
+                        <li><a href="/Wheelz_AI/html/buy.html" class="text-gray-400 hover:text-white transition-colors">Browse Vehicles</a></li>
+                        <li><a href="/Wheelz_AI/html/sell.html" class="text-gray-400 hover:text-white transition-colors">Sell Your Vehicle</a></li>
+                        <li><a href="/Wheelz_AI/html/about.html" class="text-gray-400 hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">AI Valuation</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Vehicle Types</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Cars</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Motorcycles</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Vans</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Three Wheelers</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Commercial</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact Info</h4>
+                    <div class="space-y-2 text-gray-400">
+                        <p class="flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            516/4, Dutugamunu Road, Kohuwala
+                        </p>
+                        <p class="flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                            </svg>
+                            +94 11 123 4567
+                        </p>
+                        <p class="flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                            info@wheelzai.com
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
+                <p class="text-gray-400">
+                    © 2025 WheelzAI. All rights reserved. | Powered by AI Technology | Made with ❤️ in Sri Lanka
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu (Hidden by default) -->
+    <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="fixed inset-y-0 left-0 max-w-xs w-full mobile-menu-white shadow-xl">
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center space-x-3">
+                        <img src="/Wheelz_AI/Logo/WheelzAI_Logo.png" alt="WheelzAI" class="w-8 h-8">
+                        <h3 class="text-xl font-bold text-gray-900">WheelzAI</h3>
+                    </div>
+                    <button onclick="toggleMobileMenu()" class="text-gray-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <nav class="space-y-4">
+                    <a href="/Wheelz_AI/html/home.html" class="block py-2 text-gray-700 hover:text-gray-900">Home</a>
+                    <a href="/Wheelz_AI/html/buy.html" class="block py-2 text-gray-900 font-semibold">Buy</a>
+                    <a href="/Wheelz_AI/html/about.html" class="block py-2 text-gray-700 hover:text-gray-900">About</a>
+                    <a href="/Wheelz_AI/html/contact.html" class="block py-2 text-gray-700 hover:text-gray-900">Contact</a>
+                    
+                    <div class="pt-4 border-t border-gray-200">
+                        <a href="/Wheelz_AI/html/signin.html" class="w-full bg-gray-900 text-white py-3 px-4 rounded-lg transition-colors hover:bg-gray-800 block text-center">
+                            Sign In
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Toggle Button -->
+    <button onclick="toggleMobileMenu()" class="md:hidden fixed top-4 right-4 z-40 bg-white rounded-lg p-2 shadow-lg">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+    </button>
+
+    <script>
+        // Mobile menu toggle
+        window.toggleMobileMenu = function() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            mobileMenu.classList.toggle('hidden');
+        };
+
+        // Add scroll effect to navigation
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // Performance monitoring
+        window.addEventListener('load', () => {
+            console.log('🚗 Buy page loaded successfully with white navbar');
+            console.log('⚡ Performance:', {
+                loadTime: Math.round(performance.now()),
+                vehiclesLoaded: allVehicles ? allVehicles.length : 0
+            });
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuButton = document.querySelector('button[onclick="toggleMobileMenu()"]');
+            
+            if (!mobileMenu.contains(e.target) && !mobileMenuButton.contains(e.target)) {
+                mobileMenu.classList.add('hidden');
+            }
         });
     </script>
 </body>

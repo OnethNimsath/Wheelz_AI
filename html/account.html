@@ -403,6 +403,321 @@
             font-size: 14px;
             margin: 0;
         }
+
+        /* Chatbot Styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .chatbot-toggle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .chatbot-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .chatbot-toggle svg {
+            width: 28px;
+            height: 28px;
+            fill: white;
+        }
+
+        .chatbot-window {
+            position: absolute;
+            bottom: 80px;
+            left: 0;
+            width: 400px;
+            height: 550px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUpLeft 0.3s ease;
+        }
+
+        .chatbot-window.active {
+            display: flex;
+        }
+
+        @keyframes slideUpLeft {
+            from {
+                opacity: 0;
+                transform: translateY(20px) translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) translateX(0);
+            }
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chatbot-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .chatbot-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #f8fafc;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.5;
+            animation: messageSlide 0.3s ease;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.bot {
+            background: white;
+            color: #333;
+            align-self: flex-start;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            align-self: flex-end;
+        }
+
+        .chatbot-input-area {
+            padding: 20px;
+            border-top: 1px solid #e2e8f0;
+            background: white;
+        }
+
+        .chatbot-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .chatbot-input {
+            flex: 1;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 12px 16px;
+            font-size: 14px;
+            resize: none;
+            min-height: 20px;
+            max-height: 100px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .chatbot-input:focus {
+            border-color: #667eea;
+        }
+
+        .chatbot-send {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+        }
+
+        .chatbot-send:hover {
+            transform: scale(1.05);
+        }
+
+        .chatbot-send:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .chatbot-send svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #e2e8f0;
+            max-width: 80px;
+            align-self: flex-start;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #94a3b8;
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        .quick-questions {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .quick-questions-header {
+            font-size: 13px;
+            color: #475569;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .quick-question {
+            background: white;
+            border: 1px solid #d1d5db;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #374151;
+            text-align: left;
+            width: 100%;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .quick-question:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+            transform: translateY(-1px);
+        }
+
+        .ai-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+
+        .gemini-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #4285f4 0%, #ea4335 50%, #fbbc04 100%);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+
+        .error-message-chatbot {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin: 5px 0;
+        }
+
+        .api-status {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            color: #0c4a6e;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin: 5px 0;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .chatbot-window {
+                width: calc(100vw - 30px);
+                height: 70vh;
+                bottom: 80px;
+                left: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -562,6 +877,48 @@
         </div>
     </div>
 
+    <!-- Enhanced Chatbot Integration -->
+    <div class="chatbot-container">
+        <button class="chatbot-toggle" id="chatbotToggle">
+            <svg viewBox="0 0 24 24">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+            </svg>
+        </button>
+        
+        <div class="chatbot-window" id="chatbotWindow">
+            <div class="chatbot-header">
+                <h3>WheelzAI Assistant 🇱🇰</h3>
+                <button class="chatbot-close" id="chatbotClose">&times;</button>
+            </div>
+            
+            <div class="chatbot-messages" id="chatbotMessages">
+                <!-- Messages will be added here dynamically -->
+            </div>
+            
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+            
+            <div class="chatbot-input-area">
+                <div class="chatbot-input-container">
+                    <textarea 
+                        class="chatbot-input" 
+                        id="chatbotInput" 
+                        placeholder="Ask about vehicles, account settings, or anything else..."
+                        rows="1"
+                    ></textarea>
+                    <button class="chatbot-send" id="chatbotSend">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
@@ -584,7 +941,392 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Session Manager (same as dashboard)
+        // Enhanced WheelzAI Chatbot Class for Account Page
+        class EnhancedWheelzAIChatbot {
+            constructor() {
+                this.isOpen = false;
+                this.messages = [];
+                this.conversationHistory = [];
+                this.hasShownWelcome = false;
+                
+                // Replace with your actual Gemini API key
+                this.GEMINI_API_KEY = 'AIzaSyCLW0c2OF0frOyKJtNnRMDH7WrByySs2Ww';
+                
+                // Account-specific predefined questions and answers
+                this.predefinedQA = {
+                    "How to update my profile information": "To update your profile information:\n\n✅ **On this page:**\n• Fill out the form fields with your updated information\n• Click 'Save Changes' to update your profile\n• Required fields are marked with *\n\n📝 **Available fields:**\n• Full Name (required)\n• Phone Number\n• City & Country\n• Bio/Description\n\n💡 **Tips:**\n• Keep your profile complete for better visibility\n• Update your contact info for easier communication\n• Your email cannot be changed for security reasons",
+                    
+                    "How to change my password": "To change your password:\n\n🔒 **Steps:**\n1. Click the 'Change Password' button below\n2. We'll send a password reset email to your registered email\n3. Check your inbox (and spam folder)\n4. Click the link in the email\n5. Create your new password\n\n⚠️ **Important:**\n• Use a strong password (8+ characters)\n• Include uppercase, lowercase, numbers, and symbols\n• Don't reuse old passwords\n• Keep your password secure",
+                    
+                    "How to download my account data": "To download your account data:\n\n📥 **Steps:**\n1. Click the 'Download My Data' button\n2. Your data will be compiled into a PDF report\n3. The file will download automatically\n\n📋 **What's included:**\n• Personal information\n• Account statistics\n• Join date and activity\n• Profile completeness\n\n🔐 **Privacy:**\n• Keep the downloaded file secure\n• Don't share it with unauthorized persons",
+                    
+                    "What account types are available": "WheelzAI offers different account types:\n\n🛒 **Seller Account:**\n• Post vehicle advertisements\n• Manage your listings\n• Respond to buyer inquiries\n• Track selling performance\n\n🚗 **Buyer Account:**\n• Browse vehicle listings\n• Contact sellers\n• Save favorite vehicles\n• Get buying recommendations\n\n🔄 **Both (Seller + Buyer):**\n• All seller features\n• All buyer features\n• Most flexible option\n• Switch between roles easily\n\nYou can change your account type anytime from this page!",
+                    
+                    "How to delete my account": "Account deletion is a serious action:\n\n⚠️ **Before you delete:**\n• Download your data first\n• Complete any pending transactions\n• Remove active advertisements\n• This action cannot be undone\n\n🗑️ **Deletion process:**\n• Currently requires additional security verification\n• Contact our support team for assistance\n• We'll help ensure your data is properly removed\n\n📞 **Need help instead?**\n• Consider updating privacy settings\n• Temporarily deactivate instead of delete\n• Contact support for alternatives",
+                    
+                    "Popular car brands in Sri Lanka": "The most popular car brands in Sri Lanka are:\n\n🚗 **Toyota** - Most popular, excellent resale value\n🚗 **Honda** - Reliable, good fuel economy\n🚗 **Nissan** - Affordable maintenance\n🚗 **Suzuki** - Budget-friendly options\n🚗 **Mitsubishi** - Good for SUVs\n\nToyota dominates with models like Prius, Aqua, and Allion being extremely popular."
+                };
+                
+                this.quickQuestions = Object.keys(this.predefinedQA);
+                
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.checkAPIStatus();
+            }
+
+            checkAPIStatus() {
+                if (this.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+                    console.warn('Gemini API key not configured. Using offline mode only.');
+                }
+            }
+
+            bindEvents() {
+                const toggle = document.getElementById('chatbotToggle');
+                const close = document.getElementById('chatbotClose');
+                const send = document.getElementById('chatbotSend');
+                const input = document.getElementById('chatbotInput');
+
+                if (toggle) toggle.addEventListener('click', () => this.toggleChat());
+                if (close) close.addEventListener('click', () => this.closeChat());
+                if (send) send.addEventListener('click', () => this.sendMessage());
+                
+                if (input) {
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            this.sendMessage();
+                        }
+                    });
+
+                    // Auto-resize textarea
+                    input.addEventListener('input', () => {
+                        input.style.height = 'auto';
+                        input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+                    });
+                }
+            }
+
+            toggleChat() {
+                const window = document.getElementById('chatbotWindow');
+                if (!window) return;
+                
+                this.isOpen = !this.isOpen;
+                
+                if (this.isOpen) {
+                    window.classList.add('active');
+                    const input = document.getElementById('chatbotInput');
+                    if (input) input.focus();
+                    
+                    // Show welcome message only when first opened
+                    if (!this.hasShownWelcome) {
+                        setTimeout(() => {
+                            this.addWelcomeMessage();
+                            this.hasShownWelcome = true;
+                        }, 300);
+                    }
+                } else {
+                    window.classList.remove('active');
+                }
+            }
+
+            closeChat() {
+                const window = document.getElementById('chatbotWindow');
+                if (window) {
+                    window.classList.remove('active');
+                    this.isOpen = false;
+                }
+            }
+
+            addWelcomeMessage() {
+                const welcomeMsg = "Ayubowan! Welcome to WheelzAI Account Assistant! 🇱🇰\n\nI'm here to help you manage your account and answer questions about vehicles in Sri Lanka. I can assist with:\n\n• Profile updates and settings\n• Password and security\n• Account features\n• Vehicle information\n\nChoose a quick question below or ask me anything:";
+                this.addMessage('bot', welcomeMsg);
+                
+                // Add API status message if key not configured
+                if (this.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+                    setTimeout(() => {
+                        this.addAPIStatusMessage();
+                    }, 500);
+                }
+                
+                // Add questions immediately after welcome message
+                setTimeout(() => {
+                    this.addQuickQuestions();
+                }, 100);
+            }
+
+            addAPIStatusMessage() {
+                const messagesContainer = document.getElementById('chatbotMessages');
+                if (!messagesContainer) return;
+                
+                const statusDiv = document.createElement('div');
+                statusDiv.className = 'api-status';
+                statusDiv.innerHTML = `
+                    <strong>🔧 Gemini AI Setup Required:</strong><br>
+                    To enable AI responses, add your Gemini API key to the chatbot code.<br>
+                    <small>Currently using offline responses only.</small>
+                `;
+                messagesContainer.appendChild(statusDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            addMessage(sender, text, isHtml = false) {
+                const messagesContainer = document.getElementById('chatbotMessages');
+                if (!messagesContainer) return;
+
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+                
+                if (isHtml) {
+                    messageDiv.innerHTML = text;
+                } else {
+                    messageDiv.textContent = text;
+                }
+                
+                this.messages.push({ sender, text, timestamp: new Date() });
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            addQuickQuestions() {
+                const messagesContainer = document.getElementById('chatbotMessages');
+                
+                if (!messagesContainer) {
+                    console.error('Messages container not found');
+                    return;
+                }
+                
+                // Create a visible container for the questions
+                const questionsContainer = document.createElement('div');
+                questionsContainer.className = 'quick-questions';
+                
+                // Add header
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'quick-questions-header';
+                headerDiv.textContent = '💡 Account Help Topics - Click any for instant answers:';
+                questionsContainer.appendChild(headerDiv);
+                
+                // Add each question as a clickable button
+                this.quickQuestions.forEach((question, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'quick-question';
+                    btn.textContent = `${index + 1}. ${question}`;
+                    
+                    btn.addEventListener('click', () => {
+                        this.handleQuickQuestion(question);
+                    });
+                    
+                    questionsContainer.appendChild(btn);
+                });
+                
+                messagesContainer.appendChild(questionsContainer);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                console.log('Quick questions added successfully');
+            }
+
+            handleQuickQuestion(question) {
+                // Add user message
+                this.addMessage('user', question);
+                
+                // Show typing indicator
+                this.showTypingIndicator();
+                
+                setTimeout(() => {
+                    this.hideTypingIndicator();
+                    const answer = this.predefinedQA[question];
+                    this.addMessage('bot', answer);
+                }, 1000);
+            }
+
+            showTypingIndicator() {
+                const indicator = document.getElementById('typingIndicator');
+                const messagesContainer = document.getElementById('chatbotMessages');
+                if (indicator && messagesContainer) {
+                    indicator.style.display = 'flex';
+                    messagesContainer.appendChild(indicator);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+            }
+
+            hideTypingIndicator() {
+                const indicator = document.getElementById('typingIndicator');
+                if (indicator) {
+                    indicator.style.display = 'none';
+                }
+            }
+
+            async sendMessage() {
+                const input = document.getElementById('chatbotInput');
+                const sendButton = document.getElementById('chatbotSend');
+                if (!input) return;
+
+                const message = input.value.trim();
+                if (!message) return;
+                
+                // Disable input during processing
+                if (sendButton) sendButton.disabled = true;
+                input.disabled = true;
+                
+                // Add user message
+                this.addMessage('user', message);
+                this.conversationHistory.push({ role: "user", content: message });
+                
+                input.value = '';
+                input.style.height = 'auto';
+                
+                // Show typing indicator
+                this.showTypingIndicator();
+                
+                try {
+                    // Try to get response from Gemini API
+                    const response = await this.getGeminiResponse(message);
+                    this.hideTypingIndicator();
+                    this.addMessage('bot', response + " <span class='gemini-badge'>Gemini</span>", true);
+                    this.conversationHistory.push({ role: "assistant", content: response });
+                } catch (error) {
+                    console.error('Gemini API error:', error);
+                    this.hideTypingIndicator();
+                    
+                    // Use enhanced fallback responses
+                    const fallbackResponse = this.getEnhancedResponse(message);
+                    this.addMessage('bot', fallbackResponse);
+                    
+                    if (this.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+                        this.addErrorMessage("API key not configured. Using offline responses.");
+                    } else {
+                        this.addErrorMessage("Gemini API temporarily unavailable. Using offline responses.");
+                    }
+                }
+                
+                // Re-enable input
+                if (sendButton) sendButton.disabled = false;
+                input.disabled = false;
+                input.focus();
+            }
+
+            async getGeminiResponse(message) {
+                if (this.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+                    throw new Error('API key not configured');
+                }
+
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: `You are WheelzAI Account Assistant, helping users with their account management and Sri Lankan vehicle information. You specialize in:
+
+- Account settings and profile management
+- Password and security help  
+- Platform features and navigation
+- Sri Lankan vehicle market information
+- Vehicle buying/selling guidance
+
+Context: The user is currently on their Account Details page where they can:
+- Update their profile information (name, phone, city, country, bio)
+- Change their account type (seller, buyer, or both)
+- Manage security settings (change password, download data)
+- View account statistics and information
+
+Current user is logged into their WheelzAI account and viewing their account settings page.
+
+User question: ${message}
+
+Please provide helpful, specific guidance related to account management or Sri Lankan vehicles. Keep responses concise but informative (under 250 words).`
+                            }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            topK: 40,
+                            topP: 0.95,
+                            maxOutputTokens: 350,
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`Gemini API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                    return data.candidates[0].content.parts[0].text;
+                } else {
+                    throw new Error('Invalid response format from Gemini API');
+                }
+            }
+
+            getEnhancedResponse(message) {
+                const lowerMessage = message.toLowerCase();
+                
+                // Check for exact matches with predefined questions
+                for (const [question, answer] of Object.entries(this.predefinedQA)) {
+                    if (lowerMessage.includes(question.toLowerCase().substring(0, 10))) {
+                        return answer;
+                    }
+                }
+                
+                // Account-specific responses
+                if (lowerMessage.includes('profile') || lowerMessage.includes('update') || lowerMessage.includes('edit')) {
+                    return this.predefinedQA["How to update my profile information"];
+                }
+                
+                if (lowerMessage.includes('password') || lowerMessage.includes('change password') || lowerMessage.includes('reset')) {
+                    return this.predefinedQA["How to change my password"];
+                }
+                
+                if (lowerMessage.includes('download') || lowerMessage.includes('data') || lowerMessage.includes('export')) {
+                    return this.predefinedQA["How to download my account data"];
+                }
+                
+                if (lowerMessage.includes('account type') || lowerMessage.includes('seller') || lowerMessage.includes('buyer')) {
+                    return this.predefinedQA["What account types are available"];
+                }
+                
+                if (lowerMessage.includes('delete') || lowerMessage.includes('remove account')) {
+                    return this.predefinedQA["How to delete my account"];
+                }
+                
+                // Greeting patterns
+                if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey') || lowerMessage.includes('ayubowan')) {
+                    return "Ayubowan! 🙏 I'm your WheelzAI Account Assistant! I can help you with account settings, profile updates, security, and Sri Lankan vehicle information. What would you like to know?";
+                }
+                
+                // Vehicle-related queries (fallback to general vehicle info)
+                if (lowerMessage.includes('toyota') || lowerMessage.includes('honda') || lowerMessage.includes('car') || lowerMessage.includes('vehicle')) {
+                    return "I can help with vehicle information! For detailed Sri Lankan vehicle market info, pricing, and comparisons, try asking about specific brands like Toyota, Honda, or Suzuki. I also have account-related help if you need assistance with your profile settings!";
+                }
+                
+                // Thank you
+                if (lowerMessage.includes('thank')) {
+                    return "You're very welcome! 😊 I'm here to help with your account settings and any Sri Lankan vehicle questions. Feel free to ask about profile updates, security settings, or vehicle information!";
+                }
+                
+                // Default response with account-focused suggestions
+                return "I can help you with your WheelzAI account! Try asking about:\n\n🔧 **Account Management:**\n• \"How to update my profile\"\n• \"How to change my password\"\n• \"How to download my data\"\n\n👤 **Account Types:**\n• \"What account types are available\"\n• \"Seller vs buyer accounts\"\n\n🚗 **Vehicle Info:**\n• \"Popular cars in Sri Lanka\"\n• \"Toyota vs Honda comparison\"\n\nWhat would you like to know?";
+            }
+
+            addErrorMessage(message) {
+                const messagesContainer = document.getElementById('chatbotMessages');
+                if (!messagesContainer) return;
+                
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message-chatbot';
+                errorDiv.textContent = message;
+                messagesContainer.appendChild(errorDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+
+        // Session Manager (same as original)
         class SessionManager {
             constructor() {
                 this.auth = firebase.auth();
@@ -659,7 +1401,7 @@
             }
         }
 
-        // Account Manager
+        // Account Manager (same as original with all functionality)
         class AccountManager {
             constructor(sessionManager) {
                 this.sessionManager = sessionManager;
@@ -1014,31 +1756,6 @@
                 }
             }
 
-            changePassword() {
-                // Show custom popup instead of browser confirm
-                try {
-                    console.log('Change password clicked');
-                    const popup = document.getElementById('password-popup');
-                    const emailElement = document.getElementById('popup-email');
-                    
-                    if (!popup || !emailElement) {
-                        console.error('Popup elements not found');
-                        return;
-                    }
-                    
-                    emailElement.textContent = this.sessionManager.currentUser.email;
-                    popup.classList.add('show');
-                    console.log('Popup should be visible now');
-                } catch (error) {
-                    console.error('Error showing password popup:', error);
-                    // Fallback to browser confirm
-                    const email = this.sessionManager.currentUser.email;
-                    if (confirm(`Send password reset email to ${email}?`)) {
-                        this.sendPasswordResetDirect(email);
-                    }
-                }
-            }
-
             sendPasswordResetDirect(email) {
                 auth.sendPasswordResetEmail(email)
                     .then(() => {
@@ -1130,63 +1847,6 @@
                         yPos += textLines.length * 6;
                     });
                     
-                    // Account Statistics Section
-                    yPos += 15;
-                    doc.setFontSize(18);
-                    doc.setFont(undefined, 'bold');
-                    doc.setTextColor(...primaryColor);
-                    doc.text('Account Statistics', 20, yPos);
-                    
-                    // Underline
-                    doc.line(20, yPos + 2, 75, yPos + 2);
-                    
-                    yPos += 15;
-                    doc.setTextColor(...textColor);
-                    doc.setFontSize(11);
-                    doc.setFont(undefined, 'normal');
-                    
-                    // Calculate statistics
-                    const joinDate = profile?.createdAt ? 
-                        (profile.createdAt.toDate ? profile.createdAt.toDate() : new Date(profile.createdAt)) :
-                        new Date();
-                    const daysSinceJoin = Math.floor((Date.now() - joinDate.getTime()) / (1000 * 60 * 60 * 24));
-                    
-                    const statsInfo = [
-                        ['Member Since:', joinDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })],
-                        ['Days as Member:', daysSinceJoin.toString()],
-                        ['Last Profile Update:', profile?.lastUpdated ? 
-                            (profile.lastUpdated.toDate ? profile.lastUpdated.toDate() : new Date(profile.lastUpdated)).toLocaleDateString() : 
-                            'Never'],
-                        ['Account Status:', profile?.isActive !== false ? 'Active' : 'Inactive'],
-                        ['Email Verified:', user.emailVerified ? 'Yes' : 'No']
-                    ];
-                    
-                    statsInfo.forEach(([label, value]) => {
-                        doc.setFont(undefined, 'bold');
-                        doc.text(label, 20, yPos);
-                        doc.setFont(undefined, 'normal');
-                        doc.text(value, 60, yPos);
-                        yPos += 8;
-                    });
-                    
-                    // Footer Section
-                    const pageHeight = doc.internal.pageSize.height;
-                    
-                    // Footer background
-                    doc.setFillColor(248, 250, 252); // Light gray
-                    doc.rect(0, pageHeight - 30, 210, 30, 'F');
-                    
-                    // Footer text
-                    doc.setTextColor(...secondaryColor);
-                    doc.setFontSize(9);
-                    doc.setFont(undefined, 'normal');
-                    doc.text('This document contains your personal data from WheelzAI platform.', 20, pageHeight - 20);
-                    doc.text('Keep this document secure and do not share it with unauthorized persons.', 20, pageHeight - 15);
-                    doc.text(`Document ID: ${user.uid.substring(0, 8)}-${Date.now()}`, 20, pageHeight - 10);
-                    
-                    // Privacy notice
-                    doc.text('© 2025 WheelzAI. All rights reserved.', 140, pageHeight - 15);
-                    
                     // Save the PDF
                     const fileName = `WheelzAI_Account_Data_${user.email.split('@')[0]}_${new Date().toISOString().split('T')[0]}.pdf`;
                     doc.save(fileName);
@@ -1196,37 +1856,7 @@
                 } catch (error) {
                     console.error('Error generating PDF:', error);
                     this.showMessage('Error generating PDF. Please try again.', 'error');
-                    
-                    // Fallback to JSON download if PDF fails
-                    this.downloadUserDataJSON();
                 }
-            }
-
-            downloadUserDataJSON() {
-                // Fallback JSON download method
-                const userData = {
-                    profile: this.sessionManager.userProfile,
-                    authInfo: {
-                        uid: this.sessionManager.currentUser.uid,
-                        email: this.sessionManager.currentUser.email,
-                        emailVerified: this.sessionManager.currentUser.emailVerified,
-                        creationTime: this.sessionManager.currentUser.metadata.creationTime,
-                        lastSignInTime: this.sessionManager.currentUser.metadata.lastSignInTime
-                    },
-                    exportDate: new Date().toISOString()
-                };
-
-                const dataStr = JSON.stringify(userData, null, 2);
-                const dataBlob = new Blob([dataStr], {type: 'application/json'});
-                const url = URL.createObjectURL(dataBlob);
-                
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `wheelzai-account-data-${new Date().toISOString().split('T')[0]}.json`;
-                link.click();
-                
-                URL.revokeObjectURL(url);
-                this.showMessage('Account data downloaded as JSON file!', 'success');
             }
 
             showPrivacySettings() {
@@ -1269,7 +1899,7 @@
         // Initialize everything
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                console.log('Initializing account page...');
+                console.log('Initializing account page with chatbot...');
                 
                 const sessionManager = new SessionManager();
                 
@@ -1286,7 +1916,10 @@
                 
                 await accountManager.init();
 
-                console.log('Account page initialized successfully');
+                // Initialize the chatbot
+                window.enhancedWheelzAIChatbot = new EnhancedWheelzAIChatbot();
+
+                console.log('Account page with chatbot initialized successfully');
                 
                 // Additional check to ensure data is displayed
                 setTimeout(() => {
