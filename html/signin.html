@@ -78,7 +78,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <script>
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
             authDomain: "wheelzai.firebaseapp.com",
@@ -89,12 +88,9 @@
             measurementId: "G-ECQJYZYK43"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
 
-        // Get a reference to the Auth service
         const auth = firebase.auth();
-        // For Google Sign-in
         const googleProvider = new firebase.auth.GoogleAuthProvider();
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -105,9 +101,8 @@
             const googleLoginButton = document.getElementById('googleLoginButton');
             const userStatusParagraph = document.getElementById('userStatus'); // To display messages
 
-            // --- Email/Password Login ---
             loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault(); // Prevent default form submission
+                e.preventDefault(); 
 
                 const email = loginEmailInput.value.trim();
                 const password = loginPasswordInput.value.trim();
@@ -124,8 +119,7 @@
                     console.log('User logged in:', user);
                     userStatusParagraph.textContent = `Successfully logged in as: ${user.email}`;
                     userStatusParagraph.style.color = 'green';
-                    // Redirect to your dashboard or home page
-                    window.location.href = 'dashboard.html'; // Adjust this path to your actual dashboard page
+                    window.location.href = 'dashboard.html';
                 } catch (error) {
                     let errorMessage = "An unknown error occurred.";
                     console.error('Firebase Login Error:', error);
@@ -149,7 +143,6 @@
                 }
             });
 
-            // --- Google Login ---
             googleLoginButton.addEventListener('click', async () => {
                 try {
                     const result = await auth.signInWithPopup(googleProvider);
@@ -157,8 +150,8 @@
                     console.log('Google user signed in:', user);
                     userStatusParagraph.textContent = `Signed in with Google as ${user.displayName || user.email}!`;
                     userStatusParagraph.style.color = 'green';
-                    // Redirect to your dashboard or home page
-                    window.location.href = 'dashboard.html'; // Adjust this path to your actual dashboard page
+
+                    window.location.href = 'dashboard.html';
                 } catch (error) {
                     console.error('Google Sign-in Error:', error);
                     let errorMessage = "An error occurred during Google sign-in.";

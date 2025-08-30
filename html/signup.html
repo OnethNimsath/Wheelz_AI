@@ -6,7 +6,6 @@
     <title>WheelzAI - Sign Up</title>
     <link rel="stylesheet" href="/Wheelz_AI/css/signup.css">
     <style>
-        /* Custom Popup Styles */
         .popup-overlay {
             position: fixed;
             top: 0;
@@ -122,7 +121,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Loading Spinner */
         .loading-spinner {
             width: 20px;
             height: 20px;
@@ -220,7 +218,6 @@
         </div>
     </div>
 
-    <!-- Success Popup -->
     <div id="successPopup" class="popup-overlay">
         <div class="popup-container">
             <div class="wheelzai-branding">WheelzAI</div>
@@ -237,7 +234,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script> 
     <script>
-        // Your web app's Firebase configuration
         const firebaseConfig = {
            apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
            authDomain: "wheelzai.firebaseapp.com",
@@ -248,18 +244,12 @@
            measurementId: "G-ECQJYZYK43"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-
-        // Get a reference to the Auth service
         const auth = firebase.auth();
-        // Get a reference to the Firestore service
         const db = firebase.firestore(); 
 
-        // For Google Sign-in
         const googleProvider = new firebase.auth.GoogleAuthProvider();
 
-        // Popup functions
         function showSuccessPopup(title, message) {
             const popup = document.getElementById('successPopup');
             const titleElement = popup.querySelector('.popup-title');
@@ -309,7 +299,6 @@
                 const password = signupPasswordInput.value.trim();
                 const confirmPassword = confirmPasswordInput.value.trim();
 
-                // Basic client-side validation
                 if (!sellerName) {
                     alert('Please enter your full name.');
                     return;
@@ -330,39 +319,27 @@
                     alert('You must agree to the Terms and Privacy Policy to create an account.');
                     return;
                 }
-
-                // Set loading state
                 setButtonLoading(createAccountBtn, true, 'Creating Account...');
 
                 try {
-                    // Create user with email and password
                     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                     const user = userCredential.user;
-
-                    // Update user profile
                     await user.updateProfile({
                         displayName: sellerName
                     });
-
-                    // Save additional user data to Firestore
                     await db.collection('users').doc(user.uid).set({
                         name: sellerName,
                         email: user.email,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                         userType: 'seller'
                     });
-
-                    // Reset loading state
                     setButtonLoading(createAccountBtn, false, 'Create Account');
-
-                    // Show success popup instead of alert
                     showSuccessPopup(
                         'Account Created Successfully!',
                         `Welcome to WheelzAI, ${sellerName}! Your account has been created successfully. You can now sign in to access your dashboard.`
                     );
 
                 } catch (error) {
-                    // Reset loading state
                     setButtonLoading(createAccountBtn, false, 'Create Account');
 
                     let errorMessage = "An unknown error occurred.";
@@ -387,21 +364,16 @@
                     alert(errorMessage);
                 }
             });
-
-            // Google Sign-up/Login
             googleSignupButton.addEventListener('click', async () => {
                 setButtonLoading(googleSignupButton, true, 'Connecting...');
 
                 try {
                     const result = await auth.signInWithPopup(googleProvider);
                     const user = result.user;
-
-                    // Check if the user already exists in Firestore
                     const userDocRef = db.collection('users').doc(user.uid);
                     const doc = await userDocRef.get();
 
                     if (!doc.exists) {
-                        // User is signing in with Google for the first time, create their Firestore profile
                         await userDocRef.set({
                             name: user.displayName || 'N/A',
                             email: user.email,
@@ -413,18 +385,13 @@
                     } else {
                         console.log("Existing Google user profile found in Firestore.");
                     }
-
-                    // Reset loading state
                     setButtonLoading(googleSignupButton, false, 'Google');
-
-                    // Show success popup for Google signup
                     showSuccessPopup(
                         'Google Sign-up Successful!',
                         `Welcome ${user.displayName || user.email}! Your account has been created successfully using Google.`
                     );
 
                 } catch (error) {
-                    // Reset loading state
                     setButtonLoading(googleSignupButton, false, 'Google');
 
                     console.error('Google Sign-in Error:', error);
@@ -439,8 +406,6 @@
                     alert(errorMessage);
                 }
             });
-
-            // Close popup when clicking outside
             document.getElementById('successPopup').addEventListener('click', function(e) {
                 if (e.target === this) {
                     hideSuccessPopup();

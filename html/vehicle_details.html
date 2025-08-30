@@ -14,15 +14,14 @@
       href="https://fonts.googleapis.com/css2?display=swap&family=Inter%3Awght%40400%3B500%3B700%3B900&family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
     />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    
-    <!-- Firebase SDK -->
+
     <script type="module">
+        //enhanced using chatgpt/claude
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { getStorage, ref, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
         import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
             authDomain: "wheelzai.firebaseapp.com",
@@ -33,7 +32,6 @@
             measurementId: "G-ECQJYZYK43"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const storage = getStorage(app);
@@ -42,7 +40,6 @@
         let currentVehicle = null;
         let currentImageIndex = 0;
 
-        // Function to get URL parameters
         function getUrlParameter(name) {
             name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
             const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
@@ -50,20 +47,18 @@
             return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
         }
 
-        // Function to get image URL from Firebase Storage
         async function getImageUrl(imagePath) {
             if (!imagePath) return null;
             
             try {
                 if (imagePath.startsWith('data:image/')) {
-                    return imagePath; // It's a base64 image
+                    return imagePath; 
                 }
                 
                 if (imagePath.startsWith('http')) {
-                    return imagePath; // It's already a full URL
+                    return imagePath; 
                 }
-                
-                // It's a Firebase Storage path
+
                 const imageRef = ref(storage, imagePath);
                 const url = await getDownloadURL(imageRef);
                 return url;
@@ -73,7 +68,6 @@
             }
         }
 
-        // Function to format price
         function formatPrice(price) {
             if (!price || price === 0) return 'Price on request';
             if (price >= 1000000) {
@@ -82,25 +76,21 @@
             return `LKR ${(price / 1000).toFixed(0)}K`;
         }
 
-        // Function to format number with commas
         function formatNumber(num) {
             if (!num) return 'N/A';
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         }
 
-        // Function to load vehicle details
         async function loadVehicleDetails(vehicleId) {
             try {
                 const loadingElement = document.getElementById('loadingVehicle');
                 const contentElement = document.getElementById('vehicleContent');
                 const errorElement = document.getElementById('errorMessage');
 
-                // Show loading state
                 loadingElement.classList.remove('hidden');
                 contentElement.classList.add('hidden');
                 errorElement.classList.add('hidden');
 
-                // Fetch vehicle document from Firestore
                 const docRef = doc(db, 'Advertisements', vehicleId);
                 const docSnap = await getDoc(docRef);
 
@@ -109,8 +99,7 @@
                 }
 
                 currentVehicle = { id: docSnap.id, ...docSnap.data() };
-                
-                // Process images
+
                 currentVehicle.images = [];
                 if (currentVehicle.photos && Array.isArray(currentVehicle.photos)) {
                     for (const photoPath of currentVehicle.photos) {
@@ -121,7 +110,6 @@
                     }
                 }
 
-                // If no images from photos array, try individual image fields
                 if (currentVehicle.images.length === 0) {
                     const imageFields = ['mainImage', 'image2', 'image3', 'image4', 'image5', 'image6'];
                     for (const field of imageFields) {
@@ -134,65 +122,42 @@
                     }
                 }
 
-                // Add fallback image if no images available
                 if (currentVehicle.images.length === 0) {
                     currentVehicle.images.push('https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800&h=600&fit=crop&crop=center');
                 }
 
                 await renderVehicleDetails();
 
-                // Hide loading and show content
                 loadingElement.classList.add('hidden');
                 contentElement.classList.remove('hidden');
 
             } catch (error) {
                 console.error('Error loading vehicle details:', error);
-                
-                // Show error message
                 document.getElementById('loadingVehicle').classList.add('hidden');
                 document.getElementById('errorMessage').classList.remove('hidden');
                 document.getElementById('errorText').textContent = error.message || 'Failed to load vehicle details';
             }
         }
 
-        // Function to render vehicle details
         async function renderVehicleDetails() {
             if (!currentVehicle) return;
-
-            // Update page title
             document.title = `${currentVehicle.make || ''} ${currentVehicle.model || ''} ${currentVehicle.year || ''} - WheelzAI`;
-
-            // Render main image gallery
             renderImageGallery();
-
-            // Render vehicle info
             renderVehicleInfo();
-
-            // Render specifications
             renderSpecifications();
-
-            // Render features
             renderFeatures();
-
-            // Render seller info
             renderSellerInfo();
         }
 
-        // Function to render image gallery
         function renderImageGallery() {
             const mainImageElement = document.getElementById('mainImage');
             const thumbnailsElement = document.getElementById('imageThumbnails');
             const imageCounterElement = document.getElementById('imageCounter');
 
             if (currentVehicle.images.length > 0) {
-                // Set main image
                 mainImageElement.src = currentVehicle.images[currentImageIndex];
                 mainImageElement.alt = `${currentVehicle.make} ${currentVehicle.model}`;
-
-                // Update counter
                 imageCounterElement.textContent = `${currentImageIndex + 1} / ${currentVehicle.images.length}`;
-
-                // Render thumbnails
                 if (currentVehicle.images.length > 1) {
                     thumbnailsElement.innerHTML = currentVehicle.images.map((image, index) => `
                         <img src="${image}" 
@@ -207,23 +172,18 @@
             }
         }
 
-        // Function to render vehicle info
         function renderVehicleInfo() {
             const titleElement = document.getElementById('vehicleTitle');
             const priceElement = document.getElementById('vehiclePrice');
             const locationElement = document.getElementById('vehicleLocation');
             const postedDateElement = document.getElementById('postedDate');
 
-            // Title
             titleElement.textContent = `${currentVehicle.make || 'Unknown'} ${currentVehicle.model || ''} ${currentVehicle.year || ''}`.trim();
 
-            // Price
             priceElement.textContent = formatPrice(currentVehicle.askingPrice || currentVehicle.price || 0);
 
-            // Location
             locationElement.textContent = currentVehicle.location || currentVehicle.city || 'Location not specified';
 
-            // Posted date
             const postedDate = currentVehicle.createdAt 
                 ? new Date(currentVehicle.createdAt.toDate()).toLocaleDateString('en-US', {
                     year: 'numeric',
@@ -234,7 +194,6 @@
             postedDateElement.textContent = `Posted on ${postedDate}`;
         }
 
-        // Function to render specifications
         function renderSpecifications() {
             const specsElement = document.getElementById('vehicleSpecs');
             
@@ -257,13 +216,11 @@
             `).join('');
         }
 
-        // Function to render features
         function renderFeatures() {
             const featuresElement = document.getElementById('vehicleFeatures');
             
             const features = [];
             
-            // Check various feature fields
             if (currentVehicle.airCondition) features.push('Air Conditioning');
             if (currentVehicle.powerSteering) features.push('Power Steering');
             if (currentVehicle.powerMirror) features.push('Power Mirrors');
@@ -289,7 +246,6 @@
                 `;
             }
 
-            // Add description if available
             if (currentVehicle.description || currentVehicle.additionalInfo) {
                 featuresElement.innerHTML += `
                     <div class="mt-6">
@@ -300,7 +256,6 @@
             }
         }
 
-        // Function to render seller info
         function renderSellerInfo() {
             const sellerElement = document.getElementById('sellerInfo');
             
@@ -356,7 +311,6 @@
             `;
         }
 
-        // Global functions for image gallery
         window.changeMainImage = function(index) {
             currentImageIndex = index;
             renderImageGallery();
@@ -372,7 +326,6 @@
             renderImageGallery();
         };
 
-        // Global function to share vehicle
         window.shareVehicle = function() {
             if (navigator.share) {
                 navigator.share({
@@ -381,26 +334,20 @@
                     url: window.location.href
                 });
             } else {
-                // Fallback: copy to clipboard
                 navigator.clipboard.writeText(window.location.href).then(() => {
                     alert('Link copied to clipboard!');
                 });
             }
         };
 
-        // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('DOM loaded, initializing Firebase...');
-            
-            // Setup authentication
             try {
                 await signInAnonymously(auth);
                 console.log('Signed in anonymously');
             } catch (error) {
                 console.error('Auth error:', error);
             }
-
-            // Get vehicle ID from URL
             const vehicleId = getUrlParameter('id');
             
             if (!vehicleId) {
@@ -409,7 +356,6 @@
                 return;
             }
 
-            // Load vehicle details
             await loadVehicleDetails(vehicleId);
         });
     </script>
@@ -429,13 +375,10 @@
             color: #333;
             background: #f8fafc;
         }
-        
-        /* Smooth scrolling */
         html {
             scroll-behavior: smooth;
         }
-        
-        /* White Navbar Styles */
+
         .navbar-white {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(8px);
@@ -485,14 +428,12 @@
             background: #374151;
             border-color: #374151;
         }
-        
-        /* Main content */
+
         .main-content {
             padding-top: 6rem;
             min-height: 100vh;
         }
-        
-        /* Loading and error states */
+
         .loading-container, .error-container {
             display: flex;
             flex-direction: column;
@@ -516,8 +457,7 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        
-        /* Vehicle content layout */
+
         .vehicle-content {
             display: grid;
             grid-template-columns: 1fr;
@@ -532,8 +472,7 @@
                 grid-template-columns: 2fr 1fr;
             }
         }
-        
-        /* Image gallery */
+
         .image-gallery {
             background: white;
             border-radius: 1rem;
@@ -617,8 +556,7 @@
             opacity: 1;
             border-color: #1f2937;
         }
-        
-        /* Vehicle info sections */
+
         .info-section {
             background: white;
             border-radius: 1rem;
@@ -669,8 +607,7 @@
             width: 1rem;
             height: 1rem;
         }
-        
-        /* Specifications grid */
+
         .specs-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -703,7 +640,6 @@
             color: #1f2937;
         }
         
-        /* Features */
         .features-grid {
             display: flex;
             flex-wrap: wrap;
@@ -725,8 +661,7 @@
             line-height: 1.7;
             margin-top: 0.5rem;
         }
-        
-        /* Seller info */
+
         .seller-card {
             display: flex;
             align-items: center;
@@ -826,8 +761,7 @@
             background: #4b5563;
             border-color: #4b5563;
         }
-        
-        /* Responsive design */
+
         @media (max-width: 768px) {
             .main-content {
                 padding-top: 5rem;
@@ -863,8 +797,7 @@
                 right: 0.5rem;
             }
         }
-        
-        /* Error state */
+
         .error-icon {
             width: 64px;
             height: 64px;
@@ -900,15 +833,13 @@
         .back-to-browse:hover {
             background: #374151;
         }
-        
-        /* Hidden class */
+
         .hidden {
             display: none !important;
         }
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Navigation -->
     <nav class="fixed top-0 left-0 right-0 navbar-white z-50" id="navbar">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between h-16">
@@ -938,16 +869,13 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="main-content">
-        <!-- Loading State -->
         <div id="loadingVehicle" class="loading-container">
             <div class="loading-spinner"></div>
             <h2 class="text-xl font-semibold text-gray-700">Loading vehicle details...</h2>
             <p class="text-gray-500">Please wait while we fetch the information</p>
         </div>
 
-        <!-- Error State -->
         <div id="errorMessage" class="error-container hidden">
             <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
@@ -962,9 +890,7 @@
             </a>
         </div>
 
-        <!-- Vehicle Content -->
         <div id="vehicleContent" class="hidden">
-            <!-- Vehicle Header -->
             <div class="vehicle-header">
                 <h1 id="vehicleTitle" class="vehicle-title">Loading...</h1>
                 <div id="vehiclePrice" class="vehicle-price">Loading...</div>
@@ -986,9 +912,7 @@
             </div>
 
             <div class="vehicle-content">
-                <!-- Left Column: Images and Details -->
                 <div>
-                    <!-- Image Gallery -->
                     <div class="image-gallery">
                         <div class="main-image-container">
                             <img id="mainImage" src="" alt="Vehicle" class="main-image">
@@ -1005,35 +929,27 @@
                             <div id="imageCounter" class="image-counter">1 / 1</div>
                         </div>
                         <div id="imageThumbnails" class="image-thumbnails">
-                            <!-- Thumbnails will be loaded here -->
                         </div>
                     </div>
 
-                    <!-- Vehicle Specifications -->
                     <div class="info-section">
                         <h3 class="section-title">Specifications</h3>
                         <div id="vehicleSpecs" class="specs-grid">
-                            <!-- Specs will be loaded here -->
                         </div>
                     </div>
 
-                    <!-- Features and Description -->
                     <div id="vehicleFeatures" class="info-section">
-                        <!-- Features will be loaded here -->
                     </div>
                 </div>
 
-                <!-- Right Column: Seller Info -->
                 <div>
                     <div id="sellerInfo" class="info-section">
-                        <!-- Seller info will be loaded here -->
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-gray-900 text-white mt-16">
         <div class="container mx-auto px-4 py-12">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -1094,7 +1010,6 @@
     </footer>
 
     <script>
-        // Add scroll effect to navigation
         window.addEventListener('scroll', () => {
             const nav = document.getElementById('navbar');
             if (window.scrollY > 50) {
@@ -1104,7 +1019,6 @@
             }
         });
 
-        // Performance monitoring
         window.addEventListener('load', () => {
             console.log('🚗 Vehicle details page loaded successfully');
         });

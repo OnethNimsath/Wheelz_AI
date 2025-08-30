@@ -4,13 +4,9 @@ class VoiceToTextHandler {
         this.recognition = null;
         this.targetTextArea = null;
         this.micButton = null;
-        
-        // Google Cloud Speech-to-Text API configuration
-        this.API_KEY = 'YOUR_GOOGLE_CLOUD_API_KEY'; // Replace with your actual API key
+        this.API_KEY = 'YOUR_GOOGLE_CLOUD_API_KEY'; 
         this.API_URL = 'https://speech.googleapis.com/v1/speech:recognize';
-        
-        // Web Speech API fallback configuration
-        this.useWebSpeechAPI = true; // Set to false to use only Google Cloud API
+        this.useWebSpeechAPI = true; 
         
         this.init();
     }
@@ -22,7 +18,6 @@ class VoiceToTextHandler {
     }
 
     createMicButton() {
-        // Find the additional notes textarea
         const additionalNotesTextarea = document.querySelector('textarea[placeholder*="additional information"]');
         if (!additionalNotesTextarea) {
             console.error('Additional notes textarea not found');
@@ -30,8 +25,6 @@ class VoiceToTextHandler {
         }
 
         this.targetTextArea = additionalNotesTextarea;
-
-        // Create mic button container
         const micContainer = document.createElement('div');
         micContainer.className = 'voice-input-container';
         micContainer.innerHTML = `
@@ -46,8 +39,6 @@ class VoiceToTextHandler {
             </button>
             <div class="voice-status" id="voiceStatus"></div>
         `;
-
-        // Add custom styles
         const style = document.createElement('style');
         style.textContent = `
             .voice-input-container {
@@ -200,8 +191,6 @@ class VoiceToTextHandler {
             }
         `;
         document.head.appendChild(style);
-
-        // Insert the mic container after the textarea
         this.targetTextArea.parentNode.insertBefore(micContainer, this.targetTextArea.nextSibling);
         this.micButton = document.getElementById('voiceMicButton');
     }
@@ -264,11 +253,9 @@ class VoiceToTextHandler {
     async startWebSpeechRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         this.recognition = new SpeechRecognition();
-
-        // Configuration for better results
         this.recognition.continuous = false;
         this.recognition.interimResults = true;
-        this.recognition.lang = 'en-US'; // Change to 'si-LK' for Sinhala if supported
+        this.recognition.lang = 'en-US'; 
 
         this.recognition.onstart = () => {
             console.log('Speech recognition started');
@@ -281,8 +268,6 @@ class VoiceToTextHandler {
             for (let i = event.resultIndex; i < event.results.length; i++) {
                 transcript += event.results[i][0].transcript;
             }
-
-            // Show interim results
             if (event.results[event.results.length - 1].isFinal) {
                 this.insertTextAtCursor(transcript.trim());
                 this.showStatus('✓ Voice input complete', 'success');
@@ -331,8 +316,6 @@ class VoiceToTextHandler {
         try {
             // Request microphone permission
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            
-            // Create MediaRecorder for audio capture
             const mediaRecorder = new MediaRecorder(stream);
             const audioChunks = [];
 
@@ -343,21 +326,16 @@ class VoiceToTextHandler {
             mediaRecorder.onstop = async () => {
                 const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
                 await this.processAudioWithGoogleCloud(audioBlob);
-                
-                // Stop all tracks
                 stream.getTracks().forEach(track => track.stop());
             };
 
             mediaRecorder.start();
-
-            // Auto-stop after 10 seconds or when user stops manually
             const timeout = setTimeout(() => {
                 if (this.isRecording) {
                     this.stopRecording();
                 }
             }, 10000);
 
-            // Store references for stopping
             this.mediaRecorder = mediaRecorder;
             this.recordingTimeout = timeout;
 
@@ -378,14 +356,14 @@ class VoiceToTextHandler {
             
             const requestBody = {
                 config: {
-                    encoding: 'WEBM_OPUS', // Adjust based on your audio format
-                    sampleRateHertz: 48000, // Adjust based on your recording
-                    languageCode: 'en-US', // Change to 'si' for Sinhala
+                    encoding: 'WEBM_OPUS', 
+                    sampleRateHertz: 48000, 
+                    languageCode: 'en-US', 
                     enableAutomaticPunctuation: true,
-                    model: 'default' // or 'latest_short' for short audio
+                    model: 'default' 
                 },
                 audio: {
-                    content: base64Audio.split(',')[1] // Remove data:audio/... prefix
+                    content: base64Audio.split(',')[1] 
                 }
             };
 
@@ -435,8 +413,6 @@ class VoiceToTextHandler {
         const endPos = this.targetTextArea.selectionEnd;
         const textBefore = this.targetTextArea.value.substring(0, startPos);
         const textAfter = this.targetTextArea.value.substring(endPos);
-        
-        // Add spacing if needed
         const needsSpaceBefore = textBefore && !textBefore.endsWith(' ') && !textBefore.endsWith('\n');
         const needsSpaceAfter = textAfter && !textAfter.startsWith(' ') && !textAfter.startsWith('\n');
         
@@ -447,12 +423,8 @@ class VoiceToTextHandler {
                          textAfter;
 
         this.targetTextArea.value = finalText;
-        
-        // Set cursor position after inserted text
         const newCursorPos = startPos + (needsSpaceBefore ? 1 : 0) + text.length;
         this.targetTextArea.setSelectionRange(newCursorPos, newCursorPos);
-        
-        // Trigger change event for any listeners
         this.targetTextArea.dispatchEvent(new Event('input', { bubbles: true }));
         this.targetTextArea.focus();
     }
@@ -505,7 +477,6 @@ class VoiceToTextHandler {
             this.showStatus('', '');
         }, 3000);
 
-        // Clean up resources
         if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
             this.mediaRecorder.stop();
         }
@@ -515,13 +486,11 @@ class VoiceToTextHandler {
         }
     }
 
-    // Public method to change language
     setLanguage(languageCode) {
         this.languageCode = languageCode;
         console.log(`Voice recognition language set to: ${languageCode}`);
     }
 
-    // Public method to switch between APIs
     switchToWebSpeechAPI() {
         this.useWebSpeechAPI = true;
         console.log('Switched to Web Speech API');
@@ -533,10 +502,8 @@ class VoiceToTextHandler {
     }
 }
 
-// Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = VoiceToTextHandler;
 }
 
-// Make available globally
 window.VoiceToTextHandler = VoiceToTextHandler;

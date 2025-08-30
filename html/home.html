@@ -7,14 +7,12 @@
     <meta name="description" content="Sri Lanka's premier AI-powered vehicle trading platform. Buy, sell, and get instant AI valuations for cars, vans, and motorcycles. Trusted by thousands.">
     <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    
-    <!-- Firebase SDK -->
+
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getFirestore, collection, getDocs, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { getStorage, ref, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
             authDomain: "wheelzai.firebaseapp.com",
@@ -25,12 +23,10 @@
             measurementId: "G-ECQJYZYK43"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const storage = getStorage(app);
 
-        // Function to get recent listings for featured section
         async function getFeaturedVehicles() {
             try {
                 const advertisementsRef = collection(db, 'Advertisements');
@@ -58,7 +54,6 @@
             }
         }
 
-        // Function to format price
         function formatPrice(price) {
             if (!price || price === 0) return 'Price on request';
             if (price >= 1000000) {
@@ -67,7 +62,6 @@
             return `LKR ${(price / 1000).toFixed(0)}K`;
         }
 
-        // Load featured vehicles
         async function loadFeaturedVehicles() {
             const featuredContainer = document.getElementById('featured-vehicles');
             if (!featuredContainer) return;
@@ -118,10 +112,8 @@
             }
         }
 
-        // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', loadFeaturedVehicles);
 
-        // Global navigation functions
         window.scrollToSection = function(sectionId) {
             document.getElementById(sectionId)?.scrollIntoView({ 
                 behavior: 'smooth',
@@ -148,13 +140,11 @@
             line-height: 1.6;
             color: #333;
         }
-        
-        /* Smooth scrolling */
+
         html {
             scroll-behavior: smooth;
         }
-        
-        /* White Navbar Styles */
+
         .navbar-white {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(8px);
@@ -206,8 +196,7 @@
             background: #000000;
             border-color: #000000;
         }
-        
-        /* Mobile menu for white navbar */
+
         .mobile-menu-white {
             background: white;
             color: #1f2937;
@@ -244,8 +233,7 @@
         .mobile-menu-white .mobile-browse-btn:hover {
             background: #000000;
         }
-        
-        /* Hero Section */
+
         .hero-gradient {
             background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
             position: relative;
@@ -267,8 +255,7 @@
             position: relative;
             z-index: 1;
         }
-        
-        /* Feature Cards */
+
         .feature-card {
             background: white;
             border-radius: 16px;
@@ -297,8 +284,7 @@
             color: white;
             font-size: 2rem;
         }
-        
-        /* Featured Vehicles */
+
         .featured-card {
             background: white;
             border-radius: 12px;
@@ -349,8 +335,7 @@
             color: #6b7280;
             font-size: 0.9rem;
         }
-        
-        /* Statistics */
+
         .stat-item {
             text-align: center;
         }
@@ -370,8 +355,7 @@
             font-weight: 500;
             margin-top: 0.5rem;
         }
-        
-        /* CTA Buttons */
+
         .cta-primary {
             background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
             color: white;
@@ -407,8 +391,7 @@
             color: white;
             transform: translateY(-2px);
         }
-        
-        /* Responsive */
+
         @media (max-width: 768px) {
             .hero-title {
                 font-size: 2.5rem !important;
@@ -426,8 +409,7 @@
                 font-size: 2rem;
             }
         }
-        
-        /* Animations */
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -442,13 +424,11 @@
         .animate-fade-in-up {
             animation: fadeInUp 0.6s ease-out;
         }
-        
-        /* Section spacing */
+
         .section-padding {
             padding: 5rem 0;
         }
-        
-        /* Background patterns */
+
         .bg-pattern {
             background-image: 
                 radial-gradient(circle at 25px 25px, #f3f4f6 2px, transparent 0),
@@ -458,7 +438,6 @@
     </style>
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="fixed top-0 left-0 right-0 navbar-white z-50" id="navbar">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between h-16">
@@ -488,7 +467,6 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section id="hero" class="hero-gradient section-padding pt-24">
         <div class="container mx-auto px-4">
             <div class="hero-content text-center text-white">
@@ -513,8 +491,7 @@
                         📚 Learn More
                     </button>
                 </div>
-                
-                <!-- Hero Stats -->
+
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
                     <div class="stat-item">
                         <span class="stat-number">50+</span>
@@ -537,7 +514,6 @@
         </div>
     </section>
 
-    <!-- Features Section -->
     <section id="features" class="section-padding bg-gray-50">
         <div class="container mx-auto px-4">
             <div class="text-center mb-16">
@@ -587,7 +563,6 @@
         </div>
     </section>
 
-    <!-- How It Works -->
     <section id="how-it-works" class="section-padding">
         <div class="container mx-auto px-4">
             <div class="text-center mb-16">
@@ -598,7 +573,6 @@
             </div>
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <!-- For Sellers -->
                 <div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">For Sellers</h3>
                     <div class="space-y-6">
@@ -633,8 +607,7 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- For Buyers -->
+
                 <div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">For Buyers</h3>
                     <div class="space-y-6">
@@ -673,7 +646,6 @@
         </div>
     </section>
 
-    <!-- Featured Vehicles -->
     <section id="featured" class="section-padding bg-gray-50">
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
@@ -682,7 +654,6 @@
             </div>
             
             <div id="featured-vehicles" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                <!-- Featured vehicles will be loaded here -->
                 <div class="col-span-full text-center py-12">
                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
                     <p class="text-gray-600">Loading featured vehicles...</p>
@@ -697,7 +668,6 @@
         </div>
     </section>
 
-    <!-- Call to Action -->
     <section class="section-padding bg-gradient-to-r from-gray-900 to-black text-white">
         <div class="container mx-auto px-4 text-center">
             <h2 class="text-4xl font-bold mb-4">Ready to Get Started?</h2>
@@ -717,7 +687,6 @@
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="bg-gray-900 text-white">
         <div class="container mx-auto px-4 py-12">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -817,7 +786,6 @@
         </div>
     </footer>
 
-    <!-- Mobile Menu (Hidden by default) -->
     <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
         <div class="fixed inset-y-0 left-0 max-w-xs w-full mobile-menu-white shadow-xl">
             <div class="p-4">
@@ -854,7 +822,6 @@
         </div>
     </div>
 
-    <!-- Mobile Menu Toggle Button -->
     <button onclick="toggleMobileMenu()" class="md:hidden fixed top-4 right-4 z-40 bg-white rounded-lg p-2 shadow-lg">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
@@ -862,17 +829,15 @@
     </button>
 
     <script>
-        // Mobile menu toggle
         window.toggleMobileMenu = function() {
             const mobileMenu = document.getElementById('mobileMenu');
             mobileMenu.classList.toggle('hidden');
         };
 
-        // Smooth scrolling with offset for fixed header
         window.scrollToSection = function(sectionId) {
             const element = document.getElementById(sectionId);
             if (element) {
-                const offsetTop = element.offsetTop - 80; // Account for fixed header
+                const offsetTop = element.offsetTop - 80;
                 window.scrollTo({
                     top: offsetTop,
                     behavior: 'smooth'
@@ -880,7 +845,6 @@
             }
         };
 
-        // Add scroll effect to navigation - Enhanced for white navbar
         window.addEventListener('scroll', () => {
             const nav = document.getElementById('navbar');
             if (window.scrollY > 50) {
@@ -890,7 +854,6 @@
             }
         });
 
-        // Add intersection observer for animations
         const observerOptions = {
             threshold: 0.1,
             rootMargin: '0px 0px -50px 0px'
@@ -904,15 +867,12 @@
             });
         }, observerOptions);
 
-        // Observe elements for animation
         document.addEventListener('DOMContentLoaded', () => {
             const elementsToAnimate = document.querySelectorAll('.feature-card, .stat-item, .featured-card');
             elementsToAnimate.forEach(el => observer.observe(el));
         });
 
-        // Add loading states and error handling
         document.addEventListener('DOMContentLoaded', () => {
-            // Add loading spinner to CTA buttons
             const ctaButtons = document.querySelectorAll('.cta-primary, .cta-secondary');
             ctaButtons.forEach(button => {
                 button.addEventListener('click', function() {
@@ -927,7 +887,6 @@
             });
         });
 
-        // Add performance monitoring
         window.addEventListener('load', () => {
             console.log('🏠 Home page loaded successfully with white navbar');
             console.log('⚡ Performance:', {
@@ -937,7 +896,6 @@
             });
         });
 
-        // Easter egg: Konami code
         let konamiCode = [];
         const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
         
@@ -948,12 +906,10 @@
             }
             
             if (JSON.stringify(konamiCode) === JSON.stringify(konamiSequence)) {
-                // Easter egg activated
                 document.body.style.background = 'linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7, #fab1a0)';
                 document.body.style.backgroundSize = '400% 400%';
                 document.body.style.animation = 'gradient 3s ease infinite';
-                
-                // Add keyframes for gradient animation
+
                 const style = document.createElement('style');
                 style.textContent = `
                     @keyframes gradient {
@@ -963,8 +919,7 @@
                     }
                 `;
                 document.head.appendChild(style);
-                
-                // Show message
+
                 const message = document.createElement('div');
                 message.innerHTML = '🎉 Easter egg found! You discovered the WheelzAI rainbow mode! 🌈';
                 message.style.cssText = `

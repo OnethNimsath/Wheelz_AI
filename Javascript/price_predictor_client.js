@@ -5,9 +5,6 @@ class VehiclePricePredictionClient {
         this.cacheExpiry = 5 * 60 * 1000; // 5 minutes
     }
 
-    /**
-     * Make API request with error handling
-     */
     async makeRequest(endpoint, options = {}) {
         try {
             const url = `${this.apiBaseUrl}${endpoint}`;
@@ -31,9 +28,6 @@ class VehiclePricePredictionClient {
         }
     }
 
-    /**
-     * Check if API is healthy
-     */
     async checkHealth() {
         try {
             const response = await this.makeRequest('/health');
@@ -44,9 +38,6 @@ class VehiclePricePredictionClient {
         }
     }
 
-    /**
-     * Get price prediction for a vehicle
-     */
     async predictPrice(vehicleData) {
         try {
             // Validate required fields
@@ -72,9 +63,6 @@ class VehiclePricePredictionClient {
         }
     }
 
-    /**
-     * Validate vehicle data
-     */
     validateVehicleData(data) {
         const currentYear = new Date().getFullYear();
         
@@ -94,9 +82,6 @@ class VehiclePricePredictionClient {
         }
     }
 
-    /**
-     * Get available vehicle makes
-     */
     async getMakes() {
         const cacheKey = 'makes';
         
@@ -124,17 +109,13 @@ class VehiclePricePredictionClient {
         }
     }
 
-    /**
-     * Get available models for a specific make
-     */
     async getModels(make) {
         if (!make) {
             return [];
         }
 
         const cacheKey = `models-${make.toLowerCase()}`;
-        
-        // Check cache
+
         if (this.cache.has(cacheKey)) {
             const cached = this.cache.get(cacheKey);
             if (Date.now() - cached.timestamp < this.cacheExpiry) {
@@ -144,8 +125,7 @@ class VehiclePricePredictionClient {
 
         try {
             const response = await this.makeRequest(`/get-models/${encodeURIComponent(make)}`);
-            
-            // Cache the result
+
             this.cache.set(cacheKey, {
                 data: response.models,
                 timestamp: Date.now()
@@ -158,9 +138,6 @@ class VehiclePricePredictionClient {
         }
     }
 
-    /**
-     * Validate if a vehicle exists in the database
-     */
     async validateVehicle(make, model) {
         try {
             const response = await this.makeRequest('/validate-vehicle', {
@@ -175,9 +152,6 @@ class VehiclePricePredictionClient {
         }
     }
 
-    /**
-     * Get market trends
-     */
     async getMarketTrends() {
         const cacheKey = 'market-trends';
         
@@ -205,9 +179,6 @@ class VehiclePricePredictionClient {
         }
     }
 
-    /**
-     * Batch predict prices for multiple vehicles
-     */
     async batchPredict(vehicles) {
         if (!Array.isArray(vehicles) || vehicles.length === 0) {
             throw new Error('Vehicles must be a non-empty array');
@@ -230,17 +201,11 @@ class VehiclePricePredictionClient {
         }
     }
 
-    /**
-     * Clear cache
-     */
     clearCache() {
         this.cache.clear();
     }
 }
 
-/**
- * Integration helper for WheelzAI sell page
- */
 class WheelzAIPriceIntegrator {
     constructor(apiBaseUrl = 'http://localhost:5000') {
         this.client = new VehiclePricePredictionClient(apiBaseUrl);
@@ -248,9 +213,6 @@ class WheelzAIPriceIntegrator {
         this.currentPrediction = null;
     }
 
-    /**
-     * Initialize the integrator
-     */
     async initialize() {
         try {
             console.log('🔄 Initializing WheelzAI Price Integrator...');
@@ -274,9 +236,6 @@ class WheelzAIPriceIntegrator {
         }
     }
 
-    /**
-     * Setup form listeners for real-time predictions
-     */
     setupFormListeners() {
         // Get form elements
         const makeSelect = document.querySelector('select[required]');
@@ -285,12 +244,10 @@ class WheelzAIPriceIntegrator {
         const mileageInput = document.querySelector('input[type="number"]');
         const conditionInputs = document.querySelectorAll('input[name="condition"]');
 
-        // Add event listeners
         if (makeSelect) {
             makeSelect.addEventListener('change', () => this.updateModels());
         }
 
-        // Add listeners for price calculation trigger
         [makeSelect, modelInput, yearSelect, mileageInput].forEach(element => {
             if (element) {
                 element.addEventListener('change', () => this.debounceUpdatePrice());
@@ -303,9 +260,6 @@ class WheelzAIPriceIntegrator {
         });
     }
 
-    /**
-     * Update models dropdown based on selected make
-     */
     async updateModels() {
         const makeSelect = document.querySelector('select[required]');
         const modelInput = document.querySelector('input[required]');
@@ -317,8 +271,7 @@ class WheelzAIPriceIntegrator {
 
         try {
             const models = await this.client.getModels(selectedMake);
-            
-            // Update model input with datalist for suggestions
+
             let datalist = document.getElementById('model-suggestions');
             if (!datalist) {
                 datalist = document.createElement('datalist');
@@ -339,53 +292,34 @@ class WheelzAIPriceIntegrator {
         }
     }
 
-    /**
-     * Debounced price update
-     */
     debounceUpdatePrice() {
         clearTimeout(this.updateTimeout);
         this.updateTimeout = setTimeout(() => {
             this.updatePriceEstimate();
-        }, 1000); // Wait 1 second after user stops typing
+        }, 1000); 
     }
 
-    /**
-     * Update price estimate
-     */
     async updatePriceEstimate() {
         if (!this.isInitialized) return;
 
         try {
             const vehicleData = this.collectVehicleData();
-            
-            // Check if all required fields are filled
             if (!this.isFormComplete(vehicleData)) {
                 return;
             }
 
             console.log('🔄 Updating price estimate...', vehicleData);
-
-            // Show loading state
             this.showLoadingState();
-
-            // Get prediction
             const prediction = await this.client.predictPrice(vehicleData);
             this.currentPrediction = prediction;
-
-            // Update UI
             this.updatePriceDisplay(prediction);
-
             console.log('✅ Price estimate updated:', prediction);
-
         } catch (error) {
             console.error('❌ Failed to update price estimate:', error);
             this.showErrorState(error.message);
         }
     }
 
-    /**
-     * Collect vehicle data from form
-     */
     collectVehicleData() {
         const makeSelect = document.querySelector('select[required]');
         const modelInput = document.querySelector('input[required]');
@@ -406,17 +340,11 @@ class WheelzAIPriceIntegrator {
         };
     }
 
-    /**
-     * Check if form is complete for prediction
-     */
     isFormComplete(data) {
         return data.make && data.model && data.year && data.mileage && 
                data.fuel_type && data.body_type && data.condition;
     }
 
-    /**
-     * Update price display in the UI
-     */
     updatePriceDisplay(prediction) {
         const aiEstimateElement = document.getElementById('aiEstimate');
         if (!aiEstimateElement) return;
@@ -425,7 +353,6 @@ class WheelzAIPriceIntegrator {
         
         aiEstimateElement.innerHTML = `${formatted_range.lower} - ${formatted_range.upper}`;
         
-        // Update additional info if available
         const infoElement = aiEstimateElement.nextElementSibling;
         if (infoElement) {
             const confidence = prediction.confidence || 'Medium';
@@ -438,9 +365,6 @@ class WheelzAIPriceIntegrator {
         }
     }
 
-    /**
-     * Show loading state
-     */
     showLoadingState() {
         const aiEstimateElement = document.getElementById('aiEstimate');
         if (aiEstimateElement) {
@@ -450,9 +374,6 @@ class WheelzAIPriceIntegrator {
         }
     }
 
-    /**
-     * Show error state
-     */
     showErrorState(message) {
         const aiEstimateElement = document.getElementById('aiEstimate');
         if (aiEstimateElement) {
@@ -462,9 +383,6 @@ class WheelzAIPriceIntegrator {
         }
     }
 
-    /**
-     * Show fallback message when API is not available
-     */
     showFallbackMessage() {
         const aiEstimateElement = document.getElementById('aiEstimate');
         if (aiEstimateElement) {
@@ -477,24 +395,18 @@ class WheelzAIPriceIntegrator {
         }
     }
 
-    /**
-     * Get current prediction
-     */
     getCurrentPrediction() {
         return this.currentPrediction;
     }
 }
 
-// Auto-initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
-    // Only initialize on sell page
     if (window.location.pathname.includes('sell') || document.getElementById('aiEstimate')) {
         window.wheelzAIPriceIntegrator = new WheelzAIPriceIntegrator();
         await window.wheelzAIPriceIntegrator.initialize();
     }
 });
 
-// Export for module usage
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { VehiclePricePredictionClient, WheelzAIPriceIntegrator };
 }

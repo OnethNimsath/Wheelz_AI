@@ -1471,17 +1471,14 @@
             return { width: Math.round(width), height: Math.round(height) };
         }
 
-        // Handle form submission
         async function handleFormSubmission(e) {
             e.preventDefault();
-            
-            // Check if uploads are still in progress
+
             if (uploadInProgress) {
                 customAlert('Please wait for image uploads to complete before saving.', 'warning');
                 return;
             }
-            
-            // Validate form first
+
             if (!validateForm()) {
                 return;
             }
@@ -1510,14 +1507,10 @@
             });
         }
 
-        // Collect form data
         function collectFormData() {
             const formData = {
-                // Pricing
                 askingPrice: parsePriceToNumber(document.getElementById('askingPrice').value),
                 negotiable: document.querySelector('input[name="negotiable"]:checked')?.value === 'yes',
-                
-                // Vehicle Information
                 make: document.getElementById('make').value,
                 model: document.getElementById('model').value,
                 year: parseInt(document.getElementById('year').value),
@@ -1527,31 +1520,20 @@
                 condition: document.getElementById('condition').value,
                 transmission: document.getElementById('transmission').value,
                 engineCapacity: document.getElementById('engineCapacity').value,
-                
-                // Vehicle History
                 accidentHistory: document.getElementById('accidentHistory').value,
                 serviceHistory: document.getElementById('serviceHistory').value,
-                
-                // Additional Information
                 additionalNotes: document.getElementById('additionalNotes').value,
-                
-                // Contact Information
                 phoneNumber: document.getElementById('phoneNumber').value,
                 email: document.getElementById('email').value,
                 whatsappNumber: document.getElementById('whatsappNumber').value,
-                
-                // Contact Methods
                 contactMethods: getSelectedContactMethods(),
-                
-                // Media - only include successfully uploaded images
                 photos: uploadedImages.filter(img => img.uploaded || img.isExisting).map(img => img.url),
                 documents: uploadedDocuments.map(doc => ({
                     name: doc.name,
                     size: doc.size,
                     type: doc.type || 'application/octet-stream'
                 })),
-                
-                // Metadata
+
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 updatedBy: sessionManager.currentUser.uid
             };
@@ -1559,7 +1541,6 @@
             return formData;
         }
 
-        // Parse price string to number
         function parsePriceToNumber(priceStr) {
             if (!priceStr) return 0;
             
@@ -1570,7 +1551,6 @@
             return price;
         }
 
-        // Get selected contact methods
         function getSelectedContactMethods() {
             const methods = [];
             if (document.getElementById('contactPhone').checked) methods.push('Phone');
@@ -1579,20 +1559,17 @@
             return methods;
         }
 
-        // Update advertisement in Firestore
         async function updateAdvertisement(formData) {
             if (!currentAdId) {
                 throw new Error('No advertisement ID available');
             }
             
             try {
-                // Add userId to ensure ownership
                 formData.userId = sessionManager.currentUser.uid;
                 
                 await db.collection('Advertisements').doc(currentAdId).update(formData);
                 console.log('Advertisement updated successfully');
-                
-                // Update session activity
+
                 updateSessionActivity();
                 
             } catch (error) {
@@ -1601,7 +1578,6 @@
             }
         }
 
-        // Enhanced image display with upload status
         function displayImagePreviews() {
             const container = document.getElementById('image-previews');
             if (!container) return;
@@ -1624,8 +1600,7 @@
                     e.stopPropagation();
                     removeImage(index);
                 };
-                
-                // Add upload status indicator
+
                 const statusDiv = document.createElement('div');
                 statusDiv.className = 'image-upload-status';
                 if (image.uploading) {
@@ -1643,12 +1618,10 @@
             });
         }
 
-        // Enhanced remove image with Firebase Storage cleanup
         async function removeImage(index) {
             const image = uploadedImages[index];
             
             try {
-                // If it's a Firebase Storage URL and not an existing image, try to delete it
                 if (image.url && image.url.includes('firebasestorage.googleapis.com') && !image.isExisting) {
                     try {
                         const storageRef = storage.refFromURL(image.url);
@@ -1656,11 +1629,9 @@
                         console.log('Image deleted from storage:', image.url);
                     } catch (deleteError) {
                         console.warn('Could not delete image from storage:', deleteError);
-                        // Continue with removal from array even if storage deletion fails
                     }
                 }
-                
-                // Clean up blob URL if it exists
+
                 if (image.url && image.url.startsWith('blob:')) {
                     URL.revokeObjectURL(image.url);
                 }
@@ -1671,8 +1642,7 @@
                 updateUploadUI();
                 hasUnsavedChanges = true;
                 updateSessionActivity();
-                
-                // Check if all uploads are complete
+
                 const stillUploading = uploadedImages.some(img => img.uploading);
                 if (!stillUploading) {
                     uploadInProgress = false;
@@ -1684,7 +1654,6 @@
             }
         }
 
-        // Document upload functions
         function handleDocumentUpload(event) {
             const files = Array.from(event.target.files);
             processDocumentFiles(files);
@@ -1743,7 +1712,6 @@
             updateSessionActivity();
         }
 
-        // Image upload event handlers
         function handleImageUpload(event) {
             if (uploadedImages.length >= 5) {
                 customAlert('Maximum 5 photos allowed. Please remove some photos first.', 'error');
@@ -1803,7 +1771,6 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // Form validation helpers
         function validateForm() {
             const requiredFields = [
                 { id: 'askingPrice', name: 'Asking Price' },
@@ -1832,23 +1799,20 @@
                 customAlert(`Please fill in the following required fields:\n${missingFields.join(', ')}`, 'error');
                 return false;
             }
-            
-            // Validate email format
+
             const email = document.getElementById('email').value;
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 customAlert('Please enter a valid email address', 'error');
                 return false;
             }
-            
-            // Validate price
+
             const price = parsePriceToNumber(document.getElementById('askingPrice').value);
             if (price <= 0) {
                 customAlert('Please enter a valid asking price', 'error');
                 return false;
             }
-            
-            // Check if any images are still uploading
+
             const stillUploading = uploadedImages.some(img => img.uploading);
             if (stillUploading) {
                 customAlert('Please wait for all images to finish uploading before saving.', 'warning');
@@ -1858,7 +1822,6 @@
             return true;
         }
 
-        // Session management functions
         function updateSessionActivity() {
             if (sessionManager) {
                 sessionManager.updateLastActivity();
@@ -1881,7 +1844,6 @@
         }
 
         function setupEditPageSessionMonitoring() {
-            // Enhanced session monitoring for edit page
             setInterval(() => {
                 if (sessionManager) {
                     const sessionData = sessionManager.getSessionData();
@@ -1889,17 +1851,15 @@
                         const now = Date.now();
                         const lastActivity = sessionData.lastActivity || 0;
                         const timeSinceActivity = now - lastActivity;
-                        
-                        // Update UI based on session status
-                        if (timeSinceActivity > 25 * 60 * 1000) { // 25 minutes
+                        if (timeSinceActivity > 25 * 60 * 1000) { 
                             updateSessionStatusUI();
-                            if (timeSinceActivity > 30 * 60 * 1000) { // 30 minutes
+                            if (timeSinceActivity > 30 * 60 * 1000) { 
                                 handleSessionTimeout();
                             }
                         }
                     }
                 }
-            }, 60000); // Check every minute
+            }, 60000); 
         }
 
         function handleSessionTimeout() {
@@ -1908,7 +1868,6 @@
             });
         }
 
-        // Navigation functions
         function goBack() {
             if (hasUnsavedChanges || uploadInProgress) {
                 const message = uploadInProgress ? 
@@ -1980,7 +1939,6 @@
             });
         }
 
-        // Custom popup functions
         function showCustomPopup(type, title, message, callback) {
             const popup = document.getElementById('custom-popup');
             const container = popup.querySelector('.popup-container');
@@ -2117,7 +2075,6 @@
             }, 10);
         }
 
-        // Drag and Drop functionality
         function handleDragOver(event) {
             event.preventDefault();
             event.currentTarget.classList.add('dragover');
@@ -2157,7 +2114,6 @@
             updateSessionActivity();
         }
 
-        // Auto-resize textarea
         document.addEventListener('DOMContentLoaded', () => {
             const textarea = document.getElementById('additionalNotes');
             if (textarea) {
@@ -2169,7 +2125,6 @@
             }
         });
 
-        // Enhanced session monitoring with UI updates
         function enhancedSessionCheck() {
             if (!sessionManager) return;
             
@@ -2182,19 +2137,17 @@
             const now = Date.now();
             const lastActivity = sessionData.lastActivity || 0;
             const timeSinceActivity = now - lastActivity;
-            const sessionTimeout = 30 * 60 * 1000; // 30 minutes
-            const warningTimeout = 25 * 60 * 1000; // 25 minutes
+            const sessionTimeout = 30 * 60 * 1000; 
+            const warningTimeout = 25 * 60 * 1000; 
             
             const statusElement = document.getElementById('sessionStatus');
             const textElement = document.getElementById('sessionStatusText');
             
             if (timeSinceActivity > sessionTimeout) {
-                // Session expired
                 statusElement.className = 'session-status error';
                 textElement.textContent = 'Session Expired';
                 handleSessionTimeout();
             } else if (timeSinceActivity > warningTimeout) {
-                // Session warning
                 statusElement.className = 'session-status warning';
                 const minutesLeft = Math.ceil((sessionTimeout - timeSinceActivity) / 60000);
                 textElement.textContent = `Session expires in ${minutesLeft}min`;
@@ -2211,36 +2164,31 @@
                     });
                 }
             } else {
-                // Session active
                 statusElement.className = 'session-status';
                 textElement.textContent = 'Session Active';
                 sessionManager.sessionWarningShown = false;
             }
         }
 
-        // Start enhanced session monitoring when page loads
-        setInterval(enhancedSessionCheck, 30000); // Check every 30 seconds
+        //Check session monitoring
+        setInterval(enhancedSessionCheck, 30000); 
 
-        // Keyboard shortcuts for better UX
         document.addEventListener('keydown', (e) => {
-            // Ctrl+S to save as draft
+
             if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
                 saveAsDraft();
                 updateSessionActivity();
             }
-            
-            // Escape to go back (with confirmation if unsaved changes)
+
             if (e.key === 'Escape') {
                 e.preventDefault();
                 goBack();
             }
-            
-            // Any key press updates session activity
+
             updateSessionActivity();
         });
 
-        // Initialize real-time price estimation (placeholder for AI integration)
         function initializePriceEstimation() {
             const relevantFields = ['make', 'model', 'year', 'mileage', 'condition'];
             
@@ -2256,8 +2204,6 @@
         }
 
         function updatePriceEstimation() {
-            // Placeholder for AI price estimation
-            // In a real implementation, this would call your AI service
             const make = document.getElementById('make').value;
             const model = document.getElementById('model').value;
             const year = document.getElementById('year').value;
@@ -2265,12 +2211,10 @@
             const condition = document.getElementById('condition').value;
             
             if (make && model && year && mileage && condition) {
-                // Simulate AI estimation (replace with actual API call)
                 setTimeout(() => {
                     const estimateElement = document.getElementById('aiEstimate');
                     if (estimateElement && !estimateElement.value) {
                         estimateElement.value = 'Calculating...';
-                        // Simulate API delay
                         setTimeout(() => {
                             estimateElement.value = '25.0L - 35.0L';
                         }, 2000);
@@ -2279,14 +2223,12 @@
             }
         }
 
-        // Initialize price estimation when page loads
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 initializePriceEstimation();
             }, 1000);
         });
 
-        // Activity tracking for session management
         const activityEvents = ['click', 'scroll', 'keypress', 'mousemove', 'touchstart'];
         let activityTimeout;
 
@@ -2294,16 +2236,14 @@
             clearTimeout(activityTimeout);
             activityTimeout = setTimeout(() => {
                 updateSessionActivity();
-            }, 1000); // Debounce activity updates
+            }, 1000); 
         }
 
         activityEvents.forEach(event => {
             document.addEventListener(event, trackActivity, { passive: true });
         });
 
-        // Cleanup function for memory management
         window.addEventListener('beforeunload', () => {
-            // Cleanup blob URLs to prevent memory leaks
             uploadedImages.forEach(image => {
                 if (image.url && image.url.startsWith('blob:')) {
                     URL.revokeObjectURL(image.url);
@@ -2311,7 +2251,6 @@
             });
         });
 
-        // Error boundary for graceful error handling
         window.addEventListener('error', (e) => {
             console.error('Global error:', e.error);
             
@@ -2326,10 +2265,8 @@
             }
         });
 
-        // Page visibility API for session management
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && sessionManager) {
-                // Page became visible, check session status
                 enhancedSessionCheck();
                 updateSessionActivity();
             }

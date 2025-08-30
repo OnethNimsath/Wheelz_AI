@@ -7,9 +7,7 @@
     <link rel="stylesheet" href="/Wheelz_AI/css/dashboard.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Define global popup functions immediately when page loads
         window.showLogoutPopup = function() {
-            // Remove any existing popup
             const existingPopup = document.getElementById('logout-popup');
             if (existingPopup) {
                 existingPopup.remove();
@@ -37,16 +35,14 @@
 
             document.body.insertAdjacentHTML('beforeend', popupHTML);
 
-            // Show popup with animation
             const popup = document.getElementById('logout-popup');
             const container = popup.querySelector('.logout-popup-container');
             
             if (popup && container) {
-                popup.offsetHeight; // Force reflow
+                popup.offsetHeight; 
                 popup.style.opacity = '1';
                 container.style.transform = 'scale(1)';
-                
-                // Add click outside to close
+
                 popup.addEventListener('click', function(e) {
                     if (e.target === popup) {
                         window.hideLogoutPopup();
@@ -74,14 +70,11 @@
         };
 
         window.confirmLogout = function() {
-            // Hide the popup
             window.hideLogoutPopup();
-            
-            // Perform the actual logout
+
             if (window.sessionManager) {
                 window.sessionManager.signOut();
             } else {
-                // Fallback if session manager not available
                 window.location.href = '/Wheelz_AI/html/signin.html';
             }
         };
@@ -425,7 +418,6 @@
             background: #2563eb;
         }
 
-        /* Enhanced Chatbot Styles */
         .chatbot-container {
             position: fixed;
             bottom: 20px;
@@ -709,7 +701,6 @@
             margin: 5px 0;
         }
 
-        /* Responsive design */
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
@@ -752,14 +743,12 @@
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
     <div id="loading-spinner" class="loading-container" style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; position: fixed; top: 0; left: 0; width: 100%; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); z-index: 9999;">
         <div class="loading-spinner"></div>
         <p class="text-lg text-gray-700 mt-4">Loading your dashboard...</p>
         <p class="text-sm text-gray-500 mt-2">Please wait while we verify your session</p>
     </div>
 
-    <!-- Session Warning -->
     <div id="session-warning" class="session-warning">
         <div class="flex items-start justify-between">
             <div>
@@ -772,15 +761,11 @@
         </div>
     </div>
 
-    <!-- Dashboard Content -->
     <div id="dashboard-content" class="container" style="display: none;">
-        <!-- Header -->
         <div class="header">
             <div class="welcome-message" id="welcome-message">Welcome to Your Dashboard!</div>
             <div class="welcome-subtitle">Manage your vehicle trading activities and account settings</div>
         </div>
-
-        <!-- User Info Section -->
         <div class="user-info">
             <div class="profile-section">
                 <div class="profile-avatar" id="profile-avatar">U</div>
@@ -807,7 +792,6 @@
             </div>
         </div>
 
-        <!-- Navigation Cards -->
         <div class="dashboard-grid">
             <a href="/Wheelz_AI/html/account.html" class="nav-card" data-navigate="account">
                 <div class="nav-icon" style="background: linear-gradient(45deg, #3b82f6, #2563eb);">👤</div>
@@ -836,6 +820,15 @@
                 <div class="nav-arrow">→</div>
             </a>
 
+            <a href="/Wheelz_AI/html/buy.html" class="nav-card" data-navigate="buy">
+                <div class="nav-icon" style="background: linear-gradient(45deg, #f59e0b, #d97706);">🚗</div>
+                <div class="nav-content">
+                    <div class="nav-title">Buy a Vehicle</div>
+                    <div class="nav-description">Browse vehicles</div>
+                </div>
+                <div class="nav-arrow">→</div>
+            </a>
+
             <button class="nav-card logout-card" id="logoutButton" data-action="logout">
                 <div class="nav-icon">🚪</div>
                 <div class="nav-content">
@@ -846,7 +839,6 @@
             </button>
         </div>
 
-        <!-- Statistics Section -->
         <div class="stats-section">
             <div class="stats-title">Account Overview</div>
             <div class="stats-grid">
@@ -870,12 +862,11 @@
         </div>
     </div>
 
-    <!-- Activity Indicator -->
     <div id="activity-indicator" class="activity-indicator">
         Session extended automatically
     </div>
 
-    <!-- Enhanced Chatbot Container -->
+    <!-- Integrated chatbot -->
     <div class="chatbot-container">
         <button class="chatbot-toggle" id="chatbotToggle">
             <svg viewBox="0 0 24 24">
@@ -890,7 +881,6 @@
             </div>
             
             <div class="chatbot-messages" id="chatbotMessages">
-                <!-- Messages will be added here dynamically -->
             </div>
             
             <div class="typing-indicator" id="typingIndicator">
@@ -917,24 +907,20 @@
         </div>
     </div>
 
-    <!-- Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // Enhanced WheelzAI Chatbot Class with Gemini Integration
         class EnhancedWheelzAIChatbot {
             constructor() {
                 this.isOpen = false;
                 this.messages = [];
                 this.conversationHistory = [];
                 this.hasShownWelcome = false;
-                
-                // Replace with your actual Gemini API key
+
                 this.GEMINI_API_KEY = 'AIzaSyCLW0c2OF0frOyKJtNnRMDH7WrByySs2Ww';
-                
-                // Predefined questions with answers
+
                 this.predefinedQA = {
                     "Popular car brands in Sri Lanka": "The most popular car brands in Sri Lanka are:\n\n🚗 **Toyota** - Most popular, excellent resale value\n🚗 **Honda** - Reliable, good fuel economy\n🚗 **Nissan** - Affordable maintenance\n🚗 **Suzuki** - Budget-friendly options\n🚗 **Mitsubishi** - Good for SUVs\n\nToyota dominates with models like Prius, Aqua, and Allion being extremely popular.",
                     
@@ -983,7 +969,6 @@
                         }
                     });
 
-                    // Auto-resize textarea
                     input.addEventListener('input', () => {
                         input.style.height = 'auto';
                         input.style.height = Math.min(input.scrollHeight, 100) + 'px';
@@ -1001,8 +986,7 @@
                     window.classList.add('active');
                     const input = document.getElementById('chatbotInput');
                     if (input) input.focus();
-                    
-                    // Show welcome message and questions only when first opened
+
                     if (!this.hasShownWelcome) {
                         setTimeout(() => {
                             this.addWelcomeMessage();
@@ -1025,8 +1009,7 @@
             addWelcomeMessage() {
                 const welcomeMsg = "Ayubowan! Welcome to WheelzAI! 🇱🇰\n\nI'm your Sri Lankan vehicle assistant powered by Google Gemini AI. I can help with vehicle information, prices, and answer any questions you have!\n\nChoose a quick question below or ask me anything:";
                 this.addMessage('bot', welcomeMsg);
-                
-                // Add questions immediately after welcome message
+
                 setTimeout(() => {
                     this.addQuickQuestions();
                 }, 100);
@@ -1057,18 +1040,15 @@
                     console.error('Messages container not found');
                     return;
                 }
-                
-                // Create a visible container for the questions
+
                 const questionsContainer = document.createElement('div');
                 questionsContainer.className = 'quick-questions';
-                
-                // Add header
+
                 const headerDiv = document.createElement('div');
                 headerDiv.className = 'quick-questions-header';
                 headerDiv.textContent = '💡 Popular Questions - Click any to get instant answers:';
                 questionsContainer.appendChild(headerDiv);
-                
-                // Add each question as a clickable button
+
                 this.quickQuestions.forEach((question, index) => {
                     const btn = document.createElement('button');
                     btn.className = 'quick-question';
@@ -1088,10 +1068,9 @@
             }
 
             handleQuickQuestion(question) {
-                // Add user message
+
                 this.addMessage('user', question);
-                
-                // Show typing indicator
+
                 this.showTypingIndicator();
                 
                 setTimeout(() => {
@@ -1125,22 +1104,20 @@
 
                 const message = input.value.trim();
                 if (!message) return;
-                
-                // Disable input during processing
+
                 if (sendButton) sendButton.disabled = true;
                 input.disabled = true;
-                
-                // Add user message
+
                 this.addMessage('user', message);
                 this.conversationHistory.push({ role: "user", content: message });
                 
                 input.value = '';
                 input.style.height = 'auto';
-                
-                // Show typing indicator
+
                 this.showTypingIndicator();
                 
                 try {
+                    //enhanced using claude
                     // Try to get response from Gemini API
                     const response = await this.getGeminiResponse(message);
                     this.hideTypingIndicator();
@@ -1149,8 +1126,7 @@
                 } catch (error) {
                     console.error('Gemini API error:', error);
                     this.hideTypingIndicator();
-                    
-                    // Use enhanced fallback responses
+
                     const fallbackResponse = this.getEnhancedResponse(message);
                     this.addMessage('bot', fallbackResponse);
                     
@@ -1160,8 +1136,7 @@
                         this.addErrorMessage("Gemini API temporarily unavailable. Using offline responses.");
                     }
                 }
-                
-                // Re-enable input
+
                 if (sendButton) sendButton.disabled = false;
                 input.disabled = false;
                 input.focus();
@@ -1228,20 +1203,17 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
 
             getEnhancedResponse(message) {
                 const lowerMessage = message.toLowerCase();
-                
-                // Check for exact matches with predefined questions
+
                 for (const [question, answer] of Object.entries(this.predefinedQA)) {
                     if (lowerMessage.includes(question.toLowerCase().substring(0, 10))) {
                         return answer;
                     }
                 }
-                
-                // Greeting patterns
+
                 if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey') || lowerMessage.includes('ayubowan')) {
                     return "Ayubowan! 🙏 Welcome to WheelzAI! I'm here to help you with Sri Lankan vehicle information. What would you like to know?";
                 }
-                
-                // Vehicle brand specific queries
+
                 if (lowerMessage.includes('toyota')) {
                     return "Toyota is the most popular brand in Sri Lanka! Popular models include:\n• Vios (LKR 5.2-5.7M) - Sedan\n• Vitz (LKR 5.5-6M) - Compact\n• Aqua (LKR 6-8.5M) - Hybrid\n• Prius (LKR 6.5-12M) - Premium hybrid\n\nWhich Toyota model interests you?";
                 }
@@ -1253,48 +1225,39 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
                 if (lowerMessage.includes('suzuki')) {
                     return "Suzuki vehicles in Sri Lanka:\n• Swift (LKR 5.5-5.8M) - Sporty compact\n• Alto (LKR 3.5-4.5M) - Budget option\n• Wagon R (LKR 4-5M) - Practical choice\n• Vitara (LKR 8-12M) - SUV\n\nAll known for affordable maintenance!";
                 }
-                
-                // Price-related queries
+
                 if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerMessage.includes('budget')) {
                     return "Vehicle price ranges in Sri Lanka:\n\n💰 Budget (Under LKR 4M):\nAlto, March, older Vitz\n\n💰 Mid-range (LKR 4-6M):\nVios, Vitz, Fit, Swift\n\n💰 Premium (LKR 6-10M):\nAqua, Grace, Prius\n\nWhat's your budget range?";
                 }
-                
-                // Hybrid vs petrol
+
                 if (lowerMessage.includes('hybrid') || lowerMessage.includes('fuel')) {
                     return this.predefinedQA["Hybrid vs petrol cars comparison"];
                 }
-                
-                // Import information
+
                 if (lowerMessage.includes('import') || lowerMessage.includes('duty') || lowerMessage.includes('tax')) {
                     return this.predefinedQA["Car import guide for Sri Lanka"];
                 }
-                
-                // Selling help
+
                 if (lowerMessage.includes('sell') || lowerMessage.includes('selling')) {
                     return "To sell your vehicle on WheelzAI:\n\n1. Click 'Sell a Vehicle' from your dashboard\n2. Upload clear photos from multiple angles\n3. Fill in accurate vehicle details\n4. Set a competitive price\n5. Write a detailed description\n6. Respond quickly to inquiries\n\n💡 Tips:\n• Clean your car before photos\n• Include service history\n• Be honest about any issues";
                 }
-                
-                // Buying help
+
                 if (lowerMessage.includes('buy') || lowerMessage.includes('buying') || lowerMessage.includes('purchase')) {
                     return "Tips for buying a vehicle in Sri Lanka:\n\n✅ **Before viewing:**\n• Research market prices\n• Check vehicle history if possible\n• Arrange financing if needed\n\n✅ **During inspection:**\n• Check engine, brakes, tires\n• Test drive in different conditions\n• Verify all documents\n\n✅ **Before purchase:**\n• Get a mechanic's inspection\n• Negotiate based on condition\n• Transfer ownership properly";
                 }
-                
-                // Dashboard help
+
                 if (lowerMessage.includes('dashboard') || lowerMessage.includes('account') || lowerMessage.includes('profile')) {
                     return this.predefinedQA["How to use WheelzAI dashboard"];
                 }
-                
-                // Thank you
+
                 if (lowerMessage.includes('thank')) {
                     return "You're very welcome! 😊 I'm here to help with any Sri Lankan vehicle questions. Feel free to ask about specific models, prices, or anything else!";
                 }
-                
-                // Goodbye
+
                 if (lowerMessage.includes('bye') || lowerMessage.includes('goodbye')) {
                     return "Thank you for using WheelzAI! Feel free to come back anytime for vehicle information. Safe driving! 🚗✨";
                 }
-                
-                // Default response with suggestions
+
                 return "I can help you with Sri Lankan vehicle information! Try asking about:\n\n🚗 **Specific models:** \"Toyota Vitz price\" or \"Honda Fit review\"\n💰 **Budgets:** \"Cars under 6M\" or \"Best family cars\"\n🔧 **Comparisons:** \"Hybrid vs petrol\" or \"Toyota vs Honda\"\n📊 **Platform help:** \"How to sell\" or \"Dashboard guide\"\n⛽ **Market info:** \"Fuel prices\" or \"Import duties\"\n\nWhat interests you most?";
             }
 
@@ -1310,7 +1273,6 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
             }
         }
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
             authDomain: "wheelzai.firebaseapp.com",
@@ -1321,13 +1283,12 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
             measurementId: "G-ECQJYZYK43"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
 
-        
+        //session management enhanced using claude 
         class SessionManager {
             constructor() {
                 this.auth = firebase.auth();
@@ -1377,7 +1338,6 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
                     } else {
                         console.log('User profile document does not exist, creating default profile');
                         
-                        // Create a default user profile if it doesn't exist
                         const defaultProfile = {
                             name: this.currentUser.displayName || 'User',
                             email: this.currentUser.email,
@@ -1385,8 +1345,7 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
                             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                             profileViews: 0
                         };
-                        
-                        // Save the default profile to Firestore
+
                         await this.db.collection('users').doc(this.currentUser.uid).set(defaultProfile);
                         this.userProfile = defaultProfile;
                         
@@ -1398,8 +1357,7 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
                         code: error.code,
                         message: error.message
                     });
-                    
-                    // Set a minimal default profile
+
                     this.userProfile = {
                         name: this.currentUser.displayName || 'User',
                         email: this.currentUser.email,
@@ -1412,16 +1370,13 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
             updateUI() {
                 if (!this.currentUser) return;
 
-                // Get user name
                 const userName = this.currentUser.displayName || this.userProfile?.name || 'User';
-                
-                // Update avatar
+
                 const avatar = document.getElementById('profile-avatar');
                 if (avatar) {
                     avatar.textContent = userName.charAt(0).toUpperCase();
                 }
 
-                // Update user info
                 const welcomeMessage = document.getElementById('welcome-message');
                 if (welcomeMessage) {
                     welcomeMessage.textContent = `Welcome back, ${userName}!`;
@@ -1442,7 +1397,6 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
                     userTypeElement.textContent = (this.userProfile?.userType || 'seller').charAt(0).toUpperCase() + (this.userProfile?.userType || 'seller').slice(1);
                 }
 
-                // Update session info
                 this.updateSessionTime();
                 this.updateLastActivity();
                 this.loadAccountStats();
@@ -1451,8 +1405,7 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
             async loadAccountStats() {
                 try {
                     console.log('Loading account stats for user:', this.currentUser.uid);
-                    
-                    // Get active advertisements count
+
                     const adsQuery = this.db.collection('Advertisements')
                         .where('userId', '==', this.currentUser.uid)
                         .where('status', '==', 'active');
@@ -1466,7 +1419,6 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
                         activeAdsElement.textContent = adsSnapshot.size;
                     }
 
-                    // Get total listings (all advertisements regardless of status)
                     const allListingsQuery = this.db.collection('Advertisements')
                         .where('userId', '==', this.currentUser.uid);
                     
@@ -1508,7 +1460,6 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
                         }
                     }
 
-                    // Profile views (get from user profile or default to 0)
                     const profileViews = this.userProfile?.profileViews || 0;
                     console.log('Profile views:', profileViews);
                     
@@ -1526,8 +1477,7 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
                         message: error.message,
                         stack: error.stack
                     });
-                    
-                    // Set default values if there's an error
+
                     const defaultValues = {
                         'active-ads-count': '0',
                         'account-age-days': '1',
@@ -1541,13 +1491,11 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
                             element.textContent = value;
                         }
                     });
-                    
-                    // Show user-friendly error message
+
                     console.warn('Using default values due to error loading stats');
                 }
             }
 
-            // Add refresh stats method
             async refreshStats() {
                 console.log('Manually refreshing account stats...');
                 
@@ -1565,8 +1513,7 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
                         element.textContent = '...';
                     }
                 });
-                
-                // Reload user profile and stats
+
                 await this.loadUserProfile();
                 await this.loadAccountStats();
                 
@@ -1588,8 +1535,7 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
                 if (activityElement) {
                     activityElement.textContent = 'Just now';
                 }
-                
-                // Hide session warning if shown
+
                 this.sessionWarningShown = false;
                 this.hideSessionWarning();
             }
@@ -1606,7 +1552,6 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
                     document.addEventListener(event, throttledUpdate, true);
                 });
 
-                // Update activity time display every minute
                 setInterval(() => {
                     this.updateActivityTimeDisplay();
                     this.updateSessionTime();
@@ -1674,8 +1619,7 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
                 messageElement.textContent = `Your session will expire in ${timeLeft} minutes due to inactivity.`;
                 
                 warningElement.classList.add('show');
-                
-                // Auto-hide after 10 seconds if no action
+
                 setTimeout(() => {
                     if (this.sessionWarningShown) {
                         this.hideSessionWarning();
@@ -1705,8 +1649,7 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
             showDashboard() {
                 document.getElementById('loading-spinner').style.display = 'none';
                 document.getElementById('dashboard-content').style.display = 'block';
-                
-                // Load enhanced chatbot after dashboard is shown
+
                 setTimeout(() => {
                     this.initializeChatbot();
                 }, 500);
@@ -1744,21 +1687,18 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
             }
         }
 
-        // Global functions for UI interactions
         function extendSession() {
             sessionManager.updateLastActivity();
             sessionManager.hideSessionWarning();
             sessionManager.showActivityIndicator();
         }
 
-        // Global function for refreshing stats
         window.refreshDashboardStats = function() {
             if (window.sessionManager) {
                 window.sessionManager.refreshStats();
             }
         };
 
-        // Function to add refresh button (optional)
         function addRefreshButton() {
             const statsSection = document.querySelector('.stats-section');
             if (statsSection && !document.querySelector('.refresh-button')) {
@@ -1777,26 +1717,20 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
             }
         }
 
-        // Initialize session manager
         const sessionManager = new SessionManager();
 
-        // Initialize dashboard
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('Dashboard initializing...');
             await sessionManager.init();
-            
-            // Add refresh button for testing
+
             addRefreshButton();
-            
-            // Set up logout button
+
             const logoutButton = document.getElementById('logoutButton');
             logoutButton.addEventListener('click', async (e) => {
                 e.preventDefault();
-                // Show custom logout popup instead of browser confirm
                 window.showLogoutPopup();
             });
 
-            // Set up navigation tracking
             const navButtons = document.querySelectorAll('[data-navigate]');
             navButtons.forEach(button => {
                 button.addEventListener('click', (e) => {
@@ -1808,7 +1742,6 @@ Please provide a helpful response that's specific to Sri Lanka when relevant. Ke
             console.log('Dashboard initialized successfully');
         });
 
-        // Make session manager globally available
         window.wheelzAISession = sessionManager;
         window.sessionManager = sessionManager;
     </script>

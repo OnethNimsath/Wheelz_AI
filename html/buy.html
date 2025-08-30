@@ -15,14 +15,12 @@
     />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getFirestore, collection, getDocs, query, orderBy, limit, onSnapshot, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         import { getStorage, ref, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
         import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
             authDomain: "wheelzai.firebaseapp.com",
@@ -33,7 +31,6 @@
             measurementId: "G-ECQJYZYK43"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const storage = getStorage(app);
@@ -53,11 +50,11 @@
             
             try {
                 if (imagePath.startsWith('data:image/')) {
-                    return imagePath; // It's a base64 image
+                    return imagePath; 
                 }
                 
                 if (imagePath.startsWith('http')) {
-                    return imagePath; // It's already a full URL
+                    return imagePath; 
                 }
                 
                 // It's a Firebase Storage path
@@ -70,7 +67,6 @@
             }
         }
 
-        // Function to format price
         function formatPrice(price) {
             if (!price || price === 0) return 'Price on request';
             if (price >= 1000000) {
@@ -79,6 +75,7 @@
             return `LKR ${(price / 1000).toFixed(0)}K`;
         }
 
+        //code enhanced using claude
         // Function to load vehicles from Firestore
         async function loadVehicles() {
             try {
@@ -121,11 +118,12 @@
             }
         }
 
+        //code enhanced using claude
+
         // Function to apply filters and render vehicles
         function applyFiltersAndRenderVehicles() {
             let filteredVehicles = [...allVehicles];
 
-            // Apply search filter
             if (currentFilters.searchQuery) {
                 const query = currentFilters.searchQuery.toLowerCase();
                 filteredVehicles = filteredVehicles.filter(vehicle =>
@@ -135,21 +133,18 @@
                 );
             }
 
-            // Apply brand filter
             if (currentFilters.brand !== 'All') {
                 filteredVehicles = filteredVehicles.filter(vehicle =>
                     vehicle.make === currentFilters.brand
                 );
             }
 
-            // Apply vehicle type filter
             if (currentFilters.vehicleType !== 'All') {
                 filteredVehicles = filteredVehicles.filter(vehicle =>
                     vehicle.vehicleType === currentFilters.vehicleType
                 );
             }
 
-            // Apply price range filter
             if (currentFilters.priceRange !== 'All') {
                 const [minPrice, maxPrice] = currentFilters.priceRange.split('-').map(Number);
                 filteredVehicles = filteredVehicles.filter(vehicle => {
@@ -235,7 +230,6 @@
             }).join('');
         }
 
-        // Global function for vehicle details
         window.viewVehicleDetails = function(vehicleId) {
             window.location.href = `vehicle_details.html?id=${vehicleId}`;
         };
@@ -244,7 +238,6 @@
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('DOM loaded, initializing Firebase...');
             
-            // Setup authentication
             try {
                 await signInAnonymously(auth);
                 console.log('Signed in anonymously');
@@ -263,20 +256,16 @@
                     applyFiltersAndRenderVehicles();
                 });
             }
-
-            // Setup filter dropdowns
             setupFilterDropdowns();
         });
 
         function setupFilterDropdowns() {
-            // Brand filter
             const brandBtn = document.getElementById('brandFilterBtn');
             const brandDropdown = document.getElementById('brandDropdown');
             
             if (brandBtn && brandDropdown) {
                 brandBtn.addEventListener('click', () => {
                     brandDropdown.classList.toggle('hidden');
-                    // Close other dropdowns
                     document.getElementById('vehicleTypeDropdown')?.classList.add('hidden');
                     document.getElementById('priceRangeDropdown')?.classList.add('hidden');
                 });
@@ -289,7 +278,6 @@
             if (vehicleTypeBtn && vehicleTypeDropdown) {
                 vehicleTypeBtn.addEventListener('click', () => {
                     vehicleTypeDropdown.classList.toggle('hidden');
-                    // Close other dropdowns
                     document.getElementById('brandDropdown')?.classList.add('hidden');
                     document.getElementById('priceRangeDropdown')?.classList.add('hidden');
                 });
@@ -333,7 +321,6 @@
                 });
             });
 
-            // Clear filters
             const clearFiltersBtn = document.getElementById('clearFiltersBtn');
             if (clearFiltersBtn) {
                 clearFiltersBtn.addEventListener('click', () => {
@@ -343,14 +330,12 @@
                         vehicleType: 'All',
                         priceRange: 'All'
                     };
-                    
-                    // Reset UI
+
                     document.getElementById('searchInput').value = '';
                     brandBtn.querySelector('span').textContent = 'Brand';
                     vehicleTypeBtn.querySelector('span').textContent = 'Vehicle Type';
                     priceRangeBtn.querySelector('span').textContent = 'Price Range';
-                    
-                    // Close all dropdowns
+
                     document.querySelectorAll('.dropdown-menu').forEach(dropdown => {
                         dropdown.classList.add('hidden');
                     });
@@ -359,7 +344,6 @@
                 });
             }
 
-            // Close dropdowns when clicking outside
             document.addEventListener('click', (e) => {
                 if (!brandBtn?.contains(e.target) && !brandDropdown?.contains(e.target)) {
                     brandDropdown?.classList.add('hidden');
@@ -389,13 +373,11 @@
             color: #333;
             background: #f8fafc;
         }
-        
-        /* Smooth scrolling */
+
         html {
             scroll-behavior: smooth;
         }
-        
-        /* White Navbar Styles */
+
         .navbar-white {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(8px);
@@ -442,15 +424,13 @@
             background: #374151;
             border-color: #374151;
         }
-        
-        /* Mobile menu for white navbar */
+
         .mobile-menu-white {
             background: white;
             color: #1f2937;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
-        
-        /* Main content */
+
         .main-content {
             padding-top: 6rem;
             min-height: 100vh;
@@ -483,8 +463,7 @@
         .search-input::placeholder {
             color: #9ca3af;
         }
-        
-        /* Filter buttons */
+
         .filter-btn {
             background: #f8fafc;
             border: 2px solid #e5e7eb;
@@ -515,8 +494,7 @@
             background: #dc2626;
             border-color: #dc2626;
         }
-        
-        /* Dropdown styles */
+
         .dropdown-menu {
             background: white;
             border-radius: 0.5rem;
@@ -539,8 +517,7 @@
             background: #f3f4f6;
             color: #1f2937;
         }
-        
-        /* Vehicle Grid */
+
         .vehicles-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -625,8 +602,7 @@
             color: #9ca3af;
             font-size: 0.75rem;
         }
-        
-        /* Responsive design */
+
         @media (max-width: 768px) {
             .main-content {
                 padding-top: 5rem;
@@ -647,8 +623,7 @@
                 gap: 0.5rem;
             }
         }
-        
-        /* Loading animation */
+
         .loading-spinner {
             display: inline-block;
             width: 20px;
@@ -665,7 +640,6 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Navigation -->
     <nav class="fixed top-0 left-0 right-0 navbar-white z-50" id="navbar">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between h-16">
@@ -691,11 +665,8 @@
             </div>
         </div>
     </nav>
-
-    <!-- Main Content -->
     <main class="main-content">
         <div class="container mx-auto px-4">
-            <!-- Page Header -->
             <div class="text-center mb-8">
                 <h1 class="text-4xl font-bold text-gray-900 mb-4">Browse Vehicles</h1>
                 <p class="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -703,9 +674,7 @@
                 </p>
             </div>
 
-            <!-- Search and Filters Section -->
             <div class="search-section">
-                <!-- Search Bar -->
                 <div class="mb-6">
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -722,9 +691,7 @@
                     </div>
                 </div>
 
-                <!-- Filter Buttons -->
                 <div class="filter-buttons flex gap-3 flex-wrap">
-                    <!-- Brand Filter -->
                     <div class="relative">
                         <button id="brandFilterBtn" class="filter-btn">
                             <span>Brand</span>
@@ -749,7 +716,6 @@
                         </div>
                     </div>
 
-                    <!-- Vehicle Type Filter -->
                     <div class="relative">
                         <button id="vehicleTypeFilterBtn" class="filter-btn">
                             <span>Vehicle Type</span>
@@ -769,7 +735,6 @@
                         </div>
                     </div>
 
-                    <!-- Price Range Filter -->
                     <div class="relative">
                         <button id="priceRangeFilterBtn" class="filter-btn">
                             <span>Price Range</span>
@@ -788,7 +753,6 @@
                         </div>
                     </div>
 
-                    <!-- Clear Filters -->
                     <button id="clearFiltersBtn" class="filter-btn clear-filters-btn">
                         <span>Clear Filters</span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -797,21 +761,16 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Loading State -->
             <div id="loadingVehicles" class="text-center py-12">
                 <div class="loading-spinner mx-auto mb-4"></div>
                 <p class="text-gray-600">Loading vehicles...</p>
             </div>
 
-            <!-- Vehicles Grid -->
             <div id="vehiclesGrid" class="vehicles-grid">
-                <!-- Vehicles will be loaded here -->
             </div>
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-gray-900 text-white mt-16">
         <div class="container mx-auto px-4 py-12">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -896,7 +855,6 @@
         </div>
     </footer>
 
-    <!-- Mobile Menu (Hidden by default) -->
     <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
         <div class="fixed inset-y-0 left-0 max-w-xs w-full mobile-menu-white shadow-xl">
             <div class="p-4">
@@ -928,7 +886,6 @@
         </div>
     </div>
 
-    <!-- Mobile Menu Toggle Button -->
     <button onclick="toggleMobileMenu()" class="md:hidden fixed top-4 right-4 z-40 bg-white rounded-lg p-2 shadow-lg">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
@@ -936,13 +893,11 @@
     </button>
 
     <script>
-        // Mobile menu toggle
         window.toggleMobileMenu = function() {
             const mobileMenu = document.getElementById('mobileMenu');
             mobileMenu.classList.toggle('hidden');
         };
 
-        // Add scroll effect to navigation
         window.addEventListener('scroll', () => {
             const nav = document.getElementById('navbar');
             if (window.scrollY > 50) {
@@ -952,7 +907,6 @@
             }
         });
 
-        // Performance monitoring
         window.addEventListener('load', () => {
             console.log('🚗 Buy page loaded successfully with white navbar');
             console.log('⚡ Performance:', {
@@ -961,7 +915,6 @@
             });
         });
 
-        // Close mobile menu when clicking outside
         document.addEventListener('click', (e) => {
             const mobileMenu = document.getElementById('mobileMenu');
             const mobileMenuButton = document.querySelector('button[onclick="toggleMobileMenu()"]');

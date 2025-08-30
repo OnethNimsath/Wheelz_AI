@@ -23,13 +23,11 @@
             color: #333;
             background: #ffffff;
         }
-        
-        /* Smooth scrolling */
+
         html {
             scroll-behavior: smooth;
         }
-        
-        /* White Navbar Styles */
+
         .navbar-white {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(8px);
@@ -70,8 +68,7 @@
             background: #374151;
             border-color: #374151;
         }
-        
-        /* Mobile menu for white navbar */
+
         .mobile-menu-white {
             background: white;
             color: #1f2937;
@@ -99,8 +96,7 @@
         .mobile-menu-white .mobile-sign-in-btn:hover {
             background: #374151;
         }
-        
-        /* Hero Section */
+
         .hero-gradient {
             background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
             position: relative;
@@ -122,8 +118,7 @@
             position: relative;
             z-index: 1;
         }
-        
-        /* Contact Cards */
+
         .contact-card {
             background: white;
             border: 1px solid #e5e7eb;
@@ -153,8 +148,7 @@
             color: white;
             font-size: 2.5rem;
         }
-        
-        /* Form Styling */
+
         .form-card {
             background: white;
             border: 1px solid #e5e7eb;
@@ -212,8 +206,7 @@
             cursor: not-allowed;
             transform: none;
         }
-        
-        /* Map Container */
+
         .map-container {
             border-radius: 20px;
             overflow: hidden;
@@ -224,8 +217,7 @@
             align-items: center;
             justify-content: center;
         }
-        
-        /* FAQ Section */
+
         .faq-item {
             background: white;
             border: 1px solid #e5e7eb;
@@ -268,16 +260,14 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        
-        /* Office Hours Card */
+
         .hours-card {
             background: linear-gradient(135deg, #f8fafc, #e2e8f0);
             border: 1px solid #d1d5db;
             border-radius: 16px;
             padding: 2rem;
         }
-        
-        /* Animations */
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -292,13 +282,11 @@
         .animate-fade-in-up {
             animation: fadeInUp 0.6s ease-out;
         }
-        
-        /* Section spacing */
+
         .section-padding {
             padding: 5rem 0;
         }
-        
-        /* Success/Error Messages */
+
         .message-success {
             background: #f0fdf4;
             border: 1px solid #bbf7d0;
@@ -316,8 +304,7 @@
             border-radius: 8px;
             margin-bottom: 1rem;
         }
-        
-        /* Responsive */
+
         @media (max-width: 768px) {
             .section-padding {
                 padding: 3rem 0;
@@ -334,7 +321,6 @@
     </style>
 </head>
 <body class="bg-white text-gray-900">
-    <!-- Navigation -->
     <nav class="fixed top-0 left-0 right-0 navbar-white z-50" id="navbar">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between h-16">
@@ -361,7 +347,6 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section class="hero-gradient section-padding pt-24">
         <div class="container mx-auto px-4">
             <div class="hero-content text-center text-white max-w-4xl mx-auto">
@@ -385,7 +370,6 @@
         </div>
     </section>
 
-    <!-- Contact Methods -->
     <section class="section-padding bg-gray-50">
         <div class="container mx-auto px-4">
             <div class="text-center mb-16">
@@ -423,11 +407,9 @@
         </div>
     </section>
 
-    <!-- Contact Form & Map Section -->
     <section class="section-padding">
         <div class="container mx-auto px-4">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-                <!-- Contact Form -->
                 <div>
                     <div class="form-card" id="contact-form">
                         <h3 class="text-3xl font-bold text-gray-900 mb-2">Send us a Message</h3>
@@ -487,10 +469,8 @@
                         </form>
                     </div>
                 </div>
-                
-                <!-- Office Info -->
+
                 <div>
-                    <!-- Office Hours -->
                     <div class="hours-card">
                         <h4 class="text-xl font-bold text-gray-900 mb-4">Office Hours</h4>
                         <div class="space-y-2">
@@ -519,7 +499,6 @@
         </div>
     </section>
 
-    <!-- FAQ Section -->
     <section class="section-padding bg-gray-50">
         <div class="container mx-auto px-4">
             <div class="text-center mb-16">
@@ -583,7 +562,6 @@
         </div>
     </section>
 
-    <!-- Call to Action -->
     <section class="section-padding bg-gradient-to-r from-gray-900 to-black text-white">
         <div class="container mx-auto px-4 text-center">
             <h2 class="text-4xl font-bold mb-4">Still Have Questions?</h2>
@@ -603,7 +581,6 @@
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="bg-gray-900 border-t border-gray-700">
         <div class="container mx-auto px-4 py-12">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -693,14 +670,12 @@
         </div>
     </footer>
 
-    <!-- Mobile Menu Toggle -->
     <button onclick="toggleMobileMenu()" class="md:hidden fixed top-4 right-4 z-40 bg-gray-800 rounded-lg p-2 shadow-lg">
         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
         </svg>
     </button>
 
-    <!-- Mobile Menu -->
     <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
         <div class="fixed inset-y-0 left-0 max-w-xs w-full mobile-menu-white shadow-xl">
             <div class="p-4">
@@ -733,20 +708,18 @@
     </div>
 
     <script>
-        // Mobile menu toggle
+        //some script parts are enhanced using claude/chatgpt
         window.toggleMobileMenu = function() {
             const mobileMenu = document.getElementById('mobileMenu');
             mobileMenu.classList.toggle('hidden');
         };
 
-        // FAQ Toggle Function
         window.toggleFaq = function(index) {
             const faqItems = document.querySelectorAll('.faq-item');
             const clickedItem = faqItems[index];
             const answer = clickedItem.querySelector('.faq-answer');
             const icon = clickedItem.querySelector('.faq-icon');
-            
-            // Close all other FAQ items
+
             faqItems.forEach((item, i) => {
                 if (i !== index) {
                     const otherAnswer = item.querySelector('.faq-answer');
@@ -756,7 +729,6 @@
                 }
             });
             
-            // Toggle clicked item
             if (answer.classList.contains('active')) {
                 answer.classList.remove('active');
                 icon.textContent = '+';
@@ -766,7 +738,7 @@
             }
         };
 
-        // Form Submission Handler
+        //form submission
         document.getElementById('contactForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -780,28 +752,21 @@
             button.disabled = true;
             buttonText.classList.add('hidden');
             buttonLoading.classList.remove('hidden');
-            
-            // Simulate form submission (replace with actual API call)
+
             setTimeout(() => {
-                // Show success message
+
                 messagesDiv.innerHTML = `
                     <div class="message-success">
                         <strong>Thank you for your message!</strong> We've received your inquiry and will get back to you within 24 hours.
                     </div>
                 `;
-                
-                // Reset form
+
                 this.reset();
-                
-                // Reset button state
                 button.disabled = false;
                 buttonText.classList.remove('hidden');
                 buttonLoading.classList.add('hidden');
-                
-                // Scroll to success message
                 messagesDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                // Remove success message after 5 seconds
+
                 setTimeout(() => {
                     messagesDiv.innerHTML = '';
                 }, 5000);
@@ -809,7 +774,6 @@
             }, 2000);
         });
 
-        // Form Validation
         document.querySelectorAll('.form-input').forEach(input => {
             input.addEventListener('blur', function() {
                 if (this.hasAttribute('required') && !this.value.trim()) {
@@ -826,13 +790,11 @@
             });
         });
 
-        // Email validation helper
         function isValidEmail(email) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(email);
         }
 
-        // Add scroll effect to navigation - Enhanced for white navbar
         window.addEventListener('scroll', () => {
             const nav = document.getElementById('navbar');
             if (window.scrollY > 50) {
@@ -842,7 +804,6 @@
             }
         });
 
-        // Add intersection observer for animations
         const observerOptions = {
             threshold: 0.1,
             rootMargin: '0px 0px -50px 0px'
@@ -856,12 +817,10 @@
             });
         }, observerOptions);
 
-        // Observe elements for animation
         document.addEventListener('DOMContentLoaded', () => {
             const elementsToAnimate = document.querySelectorAll('.contact-card, .form-card, .faq-item, .hours-card');
             elementsToAnimate.forEach(el => observer.observe(el));
-            
-            // Add loading spinner to buttons
+
             const buttons = document.querySelectorAll('button[onclick]:not(.form-button)');
             buttons.forEach(button => {
                 button.addEventListener('click', function() {
@@ -876,7 +835,6 @@
             });
         });
 
-        // Newsletter subscription handler
         document.querySelector('input[type="email"][placeholder="Your email"]').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 const email = this.value;
@@ -889,7 +847,6 @@
             }
         });
 
-        // Add click handler for newsletter subscribe button
         document.querySelector('footer button[class*="rounded-r-md"]').addEventListener('click', function() {
             const emailInput = this.previousElementSibling;
             const email = emailInput.value;
@@ -901,7 +858,6 @@
             }
         });
 
-        // Add smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -915,7 +871,6 @@
             });
         });
 
-        // Add performance monitoring
         window.addEventListener('load', () => {
             console.log('📞 Contact page loaded successfully with white navbar');
             console.log('⚡ Performance:', {
@@ -926,7 +881,6 @@
             });
         });
 
-        // Add hover effects for contact cards
         document.addEventListener('DOMContentLoaded', () => {
             const contactCards = document.querySelectorAll('.contact-card');
             contactCards.forEach(card => {
@@ -940,7 +894,6 @@
             });
         });
 
-        // Character counter for message textarea
         const messageTextarea = document.getElementById('message');
         if (messageTextarea) {
             const maxLength = 1000;
