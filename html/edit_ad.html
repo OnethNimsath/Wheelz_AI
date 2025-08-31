@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Advertisement - WheelzAI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase Scripts - v8 Compat -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-    <!-- Session Management - Embedded -->
     <script>
-        // Session Manager Class - Embedded for reliability
+        //enhanced using Gemini
         class SessionManager {
             constructor() {
                 this.auth = firebase.auth();
@@ -26,7 +24,6 @@
                 this.heartbeatInterval = null;
             }
 
-            // Initialize session management
             init() {
                 if (this.authStateListenerActive) return Promise.resolve(this.currentUser);
                 
@@ -46,7 +43,6 @@
                 });
             }
 
-            // Load user profile from Firestore
             async loadUserProfile() {
                 if (!this.currentUser) return null;
                 
@@ -63,7 +59,6 @@
                 return null;
             }
 
-            // Handle authentication state changes
             handleAuthStateChange(user) {
                 if (user) {
                     console.log('User session active:', user.email);
@@ -77,7 +72,6 @@
                 }
             }
 
-            // Set user session
             setUserSession(user) {
                 const sessionData = {
                     uid: user.uid,
@@ -99,7 +93,6 @@
                 }
             }
 
-            // Update session storage
             updateSessionStorage() {
                 const sessionData = this.getSessionData();
                 if (sessionData && this.currentUser) {
@@ -115,7 +108,6 @@
                 }
             }
 
-            // Clear user session
             clearUserSession() {
                 sessionStorage.removeItem('wheelzai_user_session');
                 localStorage.removeItem('wheelzai_user_session');
@@ -124,7 +116,6 @@
                 this.userProfile = null;
             }
 
-            // Get session data
             getSessionData() {
                 try {
                     const sessionData = sessionStorage.getItem('wheelzai_user_session') || 
@@ -136,7 +127,6 @@
                 }
             }
 
-            // Check if authenticated
             isAuthenticated() {
                 const sessionData = this.getSessionData();
                 if (!sessionData || !this.currentUser) {
@@ -155,7 +145,6 @@
                 return true;
             }
 
-            // Update last activity
             updateLastActivity() {
                 const sessionData = this.getSessionData();
                 if (sessionData) {
@@ -170,7 +159,6 @@
                 this.sessionWarningShown = false;
             }
 
-            // Setup activity listeners
             setupActivityListeners() {
                 const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
                 
@@ -189,7 +177,6 @@
                 });
             }
 
-            // Throttle function
             throttle(func, limit) {
                 let inThrottle;
                 return function() {
@@ -203,7 +190,6 @@
                 }
             }
 
-            // Start session monitoring
             startSessionMonitoring() {
                 if (this.heartbeatInterval) {
                     clearInterval(this.heartbeatInterval);
@@ -216,7 +202,6 @@
                 this.checkSessionStatus();
             }
 
-            // Stop session monitoring
             stopSessionMonitoring() {
                 if (this.heartbeatInterval) {
                     clearInterval(this.heartbeatInterval);
@@ -224,7 +209,6 @@
                 }
             }
 
-            // Check session status
             checkSessionStatus() {
                 const sessionData = this.getSessionData();
                 if (!sessionData || !this.currentUser) {
@@ -245,7 +229,6 @@
                 }
             }
 
-            // Show session warning
             showSessionWarning() {
                 this.sessionWarningShown = true;
                 const timeLeft = Math.ceil((this.sessionTimeout - this.warningTimeout) / 60000);
@@ -255,13 +238,11 @@
                 }
             }
 
-            // Handle session timeout
             handleSessionTimeout() {
                 alert('Your session has expired due to inactivity. Please sign in again.');
                 this.signOut();
             }
 
-            // Update UI with user info
             updateUIWithUserInfo() {
                 try {
                     const userEmailElements = document.querySelectorAll('.user-email, #userEmail, [data-user-email]');
@@ -284,7 +265,6 @@
                 }
             }
 
-            // Sign out
             async signOut() {
                 try {
                     this.stopSessionMonitoring();
@@ -297,7 +277,6 @@
                 }
             }
 
-            // Redirect if on auth page
             redirectIfOnAuthPage() {
                 const currentPage = window.location.pathname;
                 const authPages = ['/signin.html', '/signup.html', '/forgotpassword.html'];
@@ -307,7 +286,6 @@
                 }
             }
 
-            // Redirect to auth if needed
             redirectToAuthIfNeeded() {
                 const currentPage = window.location.pathname;
                 const publicPages = ['/signin.html', '/signup.html', '/forgotpassword.html', '/index.html', '/', '/home.html'];
@@ -320,7 +298,6 @@
                 }
             }
 
-            // Get current user
             getCurrentUser() {
                 return {
                     user: this.currentUser,
@@ -330,9 +307,7 @@
             }
         }
 
-        // Global session manager instance
         let globalSessionManager = null;
-
         // Function to get or create session manager
         function getSessionManager() {
             if (!globalSessionManager) {
@@ -341,12 +316,9 @@
             return globalSessionManager;
         }
     </script>
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <!-- Custom Popup Styles -->
     <style>
-        /* Custom Popup Overlay */
         .popup-overlay {
             position: fixed;
             top: 0;
@@ -662,7 +634,6 @@
             text-align: center;
         }
 
-        /* Session status indicator */
         .session-status {
             position: fixed;
             top: 20px;
@@ -702,13 +673,11 @@
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <!-- Session Status Indicator -->
     <div id="sessionStatus" class="session-status" style="display: none;">
         <div class="session-pulse"></div>
         <span id="sessionStatusText">Session Active</span>
     </div>
 
-    <!-- Header -->
     <div class="bg-white shadow-sm border-b">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
@@ -734,7 +703,6 @@
         </div>
     </div>
 
-    <!-- Loading Overlay -->
     <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg p-8 text-center">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -742,10 +710,8 @@
         </div>
     </div>
 
-    <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <form id="editAdForm" class="space-y-8">
-            <!-- Pricing Section -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
                 <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-tag text-blue-600 mr-3"></i>
@@ -779,7 +745,6 @@
                 </div>
             </div>
 
-            <!-- Vehicle Information -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
                 <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-car text-blue-600 mr-3"></i>
@@ -866,7 +831,6 @@
                 </div>
             </div>
 
-            <!-- Vehicle History -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
                 <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-history text-blue-600 mr-3"></i>
@@ -894,7 +858,6 @@
                 </div>
             </div>
 
-            <!-- Additional Notes -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
                 <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-sticky-note text-blue-600 mr-3"></i>
@@ -906,7 +869,6 @@
                 </div>
             </div>
 
-            <!-- Media Upload -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
                 <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-images text-blue-600 mr-3"></i>
@@ -950,7 +912,6 @@
                 </div>
             </div>
 
-            <!-- Contact Information -->
             <div class="bg-white rounded-lg shadow-sm border p-6">
                 <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-address-book text-blue-600 mr-3"></i>
@@ -989,7 +950,6 @@
                 </div>
             </div>
 
-            <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-4 justify-between items-center pt-6">
                 <div class="flex space-x-4">
                     <button type="button" onclick="previewAd()" class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center">
@@ -1014,7 +974,6 @@
         </form>
     </div>
 
-    <!-- Custom Popup Modal -->
     <div id="custom-popup" class="popup-overlay" style="display: none;">
         <div class="popup-container">
             <div class="popup-icon" id="popup-icon"></div>
@@ -1025,7 +984,6 @@
     </div>
 
     <script>
-        // Firebase configuration and initialization
         const firebaseConfig = {
             apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
             authDomain: "wheelzai.firebaseapp.com",
@@ -1036,13 +994,11 @@
             measurementId: "G-ECQJYZYK43"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
         const storage = firebase.storage();
 
-        // Global variables for session management
         let sessionManager = null;
         let currentAdData = null;
         let currentAdId = null;
@@ -1051,26 +1007,22 @@
         let hasUnsavedChanges = false;
         let uploadInProgress = false;
 
-        // Session management integration
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('Edit advertisement page loading...');
             
             try {
-                // Verify Firebase is loaded
                 if (typeof firebase === 'undefined') {
                     throw new Error('Firebase is not loaded');
                 }
                 
                 console.log('Firebase loaded successfully');
-                
-                // Initialize session manager
+
                 sessionManager = getSessionManager();
                 console.log('Session manager created');
                 
                 await sessionManager.init();
                 console.log('Session manager initialized');
 
-                // Check authentication first
                 if (!sessionManager.isAuthenticated()) {
                     console.log('User not authenticated, redirecting...');
                     customAlert('Please log in to edit advertisements', 'error', () => {
@@ -1080,11 +1032,9 @@
                 }
 
                 console.log('User authenticated:', sessionManager.currentUser?.email);
-                
-                // Update session status indicator
+
                 updateSessionStatusUI();
-                
-                // Get advertisement ID from URL
+
                 const urlParams = new URLSearchParams(window.location.search);
                 const adId = urlParams.get('id');
                 console.log('Advertisement ID from URL:', adId);
@@ -1096,21 +1046,16 @@
                     return;
                 }
 
-                // Load advertisement data
                 console.log('Loading advertisement data...');
                 await loadAdvertisementData(adId);
                 console.log('Advertisement data loaded successfully');
-                
-                // Initialize form functionality
+
                 initializeFormHandlers();
-                
-                // Setup session monitoring for this page
+
                 setupEditPageSessionMonitoring();
-                
-                // Populate year dropdown
+
                 populateYearDropdown();
-                
-                // Hide loading overlay
+
                 document.getElementById('loadingOverlay').style.display = 'none';
                 
             } catch (error) {
@@ -1121,7 +1066,6 @@
             }
         });
 
-        // Load advertisement data with ownership verification
         async function loadAdvertisementData(adId) {
             try {
                 console.log('Loading advertisement data for ID:', adId);
@@ -1134,21 +1078,17 @@
 
                 const adData = adDoc.data();
                 console.log('Loaded advertisement data:', adData);
-                
-                // Verify ownership
+
                 const currentUserId = sessionManager.currentUser.uid;
                 if (adData.userId && adData.userId !== currentUserId) {
                     throw new Error('You can only edit your own advertisements');
                 }
 
-                // Store global variables
                 currentAdData = adData;
                 currentAdId = adId;
-                
-                // Populate form with existing data
+
                 populateForm(adData);
-                
-                // Load existing images
+
                 loadExistingImages(adData);
                 
                 console.log('Advertisement data loaded successfully');
@@ -1159,17 +1099,14 @@
             }
         }
 
-        // Populate form with existing data
         function populateForm(adData) {
             try {
                 console.log('Populating form with data:', adData);
-                
-                // Update header with listing ID
+
                 if (adData.listingId) {
                     document.getElementById('adListingId').textContent = `ID: ${adData.listingId}`;
                 }
 
-                // Pricing Information
                 if (adData.askingPrice) {
                     document.getElementById('askingPrice').value = formatPrice(adData.askingPrice);
                 }
@@ -1183,7 +1120,6 @@
                     if (negotiableRadio) negotiableRadio.checked = true;
                 }
 
-                // Vehicle Information
                 const vehicleFields = {
                     'make': adData.make,
                     'model': adData.model,
@@ -1202,7 +1138,6 @@
                     'whatsappNumber': adData.whatsappNumber
                 };
 
-                // Populate all fields
                 Object.keys(vehicleFields).forEach(fieldId => {
                     const element = document.getElementById(fieldId);
                     if (element && vehicleFields[fieldId]) {
@@ -1210,7 +1145,6 @@
                     }
                 });
 
-                // Contact methods checkboxes
                 if (adData.contactMethods && Array.isArray(adData.contactMethods)) {
                     document.getElementById('contactPhone').checked = adData.contactMethods.includes('Phone');
                     document.getElementById('contactEmail').checked = adData.contactMethods.includes('Email');
@@ -1225,14 +1159,12 @@
             }
         }
 
-        // Format price for display
         function formatPrice(amount) {
             if (amount >= 10000000) return `${(amount / 10000000).toFixed(1)}Cr`;
             if (amount >= 100000) return `${(amount / 100000).toFixed(1)}L`;
             return amount.toString();
         }
 
-        // Load existing images
         function loadExistingImages(adData) {
             if (adData.photos && Array.isArray(adData.photos)) {
                 uploadedImages = adData.photos.slice(0, 5).map((url, index) => ({
@@ -1248,7 +1180,6 @@
             }
         }
 
-        // Populate year dropdown
         function populateYearDropdown() {
             const yearSelect = document.getElementById('year');
             const currentYear = new Date().getFullYear();
@@ -1261,9 +1192,7 @@
             }
         }
 
-        // Initialize form handlers
         function initializeFormHandlers() {
-            // Track form changes for unsaved changes warning
             const formElements = document.querySelectorAll('#editAdForm input, #editAdForm select, #editAdForm textarea');
             formElements.forEach(element => {
                 element.addEventListener('change', () => {
@@ -1276,10 +1205,8 @@
                 });
             });
 
-            // Form submission handler
             document.getElementById('editAdForm').addEventListener('submit', handleFormSubmission);
 
-            // Warn before leaving with unsaved changes
             window.addEventListener('beforeunload', (e) => {
                 if (hasUnsavedChanges || uploadInProgress) {
                     e.preventDefault();
@@ -1290,7 +1217,6 @@
             });
         }
 
-        // Enhanced image upload with Firebase Storage
         async function uploadImageToStorage(imageBlob, fileName) {
             try {
                 const userId = sessionManager.currentUser.uid;
@@ -1330,7 +1256,6 @@
             }
         }
 
-        // Enhanced image processing with Firebase Storage upload
         function processImageFiles(files) {
             const maxImages = 5;
             const currentCount = uploadedImages.length;
@@ -1368,7 +1293,6 @@
                                 
                                 canvas.toBlob(async function(blob) {
                                     try {
-                                        // Create temporary preview with local blob URL
                                         const tempImageUrl = URL.createObjectURL(blob);
                                         
                                         const imageObj = {
@@ -1388,15 +1312,12 @@
                                         updateUploadUI();
                                         hasUnsavedChanges = true;
                                         uploadInProgress = true;
-                                        
-                                        // Upload to Firebase Storage
+
                                         try {
                                             const downloadURL = await uploadImageToStorage(blob, file.name);
-                                            
-                                            // Update the image object with the Firebase URL
+
                                             const imageIndex = uploadedImages.findIndex(img => img.url === tempImageUrl);
                                             if (imageIndex !== -1) {
-                                                // Clean up the temporary blob URL
                                                 URL.revokeObjectURL(tempImageUrl);
                                                 
                                                 // Update with Firebase URL
@@ -1409,8 +1330,7 @@
                                             }
                                         } catch (uploadError) {
                                             console.error('Failed to upload image:', uploadError);
-                                            
-                                            // Remove the failed upload from the array
+
                                             const imageIndex = uploadedImages.findIndex(img => img.url === tempImageUrl);
                                             if (imageIndex !== -1) {
                                                 URL.revokeObjectURL(tempImageUrl);
@@ -1422,8 +1342,7 @@
                                             
                                             customAlert(`Failed to upload "${file.name}". Please try again.`, 'error');
                                         }
-                                        
-                                        // Check if all uploads are complete
+
                                         const stillUploading = uploadedImages.some(img => img.uploading);
                                         if (!stillUploading) {
                                             uploadInProgress = false;

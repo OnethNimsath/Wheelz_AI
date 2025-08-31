@@ -318,7 +318,6 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        /* Enhanced Modal Styles */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -417,7 +416,6 @@
             padding: 20px;
         }
 
-        /* Improved Image Gallery */
         .image-gallery-container {
             margin-bottom: 20px;
         }
@@ -528,7 +526,6 @@
             font-size: 20px;
         }
 
-        /* Enhanced Price Section */
         .price-section {
             background: linear-gradient(135deg, #059669 0%, #047857 100%);
             color: white;
@@ -571,7 +568,6 @@
             position: relative;
         }
 
-        /* Enhanced Details Grid */
         .details-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -621,7 +617,6 @@
             text-align: right;
         }
 
-        /* Enhanced Contact Section */
         .contact-section {
             background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
             border: 1px solid #bfdbfe;
@@ -683,7 +678,6 @@
             font-weight: 600;
         }
 
-        /* Additional Notes Section */
         .notes-section {
             background: #fafafa;
             padding: 18px;
@@ -708,7 +702,6 @@
             font-size: 14px;
         }
 
-        /* Chatbot Styles */
         .chatbot-container {
             position: fixed;
             bottom: 20px;
@@ -1013,7 +1006,6 @@
             margin: 5px 0;
         }
 
-        /* Mobile Responsiveness */
         @media (max-width: 768px) {
             .modal-content {
                 margin: 10px;
@@ -1076,15 +1068,13 @@
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
+
     <div id="loading-screen" style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; position: fixed; top: 0; left: 0; width: 100%; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); z-index: 9999;">
         <div class="loading-spinner"></div>
         <p class="text-lg mt-4 text-gray-700">Loading your advertisements...</p>
     </div>
 
-    <!-- Advertisements Content -->
     <div id="ads-content" class="container" style="display: none;">
-        <!-- Header -->
         <div class="header">
             <a href="dashboard.html" class="back-button">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1096,7 +1086,6 @@
             <p class="text-gray-600 mt-2">Manage and track your vehicle listings</p>
         </div>
 
-        <!-- Statistics -->
         <div class="stats-grid" id="stats-section">
             <div class="stat-card">
                 <div class="stat-value" id="total-ads">0</div>
@@ -1116,7 +1105,6 @@
             </div>
         </div>
 
-        <!-- Search and Filters -->
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;">
             <input type="text" class="search-box" id="search-input" placeholder="Search your advertisements...">
             <a href="sell.html" class="btn btn-primary" style="text-decoration: none; display: inline-block;">
@@ -1131,12 +1119,9 @@
             <button class="filter-btn" data-filter="sold">Sold</button>
         </div>
 
-        <!-- Advertisements Grid -->
         <div id="ads-grid" class="ads-grid">
-            <!-- Ads will be populated here -->
         </div>
 
-        <!-- Empty State -->
         <div id="empty-state" class="empty-state" style="display: none;">
             <div class="empty-state-icon">🚗</div>
             <div class="empty-state-title">No Advertisements Yet</div>
@@ -1158,13 +1143,12 @@
             </div>
             <div class="modal-body">
                 <div id="modal-content">
-                    <!-- Content will be populated by JavaScript -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Enhanced Chatbot Integration for Advertisements -->
+    <!-- Chatbot Integration -->
     <div class="chatbot-container">
         <button class="chatbot-toggle" id="chatbotToggle">
             <svg viewBox="0 0 24 24">
@@ -1179,7 +1163,6 @@
             </div>
             
             <div class="chatbot-messages" id="chatbotMessages">
-                <!-- Messages will be added here dynamically -->
             </div>
             
             <div class="typing-indicator" id="typingIndicator">
@@ -1206,13 +1189,11 @@
         </div>
     </div>
 
-    <!-- Firebase Scripts -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
         import { getFirestore, collection, query, where, orderBy, getDocs, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
         import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
             authDomain: "wheelzai.firebaseapp.com",
@@ -1223,21 +1204,17 @@
             measurementId: "G-ECQJYZYK43"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // Make Firebase functions globally available
         window.db = db;
         window.auth = auth;
         window.deleteDoc = deleteDoc;
         window.doc = doc;
-
-        // Global variable to track current main image
+e
         let currentMainImage = 0;
 
-        // Enhanced WheelzAI Chatbot Class for Advertisements Page
         class EnhancedWheelzAIChatbot {
             constructor() {
                 this.isOpen = false;
@@ -1245,10 +1222,8 @@
                 this.conversationHistory = [];
                 this.hasShownWelcome = false;
                 
-                // Enable Gemini API with your key
                 this.GEMINI_API_KEY = 'AIzaSyCLW0c2OF0frOyKJtNnRMDH7WrByySs2Ww';
-                
-                // Advertisement-specific predefined questions and answers
+
                 this.predefinedQA = {
                     "How to post a new vehicle advertisement": "To post a new vehicle advertisement:\n\n✅ **Steps:**\n1. Click the '+ Post New Ad' button above\n2. Fill in vehicle details (make, model, year, etc.)\n3. Upload high-quality photos from multiple angles\n4. Set your asking price and negotiation preferences\n5. Add contact information and preferred contact methods\n6. Review and submit your listing\n\n💡 **Pro Tips:**\n• Use good lighting for photos\n• Include interior, exterior, and engine shots\n• Write detailed descriptions\n• Research market prices first\n• Be honest about vehicle condition",
                     
@@ -1341,8 +1316,7 @@
             addWelcomeMessage() {
                 const welcomeMsg = "Ayubowan! Welcome to WheelzAI Ads Assistant! 🇱🇰\n\nI'm here to help you manage your vehicle advertisements and maximize your selling success. I can assist with:\n\n• Creating effective advertisements\n• Pricing strategies and market insights\n• Photography tips for better visibility\n• Managing your listings\n• Sri Lankan vehicle market information\n\nChoose a quick question below or ask me anything:";
                 this.addMessage('bot', welcomeMsg);
-                
-                // Add questions immediately after welcome message
+
                 setTimeout(() => {
                     this.addQuickQuestions();
                 }, 100);
@@ -1373,18 +1347,15 @@
                     console.error('Messages container not found');
                     return;
                 }
-                
-                // Create a visible container for the questions
+
                 const questionsContainer = document.createElement('div');
                 questionsContainer.className = 'quick-questions';
-                
-                // Add header
+
                 const headerDiv = document.createElement('div');
                 headerDiv.className = 'quick-questions-header';
                 headerDiv.textContent = '💡 Advertisement Help Topics - Click any for instant guidance:';
                 questionsContainer.appendChild(headerDiv);
-                
-                // Add each question as a clickable button
+
                 this.quickQuestions.forEach((question, index) => {
                     const btn = document.createElement('button');
                     btn.className = 'quick-question';
@@ -1404,10 +1375,9 @@
             }
 
             handleQuickQuestion(question) {
-                // Add user message
+
                 this.addMessage('user', question);
-                
-                // Show typing indicator
+
                 this.showTypingIndicator();
                 
                 setTimeout(() => {
@@ -1441,23 +1411,19 @@
 
                 const message = input.value.trim();
                 if (!message) return;
-                
-                // Disable input during processing
+
                 if (sendButton) sendButton.disabled = true;
                 input.disabled = true;
-                
-                // Add user message
+
                 this.addMessage('user', message);
                 this.conversationHistory.push({ role: "user", content: message });
                 
                 input.value = '';
                 input.style.height = 'auto';
-                
-                // Show typing indicator
+
                 this.showTypingIndicator();
                 
                 try {
-                    // Try to get response from Gemini API first
                     const response = await this.getGeminiResponse(message);
                     this.hideTypingIndicator();
                     this.addMessage('bot', response + " <span class='gemini-badge'>Gemini</span>", true);
@@ -1465,18 +1431,15 @@
                 } catch (error) {
                     console.log('Gemini API error, using offline response:', error.message);
                     this.hideTypingIndicator();
-                    
-                    // Use enhanced fallback responses
+
                     const fallbackResponse = this.getEnhancedResponse(message);
                     this.addMessage('bot', fallbackResponse);
-                    
-                    // Show error message for API issues
+
                     if (this.GEMINI_API_KEY && this.GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY_HERE') {
                         this.addErrorMessage("Gemini API temporarily unavailable. Using offline responses.");
                     }
                 }
-                
-                // Re-enable input
+
                 if (sendButton) sendButton.disabled = false;
                 input.disabled = false;
                 input.focus();
@@ -1550,15 +1513,14 @@ Please provide helpful, specific guidance related to advertisement management, v
 
             getEnhancedResponse(message) {
                 const lowerMessage = message.toLowerCase();
-                
-                // Check for exact matches with predefined questions
+
                 for (const [question, answer] of Object.entries(this.predefinedQA)) {
                     if (lowerMessage.includes(question.toLowerCase().substring(0, 15))) {
                         return answer;
                     }
                 }
                 
-                // Advertisement-specific responses
+                // pre-defined responses
                 if (lowerMessage.includes('post') || lowerMessage.includes('create') || lowerMessage.includes('new ad')) {
                     return this.predefinedQA["How to post a new vehicle advertisement"];
                 }
@@ -1583,7 +1545,6 @@ Please provide helpful, specific guidance related to advertisement management, v
                     return this.predefinedQA["Popular car brands and pricing in Sri Lanka"];
                 }
                 
-                // Vehicle brand specific queries
                 if (lowerMessage.includes('toyota')) {
                     return "Toyota is the most popular brand in Sri Lanka! 🚗\n\n**Popular Models:**\n• **Vitz:** LKR 5.5-6.5M (compact, city driving)\n• **Aqua:** LKR 6.5-8.5M (hybrid, fuel efficient)\n• **Prius:** LKR 7-12M (premium hybrid)\n• **Allion:** LKR 6-9M (sedan, family car)\n\n**Selling Tips:**\n• Toyota vehicles have excellent resale value\n• Emphasize service history and original parts\n• Hybrid models command 15-20% premium\n• Include fuel economy figures in your ad";
                 }
@@ -1591,8 +1552,7 @@ Please provide helpful, specific guidance related to advertisement management, v
                 if (lowerMessage.includes('honda')) {
                     return "Honda vehicles are highly sought after! 🏆\n\n**Popular Models:**\n• **Fit:** LKR 5.8-6.8M (versatile, reliable)\n• **Grace:** LKR 7-9M (hybrid sedan)\n• **Civic:** LKR 8-12M (premium sedan)\n• **Vezel:** LKR 8-14M (crossover SUV)\n\n**Selling Advantages:**\n• Known for reliability and build quality\n• Strong demand in Sri Lankan market\n• Good fuel efficiency attracts buyers\n• Emphasize Honda's reputation in your listing";
                 }
-                
-                // Edit/Delete queries
+
                 if (lowerMessage.includes('edit') || lowerMessage.includes('update') || lowerMessage.includes('change')) {
                     return "To edit your advertisement:\n\n✏️ **Steps:**\n1. Find your ad in the list above\n2. Click the 'Edit' button on your ad card\n3. Update any information (photos, price, description)\n4. Save your changes\n\n💡 **What you can update:**\n• Photos and descriptions\n• Asking price and negotiation settings\n• Contact information\n• Vehicle condition notes\n• Additional features or modifications\n\n🔄 **Pro tip:** Regular updates boost your ad's visibility!";
                 }
@@ -1600,23 +1560,19 @@ Please provide helpful, specific guidance related to advertisement management, v
                 if (lowerMessage.includes('delete') || lowerMessage.includes('remove')) {
                     return "To delete an advertisement:\n\n🗑️ **Steps:**\n1. Find the ad you want to remove\n2. Click the 'Delete' button (red)\n3. Confirm deletion in the popup\n\n⚠️ **Important:**\n• Deletion is permanent and cannot be undone\n• Consider editing instead if you just need to update info\n• Mark as 'Sold' instead if the vehicle was sold\n\n💡 **Alternative:** You can also mark ads as inactive if you want to temporarily hide them.";
                 }
-                
-                // Status queries
+
                 if (lowerMessage.includes('pending') || lowerMessage.includes('approval')) {
                     return "About pending advertisements:\n\n⏳ **Pending Status Means:**\n• Your ad is under review by our team\n• Usually takes 2-24 hours for approval\n• We check for quality and completeness\n\n✅ **To speed up approval:**\n• Ensure all required fields are filled\n• Upload clear, high-quality photos\n• Provide accurate vehicle information\n• Include proper contact details\n\n❌ **Common rejection reasons:**\n• Blurry or inappropriate photos\n• Incomplete vehicle information\n• Suspicious pricing (too low/high)\n• Invalid contact information";
                 }
-                
-                // Greeting patterns
+
                 if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey') || lowerMessage.includes('ayubowan')) {
                     return "Ayubowan! 🙏 I'm your WheelzAI Ads Assistant! I'm here to help you create, manage, and optimize your vehicle advertisements. Whether you need help with pricing, photography, or getting more buyers, I'm here to help. What would you like to know?";
                 }
-                
-                // Thank you
+
                 if (lowerMessage.includes('thank')) {
                     return "You're very welcome! 😊 I'm here to help you succeed with your vehicle advertisements. Feel free to ask about posting tips, pricing strategies, photo techniques, or anything else related to selling your vehicle on WheelzAI!";
                 }
-                
-                // Default response with advertisement-focused suggestions
+
                 return "I can help you with your WheelzAI advertisements! Try asking about:\n\n📝 **Creating Better Ads:**\n• \"How to post a new vehicle advertisement\"\n• \"Best practices for vehicle photography\"\n• \"How to price my vehicle competitively\"\n\n📈 **Growing Your Success:**\n• \"How to get more buyers for my ad\"\n• \"How to manage my advertisements\"\n• \"Popular car brands in Sri Lanka\"\n\n🔧 **Managing Listings:**\n• \"How to edit my advertisement\"\n• \"Why is my ad pending approval\"\n• \"How to delete an advertisement\"\n\nWhat would you like to know?";
             }
 
@@ -1666,7 +1622,6 @@ Please provide helpful, specific guidance related to advertisement management, v
             }
         }
 
-        // Advertisements Manager
         class AdvertisementsManager {
             constructor(sessionManager) {
                 this.sessionManager = sessionManager;
@@ -1904,7 +1859,6 @@ Please provide helpful, specific guidance related to advertisement management, v
             }
         }
 
-        // Global functions for ad actions
         window.viewAd = function(adId) {
             const ad = window.adsManager.allAds.find(a => a.id === adId);
             if (ad) {
@@ -1930,7 +1884,6 @@ Please provide helpful, specific guidance related to advertisement management, v
             }
         };
 
-        // Enhanced Modal functions
         window.showVehicleModal = function(ad) {
             const modal = document.getElementById('vehicle-modal');
             const modalTitle = document.getElementById('modal-title');
@@ -1957,10 +1910,8 @@ Please provide helpful, specific guidance related to advertisement management, v
                 <span>Listed on ${ad.createdAt ? ad.createdAt.toLocaleDateString() : 'Unknown date'}</span>
             `;
 
-            // Reset current image index
             currentMainImage = 0;
 
-            // Create enhanced image gallery
             let imageGalleryHTML = '';
             if (ad.photos && ad.photos.length > 0) {
                 imageGalleryHTML = `
@@ -2141,13 +2092,11 @@ Please provide helpful, specific guidance related to advertisement management, v
                 </div>
             `;
 
-            // Store current ad photos globally for navigation
             window.currentAdPhotos = ad.photos || [];
 
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-            
-            // Add show class for animation
+
             setTimeout(() => {
                 modal.classList.add('show');
             }, 10);
@@ -2173,8 +2122,7 @@ Please provide helpful, specific guidance related to advertisement management, v
             
             if (mainImage && window.currentAdPhotos[imageIndex]) {
                 mainImage.src = window.currentAdPhotos[imageIndex];
-                
-                // Update thumbnail active states
+
                 const thumbnails = document.querySelectorAll('.thumbnail');
                 thumbnails.forEach((thumb, index) => {
                     if (index === imageIndex) {
@@ -2186,7 +2134,6 @@ Please provide helpful, specific guidance related to advertisement management, v
             }
         };
 
-        // Keyboard navigation for modal
         window.addEventListener('keydown', function(event) {
             const modal = document.getElementById('vehicle-modal');
             
@@ -2201,7 +2148,6 @@ Please provide helpful, specific guidance related to advertisement management, v
             }
         });
 
-        // Close modal when clicking outside
         window.addEventListener('click', function(event) {
             const modal = document.getElementById('vehicle-modal');
             if (event.target === modal) {
@@ -2209,7 +2155,6 @@ Please provide helpful, specific guidance related to advertisement management, v
             }
         });
 
-        // Initialize everything
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 console.log('Initializing advertisements page with chatbot...');
@@ -2221,7 +2166,6 @@ Please provide helpful, specific guidance related to advertisement management, v
                 window.adsManager = adsManager;
                 await adsManager.init();
 
-                // Initialize the chatbot
                 window.enhancedWheelzAIChatbot = new EnhancedWheelzAIChatbot();
 
                 console.log('Advertisements page with chatbot initialized successfully');

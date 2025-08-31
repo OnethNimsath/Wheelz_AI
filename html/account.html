@@ -8,20 +8,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
-        // Define global functions immediately when page loads
+
         window.hidePasswordPopup = function() {
             console.log('Hiding password popup');
             const popup = document.getElementById('password-popup');
             if (popup) {
                 const container = popup.querySelector('.popup-container');
                 
-                // Animate out
                 popup.style.opacity = '0';
                 if (container) {
                     container.style.transform = 'scale(0.9)';
                 }
                 
-                // Remove after animation
                 setTimeout(() => {
                     if (popup.parentNode) {
                         popup.remove();
@@ -32,7 +30,6 @@
 
         // Function to show custom message popup
         window.showMessagePopup = function(type, title, message) {
-            // Remove any existing message popup
             const existingPopup = document.getElementById('message-popup');
             if (existingPopup) {
                 existingPopup.remove();
@@ -72,7 +69,7 @@
             const container = popup.querySelector('.message-popup-container');
             
             if (popup && container) {
-                popup.offsetHeight; // Force reflow
+                popup.offsetHeight; 
                 popup.style.opacity = '1';
                 container.style.transform = 'scale(1)';
                 
@@ -115,21 +112,15 @@
             const email = emailElement.textContent;
             console.log('Sending reset email to:', email);
             
-            // Hide password popup first
             window.hidePasswordPopup();
             
-            // Show loading message
             window.showMessagePopup('loading', 'Sending Email', 'Sending password reset email...');
             
             // Send password reset email using Firebase Auth
             firebase.auth().sendPasswordResetEmail(email)
                 .then(() => {
                     console.log('Password reset email sent successfully');
-                    
-                    // Hide loading popup
                     window.hideMessagePopup();
-                    
-                    // Show success popup
                     setTimeout(() => {
                         window.showMessagePopup('success', 'Email Sent!', `Password reset email sent to ${email}! Check your inbox and spam folder.`);
                     }, 300);
@@ -137,12 +128,10 @@
                 .catch((error) => {
                     console.error('Error sending password reset:', error);
                     
-                    // Hide loading popup
                     window.hideMessagePopup();
                     
                     let errorMessage = 'Error sending password reset email. Please try again.';
                     
-                    // Handle specific Firebase errors
                     switch (error.code) {
                         case 'auth/user-not-found':
                             errorMessage = 'No account found with this email address.';
@@ -156,8 +145,7 @@
                         default:
                             errorMessage = `Error: ${error.message}`;
                     }
-                    
-                    // Show error popup
+
                     setTimeout(() => {
                         window.showMessagePopup('error', 'Error Sending Email', errorMessage);
                     }, 300);
@@ -721,15 +709,11 @@
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
     <div id="loading-screen" style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; position: fixed; top: 0; left: 0; width: 100%; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); z-index: 9999;">
         <div class="loading-spinner"></div>
         <p class="text-lg mt-4 text-gray-700">Loading your account details...</p>
     </div>
-
-    <!-- Account Details Content -->
     <div id="account-content" class="container" style="display: none;">
-        <!-- Header -->
         <div class="header">
             <a href="/Wheelz_AI/html/dashboard.html" class="back-button">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -741,10 +725,8 @@
             <p class="text-gray-600 mt-2">Manage your profile information and account settings</p>
         </div>
 
-        <!-- Messages -->
         <div id="message-container"></div>
 
-        <!-- Profile Section -->
         <div class="account-card">
             <div class="profile-section">
                 <div class="profile-avatar" id="profile-avatar">
@@ -762,12 +744,11 @@
                 </div>
             </div>
 
-            <!-- Account Form -->
             <form id="account-form">
                 <h3 class="text-xl font-semibold text-gray-800 mb-4">Basic Information</h3>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Existing Database Fields -->
+
                     <div class="form-group">
                         <label class="form-label" for="fullName">
                             Full Name <span class="text-red-500">*</span>
@@ -793,7 +774,6 @@
                         </select>
                     </div>
 
-                    <!-- New Optional Fields -->
                     <div class="form-group">
                         <label class="form-label" for="phoneNumber">
                             Phone Number
@@ -834,7 +814,6 @@
             </form>
         </div>
 
-        <!-- Account Information -->
         <div class="account-card">
             <h3 class="text-xl font-bold text-gray-800 mb-4">Account Information</h3>
             <div class="account-stats">
@@ -857,7 +836,6 @@
             </div>
         </div>
 
-        <!-- Account Actions -->
         <div class="account-card">
             <h3 class="text-xl font-bold text-gray-800 mb-4">Account Security</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -877,7 +855,6 @@
         </div>
     </div>
 
-    <!-- Enhanced Chatbot Integration -->
     <div class="chatbot-container">
         <button class="chatbot-toggle" id="chatbotToggle">
             <svg viewBox="0 0 24 24">
@@ -892,7 +869,6 @@
             </div>
             
             <div class="chatbot-messages" id="chatbotMessages">
-                <!-- Messages will be added here dynamically -->
             </div>
             
             <div class="typing-indicator" id="typingIndicator">
@@ -919,13 +895,11 @@
         </div>
     </div>
 
-    <!-- Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAOamMqCPIzJurf85fjBleVmWffdscEslM",
             authDomain: "wheelzai.firebaseapp.com",
@@ -936,23 +910,19 @@
             measurementId: "G-ECQJYZYK43"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Enhanced WheelzAI Chatbot Class for Account Page
         class EnhancedWheelzAIChatbot {
             constructor() {
                 this.isOpen = false;
                 this.messages = [];
                 this.conversationHistory = [];
                 this.hasShownWelcome = false;
-                
-                // Replace with your actual Gemini API key
+
                 this.GEMINI_API_KEY = 'AIzaSyCLW0c2OF0frOyKJtNnRMDH7WrByySs2Ww';
-                
-                // Account-specific predefined questions and answers
+
                 this.predefinedQA = {
                     "How to update my profile information": "To update your profile information:\n\n✅ **On this page:**\n• Fill out the form fields with your updated information\n• Click 'Save Changes' to update your profile\n• Required fields are marked with *\n\n📝 **Available fields:**\n• Full Name (required)\n• Phone Number\n• City & Country\n• Bio/Description\n\n💡 **Tips:**\n• Keep your profile complete for better visibility\n• Update your contact info for easier communication\n• Your email cannot be changed for security reasons",
                     
@@ -1001,7 +971,6 @@
                         }
                     });
 
-                    // Auto-resize textarea
                     input.addEventListener('input', () => {
                         input.style.height = 'auto';
                         input.style.height = Math.min(input.scrollHeight, 100) + 'px';
@@ -1019,8 +988,7 @@
                     window.classList.add('active');
                     const input = document.getElementById('chatbotInput');
                     if (input) input.focus();
-                    
-                    // Show welcome message only when first opened
+
                     if (!this.hasShownWelcome) {
                         setTimeout(() => {
                             this.addWelcomeMessage();
@@ -1043,15 +1011,13 @@
             addWelcomeMessage() {
                 const welcomeMsg = "Ayubowan! Welcome to WheelzAI Account Assistant! 🇱🇰\n\nI'm here to help you manage your account and answer questions about vehicles in Sri Lanka. I can assist with:\n\n• Profile updates and settings\n• Password and security\n• Account features\n• Vehicle information\n\nChoose a quick question below or ask me anything:";
                 this.addMessage('bot', welcomeMsg);
-                
-                // Add API status message if key not configured
+
                 if (this.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
                     setTimeout(() => {
                         this.addAPIStatusMessage();
                     }, 500);
                 }
-                
-                // Add questions immediately after welcome message
+
                 setTimeout(() => {
                     this.addQuickQuestions();
                 }, 100);
@@ -1097,18 +1063,15 @@
                     console.error('Messages container not found');
                     return;
                 }
-                
-                // Create a visible container for the questions
+
                 const questionsContainer = document.createElement('div');
                 questionsContainer.className = 'quick-questions';
-                
-                // Add header
+
                 const headerDiv = document.createElement('div');
                 headerDiv.className = 'quick-questions-header';
                 headerDiv.textContent = '💡 Account Help Topics - Click any for instant answers:';
                 questionsContainer.appendChild(headerDiv);
-                
-                // Add each question as a clickable button
+
                 this.quickQuestions.forEach((question, index) => {
                     const btn = document.createElement('button');
                     btn.className = 'quick-question';
@@ -1128,10 +1091,8 @@
             }
 
             handleQuickQuestion(question) {
-                // Add user message
                 this.addMessage('user', question);
-                
-                // Show typing indicator
+
                 this.showTypingIndicator();
                 
                 setTimeout(() => {
@@ -1165,21 +1126,18 @@
 
                 const message = input.value.trim();
                 if (!message) return;
-                
-                // Disable input during processing
+
                 if (sendButton) sendButton.disabled = true;
                 input.disabled = true;
-                
-                // Add user message
+
                 this.addMessage('user', message);
                 this.conversationHistory.push({ role: "user", content: message });
                 
                 input.value = '';
                 input.style.height = 'auto';
-                
-                // Show typing indicator
+
                 this.showTypingIndicator();
-                
+                //used claude to enhance the chatbot response
                 try {
                     // Try to get response from Gemini API
                     const response = await this.getGeminiResponse(message);
@@ -1274,7 +1232,7 @@ Please provide helpful, specific guidance related to account management or Sri L
                     }
                 }
                 
-                // Account-specific responses
+                //Pre-defined responses
                 if (lowerMessage.includes('profile') || lowerMessage.includes('update') || lowerMessage.includes('edit')) {
                     return this.predefinedQA["How to update my profile information"];
                 }
@@ -1294,23 +1252,19 @@ Please provide helpful, specific guidance related to account management or Sri L
                 if (lowerMessage.includes('delete') || lowerMessage.includes('remove account')) {
                     return this.predefinedQA["How to delete my account"];
                 }
-                
-                // Greeting patterns
+
                 if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey') || lowerMessage.includes('ayubowan')) {
                     return "Ayubowan! 🙏 I'm your WheelzAI Account Assistant! I can help you with account settings, profile updates, security, and Sri Lankan vehicle information. What would you like to know?";
                 }
-                
-                // Vehicle-related queries (fallback to general vehicle info)
+
                 if (lowerMessage.includes('toyota') || lowerMessage.includes('honda') || lowerMessage.includes('car') || lowerMessage.includes('vehicle')) {
                     return "I can help with vehicle information! For detailed Sri Lankan vehicle market info, pricing, and comparisons, try asking about specific brands like Toyota, Honda, or Suzuki. I also have account-related help if you need assistance with your profile settings!";
                 }
-                
-                // Thank you
+
                 if (lowerMessage.includes('thank')) {
                     return "You're very welcome! 😊 I'm here to help with your account settings and any Sri Lankan vehicle questions. Feel free to ask about profile updates, security settings, or vehicle information!";
                 }
-                
-                // Default response with account-focused suggestions
+
                 return "I can help you with your WheelzAI account! Try asking about:\n\n🔧 **Account Management:**\n• \"How to update my profile\"\n• \"How to change my password\"\n• \"How to download my data\"\n\n👤 **Account Types:**\n• \"What account types are available\"\n• \"Seller vs buyer accounts\"\n\n🚗 **Vehicle Info:**\n• \"Popular cars in Sri Lanka\"\n• \"Toyota vs Honda comparison\"\n\nWhat would you like to know?";
             }
 
@@ -1326,7 +1280,7 @@ Please provide helpful, specific guidance related to account management or Sri L
             }
         }
 
-        // Session Manager (same as original)
+        // Session Manager
         class SessionManager {
             constructor() {
                 this.auth = firebase.auth();
@@ -1401,7 +1355,6 @@ Please provide helpful, specific guidance related to account management or Sri L
             }
         }
 
-        // Account Manager (same as original with all functionality)
         class AccountManager {
             constructor(sessionManager) {
                 this.sessionManager = sessionManager;
@@ -1426,7 +1379,6 @@ Please provide helpful, specific guidance related to account management or Sri L
 
                     console.log('Current user:', user.email);
 
-                    // Ensure we have the latest profile data
                     await this.sessionManager.loadUserProfile();
                     const profile = this.sessionManager.userProfile;
                     
@@ -1460,6 +1412,7 @@ Please provide helpful, specific guidance related to account management or Sri L
                 }
             }
 
+            //enhanced the code using Gemini    
             updateProfileSection(user, profile) {
                 // Get the actual user name from database or auth
                 const userName = profile?.name || user.displayName || user.email?.split('@')[0] || 'User';
@@ -1590,7 +1543,6 @@ Please provide helpful, specific guidance related to account management or Sri L
                     console.error('Change password button not found');
                 }
 
-                // Download data
                 document.getElementById('download-data-btn').addEventListener('click', () => {
                     this.downloadUserData();
                 });
@@ -1608,24 +1560,20 @@ Please provide helpful, specific guidance related to account management or Sri L
 
             showPasswordResetPopup() {
                 console.log('Showing password reset popup...');
-                
-                // Create popup
+
                 this.createPasswordPopup();
-                
-                // Set email
+
                 const emailElement = document.getElementById('popup-email');
                 if (emailElement) {
                     emailElement.textContent = this.sessionManager.currentUser.email;
                     console.log('Email set to:', this.sessionManager.currentUser.email);
                 } else {
                     console.error('Could not find email element');
-                    // Fallback
                     this.fallbackPasswordReset();
                 }
             }
 
             createPasswordPopup() {
-                // Remove any existing popup first
                 const existingPopup = document.getElementById('password-popup');
                 if (existingPopup) {
                     existingPopup.remove();
@@ -1661,14 +1609,11 @@ Please provide helpful, specific guidance related to account management or Sri L
                 const container = popup.querySelector('.popup-container');
                 
                 if (popup && container) {
-                    // Force a reflow to ensure styles are applied
                     popup.offsetHeight;
-                    
-                    // Animate in
+
                     popup.style.opacity = '1';
                     container.style.transform = 'scale(1)';
-                    
-                    // Add click outside to close
+
                     popup.addEventListener('click', function(e) {
                         if (e.target === popup) {
                             hidePasswordPopup();
@@ -1824,8 +1769,7 @@ Please provide helpful, specific guidance related to account management or Sri L
                     doc.setTextColor(...textColor);
                     doc.setFontSize(11);
                     doc.setFont(undefined, 'normal');
-                    
-                    // Personal Information Table
+
                     const personalInfo = [
                         ['Full Name:', profile?.name || user.displayName || 'Not provided'],
                         ['Email Address:', user.email],
@@ -1840,8 +1784,7 @@ Please provide helpful, specific guidance related to account management or Sri L
                         doc.setFont(undefined, 'bold');
                         doc.text(label, 20, yPos);
                         doc.setFont(undefined, 'normal');
-                        
-                        // Handle long text wrapping
+
                         const textLines = doc.splitTextToSize(value, 120);
                         doc.text(textLines, 60, yPos);
                         yPos += textLines.length * 6;
@@ -1877,8 +1820,7 @@ Please provide helpful, specific guidance related to account management or Sri L
             showMessage(message, type) {
                 const container = document.getElementById('message-container');
                 container.innerHTML = `<div class="${type}-message">${message}</div>`;
-                
-                // Auto-hide success messages
+
                 if (type === 'success') {
                     setTimeout(() => {
                         this.clearMessages();
@@ -1920,8 +1862,7 @@ Please provide helpful, specific guidance related to account management or Sri L
                 window.enhancedWheelzAIChatbot = new EnhancedWheelzAIChatbot();
 
                 console.log('Account page with chatbot initialized successfully');
-                
-                // Additional check to ensure data is displayed
+
                 setTimeout(() => {
                     const profileName = document.getElementById('profile-name').textContent;
                     if (profileName === 'Loading...') {
